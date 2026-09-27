@@ -1,0 +1,34 @@
+# Variational autoencoders {#sec-vae}
+
+**Variational autoencoders** [@Kingma2013] use $\mathcal{N}(0, 1)$ as a prior for the latent space, but any other prior could be used in principle. The VAE loss is the opposite of the ELBO:
+
+$$
+\begin{aligned}
+\min_{\theta, \phi} \, \mathcal{L}(\theta, \phi) &= \mathcal{L}_\text{reconstruction}(\theta, \phi) + \mathcal{L}_\text{regularization}(\phi) \\
+&= \mathbb{E}_{\mathbf{x} \in \mathcal{D}, \mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})} [ - \log p_\theta(\mathbf{x} | \mathbf{z})] + \text{KL}(q_\phi(\mathbf{z}|\mathbf{x}) || \mathcal{N}(\mathbf{0}, \mathbf{1}))\\
+\end{aligned}
+$$
+
+The reparameterization trick and the fact that the KL between normal distributions has a closed form allow us to use backpropagation end-to-end.
+
+The advantage of minimizing the KL of $q_\phi(\mathbf{z}|\mathbf{x})$ with $\mathcal{N}(0, 1)$ is that the KL takes a **closed form** when the distributions are normal (@sec-klnormal), i.e. there is no need to compute the expectation over all possible latent representations $\mathbf{z}$:
+
+$$
+    \mathcal{L}_\text{regularization}(\phi) = \text{KL}(q_\phi(\mathbf{z}|\mathbf{x}) || \mathcal{N}(\mathbf{0}, \mathbf{1})) = \mathbb{E}_{\mathbf{x} \in \mathcal{D}, \mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})}[- \log \frac{f_{0, 1}(\mathbf{z})}{q_\phi(\mathbf{z}|\mathbf{x})}]
+$$
+
+If $\mathbf{\mu_x}$ and $\mathbf{\sigma_x}$ have $K$ elements (dimension of the latent space), the KL can be expressed as:
+
+$$
+    \mathcal{L}_\text{regularization}(\phi) = \mathbb{E}_{\mathbf{x} \in \mathcal{D}}[\dfrac{1}{2} \, \sum_{k=1}^K (\mathbf{\sigma_x^2} + \mathbf{\mu_x}^2 -1 - \log \mathbf{\sigma_x^2})]
+$$
+
+The KL is very easy to differentiate w.r.t $\mathbf{\mu_x}$ and $\mathbf{\sigma_x}$, i.e. w.r.t $\phi$! In practice, the encoder predicts the vectors $\mathbf{\mu_x}$ and $\Sigma_\mathbf{x} = \log \mathbf{\sigma_x^2}$, so the loss becomes:
+
+$$
+    \mathcal{L}_\text{regularization}(\phi) = \dfrac{1}{2} \, \sum_{k=1}^K (\exp \Sigma_\mathbf{x} + \mathbf{\mu_x}^2 -1 - \Sigma_\mathbf{x})
+$$
+
+The encoder $q_\phi(z|x)$ and decoder $p_\theta(x | z)$ are neural networks in a VAE, but other parameterized distributions can be used (e.g. in physics).
+
+![Variational autoencoder with the reparameterization trick. Source: <https://ijdykeman.github.io/ml/2016/12/21/cvae.html>](../img/vae-reparameterization.png){#fig-vaereparameterization width=70%}

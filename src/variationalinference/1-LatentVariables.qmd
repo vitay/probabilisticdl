@@ -1,0 +1,49 @@
+# Latent variable models {#sec-latentvariables}
+
+The input data $X = \{x_i\}_{i=1}^N$ comes from an unknown distribution of pdf $p(x)$. The training set $\mathcal{D}$ is formed by **samples** of that distribution. Learning the distribution of the data means learning a **parameterized distribution** $p_\theta(x)$ that is as close as possible to the true distribution $p(x)$.
+
+The parameterized distribution could be a family of known distributions (e.g. normal) or a neural network with a softmax output layer.
+
+This means that we want to minimize the KL between the two distributions:
+
+$$
+    \min_\theta \, \text{KL}(p(x) || p_\theta(x)) = \mathbb{E}_{x \sim p(x)} [- \log \dfrac{p_\theta(x)}{p(x)}]
+$$
+
+The problem is that we do not know $p(x)$ as it is what we want to learn, so we cannot estimate the KL directly. When trying to learn the distribution $p(x)$ of the data directly, we could use the same trick as in maximum likelihood estimation (@sec-klml):
+
+$$
+    \nabla_\theta \, \text{KL}(p(x) || p_\theta(x)) = \nabla_\theta \, H(p(x), p_\theta(x)) = \nabla_\theta \, \mathbb{E}_{x \sim p(x)} [- \log p_\theta(x)]
+$$
+
+i.e. maximize the log-likelihood of the model on the data $\mathcal{D}$.
+
+If we use $N$ data samples to estimate the expectation, we notice that:
+
+$$
+    \mathbb{E}_{x \sim p(x)} [\log p_\theta(x)] \approx \dfrac{1}{N} \, \sum_{i=1}^N \log p_\theta(x_i) = \dfrac{1}{N} \, \log \prod_{i=1}^N p_\theta(x_i) = \dfrac{1}{N} \, \log L(\theta)
+$$
+
+is indeed the log-likelihood of the model on the data that we maximize in **maximum likelihood estimation** (@sec-mle).
+
+The problem is that images are **high-dimensional** (one dimension per pixel), so we would need astronomical numbers of samples to estimate the gradient (once): this is the **curse of dimensionality**.
+
+![The curse of dimensionality. Source: <https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html>](../img/curse-of-dimensionality.png){#fig-cursedimensionality width=70%}
+
+MLE does not work well in high-dimensional spaces. We need to work in a much lower-dimensional space.
+
+Images are not random samples of the pixel space: **natural images** are embedded in a much lower-dimensional space called a **manifold**. A manifold is a **locally Euclidean** topological space of lower dimension. The surface of the earth is locally flat and 2D, but globally spherical and 3D.
+
+> If we have a **generative model** $p(x | z)$ telling us how a sample $z$ on the manifold maps to the image space, we would only need to learn the distribution of the data in the lower-dimensional **latent space**.
+
+The low-dimensional **latent variables** $z$ are the actual cause for the observations $x$. Given a sample $z$ on the manifold, we can train a **generative model** $p_\theta(x | z)$ to recreate the input $x$. $p_\theta(x | z)$ is the **decoder**: given a latent representation $z$, what is the corresponding observation $x$?
+
+![Latent variable model. Source: <https://blog.evjang.com/2016/08/variational-bayes.html>](../img/latent-variable-model.png){#fig-latentvariable width=50%}
+
+If we learn the distribution $p_\theta(z)$ of the manifold (latent space), we can infer the distribution of the data $p_\theta(x)$ using that model (**marginalization**):
+
+$$
+    p_\theta(x) = \mathbb{E}_{z \sim p_\theta(z)} [p_\theta(x | z)] = \int_z p_\theta(x | z) \, p_\theta(z) \, dz
+$$
+
+Problem: we do not know $p_\theta(z)$, as the only data we see is $x$: $z$ is called a **latent variable** because it explains the data but is hidden.

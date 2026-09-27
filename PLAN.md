@@ -17,7 +17,11 @@ Statistical machine learning    src/statisticalml/
   KL divergence in ML             2-KL.qmd
   Softmax classifier              3-Softmax.qmd
   Mixture density networks        4-MDN.qmd
-Variational inference           src/5-VariationalInference.qmd
+Variational inference           src/variationalinference/
+  Latent variable models          1-LatentVariables.qmd
+  Variational inference           2-VariationalInference.qmd
+  Why maximizing the ELBO works   3-ELBO.qmd
+  Variational autoencoders        4-VAE.qmd
 References                      src/references.qmd
 ```
 
@@ -29,7 +33,7 @@ All images live in `src/img/` (referenced as `../img/` from the part subfolders,
 - [x] `2. Maximum Likelihood Estimation (MLE).md` → `src/basics/2-MLE.qmd`
 - [x] `3. Statistical machine learning.md` → split into `src/statisticalml/` (one chapter per former `##` section, headings promoted one level; "Three paradigms" renamed "Learning paradigms")
 - [x] `4. Bayesian estimation.md` → `src/basics/3-Bayesian.qmd` — the source was a stub; the MAP section was written from scratch. Placed in Basics as it continues MLE (CLT → MAP).
-- [x] `5. Variational inference - ELBO.md` → `src/5-VariationalInference.qmd` — standalone for now; could become a "Generative models" part (ELBO, VAE, …) as content grows.
+- [x] `5. Variational inference - ELBO.md` → split into `src/variationalinference/` (one chapter per former `##` section; "Generative modeling" → "Latent variable models", "first explanation" → "Variational inference", "second explanation" → "Why maximizing the ELBO works"; one bridging sentence added at the start of chapters 2 and 3)
 
 ## Conversion conventions
 

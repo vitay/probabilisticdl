@@ -1,0 +1,87 @@
+# Variational inference {#sec-variationalinference}
+
+In a latent variable model (@sec-latentvariables), we need the distribution $p_\theta(z)$ of the latent space to generate data, but we only observe $x$. To estimate $p_\theta(z)$, we could again marginalize over $x$:
+
+$$
+    p_\theta(z) = \mathbb{E}_{x \sim p_\theta(x)} [p_\theta(z | x)] = \int_x p_\theta(z | x) \, p_\theta(x) \, dx
+$$
+
+$p_\theta(z | x)$ is the **encoder**: given an input $x \sim p_\theta(x)$, what is its latent representation $z$?
+
+The Bayes rule tells us:
+
+$$
+    p_\theta(z | x) = p_\theta(x |z) \, \dfrac{p_\theta(z)}{p_\theta(x)}
+$$
+
+The **posterior** probability (encoder) $p_\theta(z | x)$ depends on the **model** (decoder) $p_\theta(x|z)$, the **prior** (assumption) $p_\theta(z)$ and the **evidence** (data) $p_\theta(x)$.
+
+The posterior is **intractable**, as the evidence $p_\theta(x) = \int_z p_\theta(x | z) \, p_\theta(z) \, dz$ would require to integrate over all possible latent representations $z$.
+
+**Variational inference** proposes to approximate the true posterior (encoder) $p_\theta(z | x)$ by another parameterized distribution $q_\phi(z|x)$.
+
+![Graphical model of a VAE. Source: <https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html>](../img/vae-graphical-model.png){#fig-vaegraphicalmodel width=70%}
+
+The decoder $p_\theta(x |z)$ generates observations $x$ from a latent representation $z$ with parameters $\theta$. The encoder $q_\phi(z|x)$ estimates the latent representation $z$ of a generated observation $x$. It should approximate $p_\theta(z | x)$ with parameters $\phi$.
+
+To make $q_\phi(z| x)$ close to $p_\theta(z | x)$, we minimize their KL divergence:
+
+$$
+    \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) = \mathbb{E}_{z \sim q_\phi(z|x)} [- \log \dfrac{p_\theta(z | x)}{q_\phi(z|x)}]
+$$
+
+Note that we sample the latent representations from the learned encoder $q_\phi(z|x)$ (imagination). As $p_\theta(z | x) = p_\theta(x |z) \, \dfrac{p_\theta(z)}{p_\theta(x)}$, we get:
+
+$$
+\begin{aligned}
+\text{KL}(q_\phi(z|x) || p_\theta(z | x) ) &= \mathbb{E}_{z \sim q_\phi(z|x)} [- \log \dfrac{p_\theta(x | z) \, p_\theta(z)}{q_\phi(z|x) \, p_\theta(x)}]\\
+&=\mathbb{E}_{z \sim q_\phi(z|x)} [- \log \dfrac{p_\theta(z)}{q_\phi(z|x)}] - \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x)] + \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)]\\
+\end{aligned}
+$$
+
+$p_\theta(x)$ does not depend on $z$, so its expectation w.r.t $z$ is constant:
+
+$$
+    \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) = \text{KL}(q_\phi(z| x) || p_\theta(z)) + \log p_\theta(x) + \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)]
+$$
+
+We rearrange the terms:
+
+$$
+    \log p_\theta(x) - \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) = - \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)] - \text{KL}(q_\phi(z|x) || p_\theta(z))
+$$
+
+* Training the **encoder** means that we **minimize** $\text{KL}(q_\phi(z|x) || p_\theta(z | x) )$, i.e. we want the encoder $q_\phi(z | x)$ to be close to the true "inverse" of the decoder.
+* Training the **decoder** means that we **maximize** $\log p_\theta(x)$ (log-likelihood of the model), i.e. we generate realistic data / explain the data samples.
+* Training the encoder and decoder together means that we **maximize**:
+
+$$
+    \text{ELBO}(\theta, \phi) = \log p_\theta(x) - \text{KL}(q_\phi(z|x) || p_\theta(z | x) )
+$$
+
+The KL divergence is always positive or equal to 0, so we have:
+
+$$
+    \text{ELBO}(\theta, \phi) \leq \log p_\theta(x)
+$$
+
+This term is called the **evidence lower bound** (ELBO): by maximizing it, we also maximize the intractable evidence $\log p_\theta(x)$, which is what we want to do (see @sec-elbo for the reason).
+
+The trick is that the right-hand term of the equation gives us a tractable definition of the ELBO term:
+
+$$
+\begin{aligned}
+\text{ELBO}(\theta, \phi) &= \log p_\theta(x) - \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) \\
+&= \mathbb{E}_{z \sim q_\phi(z|x)} [\log p_\theta(x | z)] - \text{KL}(q_\phi(z|x) || p_\theta(z))
+\end{aligned}
+$$
+
+What happens when we **minimize** the negative ELBO?
+
+$$
+    \mathcal{L}(\theta, \phi) = - \text{ELBO}(\theta, \phi) = \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)] + \text{KL}(q_\phi(z| x) || p_\theta(z))
+$$
+
+* $\mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)]$ is the **reconstruction loss** of the decoder $p_\theta(x | z)$: given a sample $z$ of the encoder $q_\phi(z|x)$, minimize the negative log-likelihood of the reconstruction $p_\theta(x | z)$.
+
+* $\text{KL}(q_\phi(z| x) || p_\theta(z))$ is the **regularization loss** for the encoder: the latent distribution $q_\phi(z|x)$ should not be too far from the **prior** $p_\theta(z)$.
