@@ -1,0 +1,120 @@
+# Mixture density networks for continuous distributions {#sec-mdn}
+
+See <https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20> for an explanation with code.
+
+## Mean-variance estimation (MVE)
+
+The easiest case is when we can assume that the data comes from a normal distribution. All we need to predict is then the mean and the variance of the distribution. This is logically called **mean-variance estimation** [MVE, @Nix1994].
+
+As for the softmax classifier, the training data is a set of tuples $\{\mathbf{x}_i, \mathbf{t}_i\}_{i=1}^N$ sampled from the conditional probability distribution $p(\mathbf{t} | \mathbf{x})$, but the outputs $\mathbf{t}_i$ are regular vectors of size $d_o$, not classes.
+
+Let's make the assumption that the underlying distribution is a **multivariate normal distribution**, with a mean vector $\mu(\mathbf{x})$ and standard deviation vector $\sigma(\mathbf{x})$ that depend on the input $\mathbf{x}$:
+
+$$
+    p(\mathbf{t} | \mathbf{x}) = \mathcal{N}(\mu(\mathbf{x}), \sigma(\mathbf{x}) \cdot I)
+$$
+
+It is easy to generalize to anisotropic normal distributions with a full covariance matrix $\Sigma(\mathbf{x})$, but let's keep the math simple here.
+
+Our model will be a parameterized distribution $p_\theta(\mathbf{t} | \mathbf{x})$, which we can safely consider as a normal distribution too:
+
+$$
+    p_\theta (\mathbf{t} | \mathbf{x}) = \mathcal{N}(\mu_\theta(\mathbf{x}), \sigma_\theta(\mathbf{x}) \cdot I)
+$$
+
+The model is fully parameterized by the two vectors $\mu_\theta(\mathbf{x})$ and $\sigma_\theta(\mathbf{x})$. All we need is a function approximator (aka neural network) taking $\mathbf{x}$ as an input and returning the two vectors.
+
+$$
+    \mu_\theta, \sigma_\theta = F_\theta (\mathbf{x})
+$$
+
+![Mean-variance estimation network. Source: @Sluijterman2024](../img/mve-network.jpg){#fig-mve width=70%}
+
+If we knew the original parameters $\mu(\mathbf{x})$ and $\sigma(\mathbf{x})$ of the data distribution, we would only need to minimize the KL (@sec-klnormal):
+
+$$
+    \text{KL}(p ||p_\theta) = \log \dfrac{\sigma_\theta}{\sigma} + \dfrac{\sigma^2 + (\mu - \mu_\theta)^2}{2 \sigma_\theta^2} - \dfrac{1}{2}
+$$
+
+As a side note, if we only care about the mean of the data (i.e. consider $\sigma_\theta$ constant), the KL becomes proportional to:
+
+$$
+    \text{KL}(p ||p_\theta) \sim (\mu - \mu_\theta)^2
+$$
+
+i.e. the squared difference between the mean prediction $\mu_\theta$ and the mean of the data. Pretty close to the mse... Standard regression is just a sub-case of MVE where we do not care about the variance.
+
+Anyway, we do not have access to the parameters of the data. All we can do is maximize the likelihood of our model on samples taken from the data distribution. It is the same as minimizing the negative log-likelihood:
+
+$$
+    \mathcal{L}(\theta) = \mathbb{E}_{\mathbf{x}, \mathbf{t} \sim p(\mathbf{t} | \mathbf{x})} [- \log p_\theta(\mathbf{t} | \mathbf{x})] \approx \dfrac{1}{N} \, \sum_{i=1}^N - \log p_\theta(\mathbf{t}_i | \mathbf{x}_i)
+$$
+
+The NLL of a sample $(\mathbf{x}_i, \mathbf{t}_i)$ is by definition of the normal distribution:
+
+$$
+    - \log p_\theta(\mathbf{t}_i | \mathbf{x}_i) = \dfrac{1}{2} [ \log 2 \pi + 2 \, \log \sigma_\theta(\mathbf{x}_i) + \dfrac{(\mathbf{t}_i - \mu_\theta(\mathbf{x}_i))^2}{\sigma_\theta(\mathbf{x}_i)^2}]
+$$
+
+The loss function is a fully differentiable function of the parameters $\theta$: we can apply **gradient descent** (aka backpropagation) without any problem! Even if $\mu_\theta(\mathbf{x})$ and $\sigma_\theta(\mathbf{x})$ were the output of two different neural networks, we could train them in parallel by providing them the same loss function.
+
+## Mixture density networks
+
+MVE is nice and all, as it allows to learn both the mean and variance of the data during regression, but it assumes that the data is normal, i.e. unimodal. In real life, interesting probability distributions are multimodal, which means that the pdf has more than one local maximum.
+
+![Unimodal vs. multimodal distributions. Source: <https://medium.com/analytics-vidhya/learning-from-multimodal-target-mixture-density-network-94891d4e357e>](../img/multimodal-distribution.png){#fig-multimodal width=70%}
+
+In <https://github.com/dusenberrymw/mixture-density-networks/blob/master/mixture_density_networks.ipynb>, they take a nice example to understand why it is important. As seen on the left of @fig-mdninverse, it is very easy to do a non-linear regression $y = f_\theta(x)$ on this data.
+
+![Left: the forward model $y = f_\theta(x)$ is easy to regress. Right: the inverse model $x = f_\theta(y)$ is not, as one value of $y$ corresponds to several values of $x$. Source: <https://github.com/dusenberrymw/mixture-density-networks>](../img/mdn-inverse-regression.png){#fig-mdninverse}
+
+However, learning the inverse model $x = f_\theta(y)$ is not possible for a regular regression algorithm, as the mean of $x$ is not a function of $y$ (one value of $y$ can correspond to two values of $x$). The classical dataset for such a problem is the half-moon data, where the probability density of the y-axis is clearly multimodal:
+
+![Half-moons dataset (left) and the multimodal density of its y-coordinate (right).](../img/mdn-halfmoons-pdf.png){#fig-halfmoons}
+
+For multimodal distributions, a **mixture of Gaussians** (as in the Gaussian Mixture Models - GMM - used in clustering) is able to approximate virtually any complex distribution. We just need a basis of $K$ multivariate normal distributions $\mathcal{N}(\mu_k(\mathbf{x}), \sigma_k(\mathbf{x}) \cdot I)$ and weigh them with a **mixing weight** $\alpha_k(\mathbf{x})$:
+
+$$
+    p_\theta(\mathbf{t} | \mathbf{x}) = \sum_{k=1}^K \alpha_k(\mathbf{x}) \cdot \mathcal{N}(\mu_k(\mathbf{x}), \sigma_k(\mathbf{x}) \cdot I)
+$$
+
+The neural network should output for each component $k$:
+
+* the mean $\mu_k(\mathbf{x})$ of the component,
+* the std $\sigma_k(\mathbf{x})$ of the component,
+* the weight $\alpha_k(\mathbf{x})$.
+
+A necessary condition is that the weights $\alpha_k(\mathbf{x})$ are positive and sum to 1: $\sum_{k=1}^K \alpha_k(\mathbf{x}) = 1$. A simple method to ensure this is to use a softmax over the corresponding output neurons $z_k$:
+
+$$
+    \alpha_k(\mathbf{x}) = \dfrac{e^{z_k}}{\displaystyle\sum_{j=1}^K e^{z_j}}
+$$
+
+Similarly, the std must be positive, so we take the exponential of the corresponding output neuron $z^\sigma_k$:
+
+$$
+    \sigma_k(\mathbf{x}) = e^{z^\sigma_k}
+$$
+
+![Architecture of a mixture density network. Source: <https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20>](../img/mdn-architecture.webp){#fig-mdn width=70%}
+
+A **mixture density network** is a regular neural network outputting those three vectors for each component $k$. Training is done by maximizing the log-likelihood of the model on data samples, or equivalently by minimizing the loss function:
+
+$$
+    \mathcal{L}(\theta) = \dfrac{1}{N} \, \sum_{i=1}^N - \log p_\theta(\mathbf{t}_i | \mathbf{x}_i)  = \dfrac{1}{N} \, \sum_{i=1}^N - \log \sum_{k=1}^K \alpha_k(\mathbf{x}_i) \cdot \mathcal{N}(\mathbf{t}_i; \mu_k(\mathbf{x}_i), \sigma_k(\mathbf{x}_i) \cdot I)
+$$
+
+Because of the log of a sum, the loss does not simplify nicely, but it does not matter for pytorch or tensorflow: they can minimize it without a problem. It is straightforward to get the gradient of the loss with respect to $\mu_k(\mathbf{x})$, $\sigma_k(\mathbf{x})$ (as in MVE) and $\alpha_k(\mathbf{x})$, and continue with backpropagation for the weights of the neural network.
+
+After training, how do we use this network? For a given input $\mathbf{x}$, you would only get the value of the probability density function $p_\theta$ of the mixture, which is not very informative unless you can visualize it.
+
+![Left: posterior density learned by a MDN. Right: means of the components, their size indicating their mixing weight. Source: <https://gpflow.readthedocs.io/en/v1.5.1-docs/notebooks/tailor/mixture_density_network.html>](../img/mdn-posterior-density.png){#fig-mdnposterior}
+
+Getting a sample out of the mixture requires two steps:
+
+1. sample a component $k$ using the softmax mixing weights $\alpha_k(\mathbf{x})$.
+2. sample the corresponding normal distribution $\mathcal{N}(\mu_k(\mathbf{x}), \sigma_k(\mathbf{x}) \cdot I)$.
+
+@fig-mdnsampling shows an example with sampling from two components on the half-moons.
+
+![Sampling from a two-component MDN on the half-moons. Source: <https://medium.com/@dave.cote.msc/made-easy-mixture-density-network-for-multivariate-regression-49e576721b3>](../img/mdn-halfmoons-sampling.png){#fig-mdnsampling width=60%}

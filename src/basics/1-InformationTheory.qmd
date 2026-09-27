@@ -11,7 +11,7 @@ The key concept of information theory is the **entropy** of a random variable $X
 
 The key application of information theory is signal compression: the only messages that need to be communicated over a network are the surprising ones, i.e. the ones that cannot be predicted by the receiver. The certain ones can be assumed by the receiver.
 
-![Self-information of an outcome.](img/self-information.png){#fig-selfinformation width=60%}
+![Self-information of an outcome.](../img/self-information.png){#fig-selfinformation width=60%}
 
 A useful measurement of how surprising an outcome $x$ of a probability distribution $X$ with pdf/pmf $p(x)$ is, is the **self-information**:
 
@@ -50,7 +50,7 @@ The continuous entropy is not an exact equivalent of the discrete entropy, but l
 
 The entropy of a Bernoulli variable is maximal when both outcomes are **equiprobable**. If a variable is **deterministic** (probability is either 0 or 1), its entropy is minimal and equal to zero.
 
-![The entropy of a Bernoulli distribution is maximal when the two outcomes are equiprobable.](img/entropy-bernoulli.png){#fig-entropybernoulli width=60%}
+![The entropy of a Bernoulli distribution is maximal when the two outcomes are equiprobable.](../img/entropy-bernoulli.png){#fig-entropybernoulli width=60%}
 
 The entropy has equivalent properties to probabilities, where products are replaced by additions and divisions are replaced by subtractions:
 
@@ -127,7 +127,7 @@ Beware that the notation $H(X, Y)$ is the same as the joint entropy, but it is a
 
 It measures the entropy of the outcomes of $X$ for the distribution of $Y$, i.e. how surprising those samples are for $Y$. If $X$ and $Y$ are the same, the cross-entropy is the same as the entropy of $X$. If they are different, the samples of $X$ become surprising for $Y$, i.e. they have a low likelihood $P(Y=x)$.
 
-![The cross-entropy measures the overlap between two probability distributions.](img/cross-entropy.svg){#fig-crossentropy width=60%}
+![The cross-entropy measures the overlap between two probability distributions.](../img/cross-entropy.svg){#fig-crossentropy width=60%}
 
 The cross-entropy is the mathematical expectation of the **negative log-likelihood** that a sample $x$ taken from the distribution $X$ could also come from the distribution $Y$. It measures how many bits of information one would need to distinguish the two distributions $X$ and $Y$.
 

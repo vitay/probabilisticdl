@@ -1,0 +1,138 @@
+# Softmax classifier for discrete distributions {#sec-softmax}
+
+In machine learning, classification consists in learning a mapping between input vectors $\mathbf{x}$ and a finite number of classes $\mathbf{t}$ for some unknown conditional data distribution $p(\mathbf{t} | \mathbf{x})$. The training data is a set of tuples $\{\mathbf{x}_i, t_i\}_{i=1}^N$ sampled from $p$, where the values $t_i$ are called labels, targets or ground truth, and represent the class of each sample.
+
+In object recognition, the input vectors are the pixels of particular images, and the targets are the name of the object represented in each image (or their index).
+
+In multi-class classification, the target is usually represented by a **one-hot encoded vector** $\mathbf{t}$ consisting of mostly zeros, except a one at a location corresponding to the class.
+
+For example, if you have five classes (cat, dog, ship, house, car), an image $\mathbf{x}$ of a dog would be associated with the following ground truth vector:
+
+$$
+    \mathbf{t} = [\text{cat}, \text{dog}, \text{ship}, \text{house}, \text{car}] = [0, 1, 0, 0, 0]
+$$
+
+The target vectors of the training set can be seen as being samples of a **conditional probability distribution** $p(\mathbf{t} | \mathbf{x})$, in this case a discrete **multinomial** (or multinoulli) distribution (a die with one side per class). For a given image $\mathbf{x}$, the conditional probabilities are defined by the one-hot encoded vector $\mathbf{t}$:
+
+$$
+    p(\mathbf{t} | \mathbf{x}) = [p(\text{cat}| \mathbf{x}), p(\text{dog}| \mathbf{x}), p(\text{ship}| \mathbf{x}), p(\text{house}| \mathbf{x}), p(\text{car}| \mathbf{x})] = [0, 1, 0, 0, 0]
+$$
+
+Each image $\mathbf{x}$ has different probabilities of belonging to one class or another. Note that the use of one-hot encoded targets is a special case: the ground truth could have non-binary conditional probabilities.
+
+A **softmax classifier** is a parametric function approximator $p_\theta(\mathbf{y} | \mathbf{x})$ that outputs a conditional probability distribution through the vector $\mathbf{y}$, in the form of a multinomial distribution:
+
+$$
+    p_\theta(\mathbf{y} | \mathbf{x}) = [p_\theta(\text{cat}| \mathbf{x}), p_\theta(\text{dog}| \mathbf{x}), p_\theta(\text{ship}| \mathbf{x}), p_\theta(\text{house}| \mathbf{x}), p_\theta(\text{car}| \mathbf{x})]
+$$
+
+To make sure that the vector $\mathbf{y}$ indeed characterizes a probability distribution over the classes, its elements must be positive and sum to one. A classical choice is the softmax function, creating the vector $\mathbf{y}$ from the **logit score** $\mathbf{z}$. Their elements are related by:
+
+$$
+    \mathbf{y} = [y_i]_i = \mathcal{S}(\textbf{z}) = [\dfrac{e^{z_i}}{\sum_j e^{z_j}}]_i
+$$
+
+The use of the exponential makes sure that the elements are positive, and the denominator makes sure that they sum to one. The logit score vector can be anything, for example the output of a neural network with parameters $\theta$ taking $\mathbf{x}$ as an input:
+
+$$
+    \mathbf{z} = F_\theta(\mathbf{x})
+$$
+
+Using the softmax function makes sure that, for an input $\mathbf{x}$, the vectors $\mathbf{t}$ and $\mathbf{y}$ both represent a multinomial probability distribution, and that they can be compared with each other.
+
+![The softmax function transforms logit scores into a multinomial probability distribution.](../img/softmax-transformation.png){#fig-softmax width=70%}
+
+Now that we have two multinomial probability distributions, one $p(\mathbf{t} | \mathbf{x})$ representing the data, the other $p_\theta(\mathbf{y} | \mathbf{x})$ representing the parameterized model, we can try to find the value of $\theta$ that minimizes the statistical distance between the two distributions. As before, minimizing the KL divergence between the two is the same as minimizing their cross-entropy.
+
+The cross-entropy loss function to minimize is expressed as:
+
+$$
+    \mathcal{L}(\theta) = \mathbb{E}_{\mathbf{x}, \mathbf{t} \sim p(\mathbf{t} | \mathbf{x})} [- \log p_\theta(\mathbf{t} | \mathbf{x})]
+$$
+
+What does $- \log p_\theta(\mathbf{t} | \mathbf{x})$ mean for a single sample? It denotes the negative log-likelihood that the model with parameters $\theta$ explains the target vector $\mathbf{t}$ for an input $\mathbf{x}$.
+
+Let's suppose that the input image $\mathbf{x}$ is a dog ($\mathbf{t} = [0, 1, 0, 0, 0]$). This negative log-likelihood is defined by the predicted probability $p_\theta(\text{dog}| \mathbf{x})$, i.e. the second element of the vector $\mathbf{y}$. As $\mathbf{t} = [0, 1, 0, 0, 0]$ is a one-hot encoded vector, the log-likelihood could also be written as the dot product between $\mathbf{t}$ and $\log \, \mathbf{y}$:
+
+$$
+    - \log \, p_\theta(\mathbf{t} | \mathbf{x}) = - \log \, p_\theta(\text{dog}| \mathbf{x})
+    = - \begin{bmatrix} 0 & 1 & 0 & 0 & 0 \\ \end{bmatrix} \times \begin{bmatrix} \log \, p_\theta(\text{cat}| \mathbf{x}) \\ \log \, p_\theta(\text{dog}| \mathbf{x}) \\ \log \, p_\theta(\text{ship}| \mathbf{x}) \\ \log \, p_\theta(\text{house}| \mathbf{x})\\ \log \, p_\theta(\text{car}| \mathbf{x}) \\ \end{bmatrix}
+    = - \mathbf{t} \cdot \log \, \mathbf{y}
+$$
+
+The cross-entropy loss function can therefore be expressed as:
+
+$$
+    \mathcal{L}(\theta) = \mathbb{E}_{\mathbf{x}, \mathbf{t} \sim p(\mathbf{t} | \mathbf{x})} [- \mathbf{t} \cdot \log \, \mathbf{y}]
+$$
+
+To estimate this loss function, we only have to sample $N$ tuples $(\mathbf{x}_i, \mathbf{t}_i)$ from the data distribution and approximate it with a sampling average:
+
+$$
+    \mathcal{L}(\theta) \approx \dfrac{1}{N} \sum_{i=1}^N - \mathbf{t}_i \cdot \log \, \mathbf{y}_i
+$$
+
+When the model is a softmax over parameterized logit scores:
+
+$$
+    \mathbf{y} = \mathcal{S}(\mathbf{z}) = \mathcal{S}( F_\theta(\mathbf{x}) )
+$$
+
+the gradient of the individual loss function $l(\theta) = - \mathbf{t} \cdot \log \, \mathbf{y}$ with respect to the logit scores is extremely simple:
+
+$$
+    \dfrac{\partial l(\theta)}{\partial \mathbf{z}} = - (\mathbf{t} - \mathbf{y})
+$$
+
+:::{.callout-note icon="false" collapse="true"}
+## Proof
+
+When differentiating a softmax probability $y_j = \dfrac{\exp(z_j)}{\sum_k \exp(z_k)}$ w.r.t a logit score $z_i$, i.e. $\dfrac{\partial y_j}{\partial z_i}$, we need to consider two cases:
+
+* If $i=j$, $\exp(z_i)$ appears both at the numerator and denominator of $\dfrac{\exp(z_i)}{\sum_k \exp(z_k)}$. The product rule $(f\times g)' = f'\, g + f \, g'$ gives us:
+
+$$
+\begin{aligned}
+\dfrac{\partial y_i}{\partial z_i} &= \dfrac{\exp(z_i)}{\sum_k \exp(z_k)} + \exp(z_i) \, \dfrac{- \exp(z_i)}{(\sum_k \exp(z_k))^2} \\
+&= \dfrac{\exp(z_i) \, \sum_k \exp(z_k) - \exp(z_i)^2}{(\sum_k \exp(z_k))^2} \\
+&= \dfrac{\exp(z_i)}{\sum_k \exp(z_k)} \, (1- \dfrac{\exp(z_i)}{\sum_k \exp(z_k)})\\
+&= y_i \, (1 - y_i)\\
+\end{aligned}
+$$
+
+This is similar to the derivative of the logistic function.
+
+* If $i \neq j$, $z_i$ only appears at the denominator, so we only need the chain rule:
+
+$$
+\begin{aligned}
+\dfrac{\partial y_j}{\partial z_i} &= - \exp(z_j) \, \dfrac{\exp(z_i)}{(\sum_k \exp(z_k))^2} \\
+&= - \dfrac{\exp(z_i)}{\sum_k \exp(z_k)} \, \dfrac{\exp(z_j)}{\sum_k \exp(z_k)} \\
+&= - y_i \, y_j \\
+\end{aligned}
+$$
+
+This allows us to differentiate the cross-entropy:
+
+$$
+\begin{aligned}
+\frac{\partial {l}(\theta)}{\partial z_i} & = - \sum_j \frac{\partial}{\partial z_i} t_j \log(y_j)=
+- \sum_j t_j \frac{\partial \log(y_j)}{\partial z_i} = - \sum_j t_j \frac{1}{y_j} \frac{\partial y_j}{\partial z_i} \\
+& = - \frac{t_i}{y_i} \frac{\partial y_i}{\partial z_i} - \sum_{j \neq i} \frac{t_j}{y_j} \frac{\partial y_j}{\partial z_i}
+= - \frac{t_i}{y_i} y_i (1-y_i) - \sum_{j \neq i} \frac{t_j}{y_j} (-y_j \, y_i) \\
+& = - t_i + t_i \, y_i + \sum_{j \neq i} t_j \, y_i = - t_i + \sum_{j} t_j y_i
+= -t_i + y_i \sum_{j} t_j \\
+& = - (t_i - y_i)
+\end{aligned}
+$$
+
+as the targets sum to one.
+:::
+
+Put together, the gradient of the cross-entropy loss function is:
+
+$$
+    \nabla_\theta \, \mathcal{L}(\theta) = \mathbb{E}_{\mathbf{x}, \mathbf{t} \sim p(\mathbf{t} | \mathbf{x})} [ - (\mathbf{t} - \mathbf{y} ) \times \nabla_\theta \, F_\theta(\mathbf{x})]
+$$
+
+The function approximator $\mathbf{z} = F_\theta(\mathbf{x})$ can be anything (neural network, etc.): we know how to apply gradient descent / backpropagation to minimize the KL divergence / cross-entropy between the data and the model!

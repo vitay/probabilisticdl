@@ -1,0 +1,93 @@
+# Learning paradigms {#sec-paradigms}
+
+We can think of three main paradigms in machine learning.
+
+## Discriminative learning (supervised learning, classification, regression)
+
+In discriminative learning, we try to model a **conditional probability** mapping a probability distribution $X$ into a probability distribution $Y$:
+
+$$
+    x \sim X, y\sim Y: p(y | x)
+$$
+
+We create a neural network $p_\theta(y | x)$ whose goal is to approximate the data distribution by taking an input $x$ and returning a parameterization of the distribution of $y$.
+
+```{mermaid}
+flowchart LR
+    x --> f --> y
+    x(("<i>x</i>"))
+    f["<i>f</i><sub>θ</sub>"]
+    y(("<i>p</i><sub>θ</sub>(<i>y</i> | <i>x</i>)"))
+```
+
+If $Y$ is a **discrete** (categorical) distribution, we are doing a **classification**. We just need to model $Y$ using a Gibbs / Boltzmann distribution (i.e. a softmax layer) and we are good.
+
+If $Y$ is **continuous** and Gaussian, but we only care about its expectation ($\mathbb{E}[Y|X]$), we are performing **regression**. If we also want its variance, it is Bayesian regression.
+
+If $Y$ is **continuous** and we want its distribution (of an unknown family) for uncertainty estimation, we need to use mixtures of Gaussians like in **Mixture Density Networks** (MDN, see @sec-mdn).
+
+## Generative modeling (unsupervised learning)
+
+In unsupervised learning, we only get samples $x$ of an unknown distribution $X$:
+
+$$
+    x \sim X: p(x)
+$$
+
+In **density estimation**, we want to train a neural network to predict the **likelihood** of a sample $x$.
+
+```{mermaid}
+flowchart LR
+    x --> f --> y
+    x(("<i>x</i>"))
+    f["<i>f</i><sub>θ</sub>"]
+    y(("<i>p</i><sub>θ</sub>(<i>x</i>)"))
+```
+
+This is vanilla **maximum likelihood estimation** (MLE, @sec-mle). This can be useful for **anomaly detection**: if the predicted likelihood of a new sample is below a threshold, it might be an anomaly.
+
+**Generative modeling** is quite different. We want to generate a **new sample** from the data distribution (e.g. generate new images of cats). In most methods we want to learn a mapping between a simple known distribution (typically the standard normal distribution) and the data distribution. A sample $z$ from the "latent" prior distribution should be transformed into a sample $x$ of the (approximated) data distribution.
+
+```{mermaid}
+flowchart LR
+    x --> f --> y
+    x(("<i>z</i> ~ 𝒩(0, 1)"))
+    f["<i>f</i><sub>θ</sub>"]
+    y(("<i>x</i> ~ <i>p</i><sub>θ</sub>(<i>x</i>)"))
+```
+
+This is what the decoder of a VAE (variational inference, @sec-variationalinference), the generator of a GAN, or a diffusion model does.
+
+## Autoregressive modeling (self-supervised learning)
+
+Finally, autoregressive models predict part of the sample based on the rest. For temporal sequences, it is often **next item prediction**:
+
+$$
+    p(x_{t+1} | x_t, x_{t-1}, \ldots, x_0)
+$$
+
+Transformers for language modeling learn the **categorical probability distribution** of the next token (classification over thousands of vocabulary tokens) given the history (aka prompt).
+
+```{mermaid}
+flowchart LR
+    x --> f --> y
+    x(("<i>x</i><sub>0</sub>, …, <i>x</i><sub>t-1</sub>, <i>x</i><sub>t</sub>"))
+    f["LLM"]
+    y(("<i>x</i><sub>t+1</sub>"))
+```
+
+There also exist autoregressive vision models, where the next pixel is predicted depending on the others (PixelCNN).
+
+Masked learning (predict part of the sample given the rest) somehow fits in this category.
+
+## Summary
+
+In virtually all machine learning paradigms, we learn a parameterized probability distribution $p_\theta(x)$ (whatever the meaning of $x$) and want to make it close to the data distribution $p(x)$.
+
+The only way to do that is to minimize the KL divergence between the two distributions:
+
+$$
+    \theta^* = \text{argmin}_\theta \; \text{KL}(p(x) || p_\theta(x))
+$$
+
+However, we generally do not know the explicit form of $p(x)$: we only have access to samples $x_i$ from which we need to approximate the KL.

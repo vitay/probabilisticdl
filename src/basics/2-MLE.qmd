@@ -12,7 +12,7 @@ $$
 
 where $\mu$ is the mean of the distribution and $\sigma$ its standard deviation. The family of normal distributions is parameterized by $\mu$ and $\sigma$.
 
-![Normal distributions with different parameters $\mu$ and $\sigma$ explain the data with different likelihoods.](img/mle-normal-fits.png){#fig-mlenormalfits width=60%}
+![Normal distributions with different parameters $\mu$ and $\sigma$ explain the data with different likelihoods.](../img/mle-normal-fits.png){#fig-mlenormalfits width=60%}
 
 The problem is to find the values of $\mu$ and $\sigma$ which best explain the observations $\{x_i\}_{i=1}^N$. Said otherwise: among all possible normal distributions with different values for $\mu$ and $\sigma$, which one is the most likely origin of the samples $\{x_i\}_{i=1}^N$? In @fig-mlenormalfits, the orange normal distribution fits the data better than the green one. But how do we find its parameters?
 

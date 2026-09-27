@@ -23,10 +23,17 @@ book:
 
   chapters:
     - index.qmd
-    - src/1-InformationTheory.qmd
-    - src/2-MLE.qmd
-    - src/3-StatisticalML.qmd
-    - src/4-Bayesian.qmd
+    - part: "**Basics**"
+      chapters:
+        - src/basics/1-InformationTheory.qmd
+        - src/basics/2-MLE.qmd
+        - src/basics/3-Bayesian.qmd
+    - part: "**Statistical machine learning**"
+      chapters:
+        - src/statisticalml/1-Paradigms.qmd
+        - src/statisticalml/2-KL.qmd
+        - src/statisticalml/3-Softmax.qmd
+        - src/statisticalml/4-MDN.qmd
     - src/5-VariationalInference.qmd
     - src/references.qmd
 
