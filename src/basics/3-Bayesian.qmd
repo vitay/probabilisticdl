@@ -20,8 +20,155 @@ If we perform the sampling multiple times, even with a few samples, the average 
 
 ![Illustration of the central limit theorem. Source: <https://en.wikipedia.org/wiki/Central_limit_theorem>](../img/central-limit-theorem.png){#fig-clt width=70%}
 
-MLE (@sec-mle) is a frequentist estimation method as it only relies on the obtained samples, not on additional knowledge one might have about the underlying distribution. In Bayesian statistics [@Bayes1763], this additional knowledge takes the form of a prior distribution $P(\theta)$ over the parameters $\theta$ of the model.
+MLE (@sec-mle) is a frequentist estimation method as it only relies on the obtained samples, not on additional knowledge one might have about the underlying distribution. In Bayesian statistics [@Bayes1763], this additional knowledge takes the form of a prior distribution $p(\theta)$ over the parameters $\theta$ of the model.
 
-## Maximum a posteriori (MAP)
+## Maximum a posteriori (MAP) {#sec-map}
 
-*To be written.*
+### Bayes' rule on the parameters
+
+In MLE, the parameters $\theta$ are fixed but unknown quantities: we search for the value that maximizes the likelihood $p(X | \theta) = p_\theta(X)$ of the data, and that's it. In Bayesian statistics, the parameters are themselves **random variables**. Before seeing any data, our belief about their value is described by the **prior** distribution $p(\theta)$. After observing the data $X = \{x_i\}_{i=1}^N$, this belief is updated into the **posterior** distribution $p(\theta | X)$ using Bayes' rule:
+
+$$
+    p(\theta | X) = \dfrac{p(X | \theta) \, p(\theta)}{p(X)}
+$$
+
+The posterior depends on:
+
+* the **likelihood** $p(X | \theta)$: how well the parameters $\theta$ explain the data, exactly as in MLE.
+* the **prior** $p(\theta)$: which values of the parameters are plausible before seeing the data.
+* the **evidence** $p(X)$: the probability of the data under all possible values of the parameters.
+
+The evidence is obtained by marginalizing over the parameters:
+
+$$
+    p(X) = \int_\theta p(X | \theta) \, p(\theta) \, d\theta
+$$
+
+It does not depend on $\theta$ anymore: it is only a normalization constant ensuring that the posterior integrates to one.
+
+The idea of **maximum a posteriori** (MAP) estimation is to search for the value of the parameters that is the most probable *after* having observed the data, i.e. the **mode** of the posterior distribution:
+
+$$
+    \theta_\text{MAP} = \text{argmax}_\theta \, p(\theta | X) = \text{argmax}_\theta \, \dfrac{p(X | \theta) \, p(\theta)}{p(X)}
+$$
+
+As the evidence does not depend on $\theta$, we do not need to compute it to find the mode of the posterior. This is lucky, as the integral over all possible parameters is generally intractable:
+
+$$
+    \theta_\text{MAP} = \text{argmax}_\theta \, p(X | \theta) \, p(\theta)
+$$
+
+For the same reasons as in MLE, we rather maximize the logarithm of this quantity. When the samples are i.i.d, the likelihood is a product over the samples, so the log-posterior (up to a constant) is a sum:
+
+$$
+    \theta_\text{MAP} = \text{argmax}_\theta \, \log p(X | \theta) + \log p(\theta) = \text{argmax}_\theta \, \sum_{i=1}^N \log p(x_i | \theta) + \log p(\theta)
+$$
+
+or, if you prefer minimizing the negative log-likelihood:
+
+$$
+    \theta_\text{MAP} = \text{argmin}_\theta \, \sum_{i=1}^N - \log p(x_i | \theta) - \log p(\theta)
+$$
+
+The MAP objective is the MLE objective plus an additional term, the log-prior, which pulls the estimate towards the values of the parameters that we believe are plausible.
+
+If the prior is **uniform** (all values of $\theta$ are equally plausible), $\log p(\theta)$ is a constant and MAP reduces to MLE:
+
+$$
+    p(\theta) = \text{cst} \quad \Rightarrow \quad \theta_\text{MAP} = \theta_\text{MLE}
+$$
+
+MLE is therefore a special case of MAP where we have no prior knowledge about the parameters.
+
+### MAP for the mean of a normal distribution
+
+Let's go back to the example of the univariate normal distribution from @sec-mle. To keep the math simple, we suppose that the standard deviation $\sigma$ of the data is known and only estimate its mean $\mu$. The likelihood of the $N$ samples is:
+
+$$
+    p(X | \mu) = \prod_{i=1}^{N} \frac{1}{\sqrt{2\pi \sigma^2}} \, \exp{- \frac{(x_i - \mu)^2}{2\sigma^2}}
+$$
+
+Before seeing the data, we believe that the mean should be around a value $\mu_0$, with an uncertainty $\sigma_0$. This translates into a normal prior on the parameter $\mu$:
+
+$$
+    p(\mu) = \mathcal{N}(\mu_0, \sigma_0) = \frac{1}{\sqrt{2\pi \sigma_0^2}} \, \exp{- \frac{(\mu - \mu_0)^2}{2\sigma_0^2}}
+$$
+
+The log-posterior is, up to constant terms that do not depend on $\mu$:
+
+$$
+    \log p(\mu | X) = - \frac{\sum_{i=1}^{N}(x_i - \mu)^2}{2\sigma^2} - \frac{(\mu - \mu_0)^2}{2\sigma_0^2} + \text{cst}
+$$
+
+Its maximum is reached when its derivative w.r.t $\mu$ is zero:
+
+$$
+    \frac{\partial \log p(\mu | X)}{\partial \mu} = \frac{\sum_{i=1}^{N}(x_i - \mu)}{\sigma^2} - \frac{\mu - \mu_0}{\sigma_0^2} = 0
+$$
+
+which gives:
+
+$$
+    \mu \, (\frac{N}{\sigma^2} + \frac{1}{\sigma_0^2}) = \frac{\sum_{i=1}^{N} x_i}{\sigma^2} + \frac{\mu_0}{\sigma_0^2}
+$$
+
+By introducing the empirical mean of the data $\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_i$, i.e. the MLE estimate, we obtain:
+
+$$
+    \mu_\text{MAP} = \dfrac{N \, \sigma_0^2}{N \, \sigma_0^2 + \sigma^2} \, \bar{x} + \dfrac{\sigma^2}{N \, \sigma_0^2 + \sigma^2} \, \mu_0
+$$
+
+The MAP estimate is a **weighted average** between the MLE estimate $\bar{x}$ and the prior mean $\mu_0$. The two weights sum to one, and their relative importance depends on the number of samples and on how confident we are in the prior:
+
+* When there are **few samples** ($N \rightarrow 0$), the estimate stays close to the prior $\mu_0$: we do not have enough evidence to change our mind.
+* When there are **many samples** ($N \rightarrow \infty$), the weight of the prior vanishes and the MAP estimate tends to the MLE estimate $\bar{x}$: the data overrides the prior.
+* When the prior is **very uncertain** ($\sigma_0 \rightarrow \infty$), the prior becomes uniform and we also recover MLE.
+* When the prior is **very certain** ($\sigma_0 \rightarrow 0$), the estimate sticks to $\mu_0$, whatever the data says.
+
+@fig-mapposterior illustrates this with a prior $\mathcal{N}(0, 1)$ and data sampled from $\mathcal{N}(3, 2)$. With a single sample, the posterior stays close to the prior. As more samples are observed, the likelihood becomes sharper and pulls the posterior towards the empirical mean $\bar{x}$, while the prior loses its influence.
+
+![Prior, (normalized) likelihood and posterior of the mean $\mu$ for $N = 1$, 5 and 50 samples drawn from $\mathcal{N}(3, 2)$, with a prior $\mathcal{N}(0, 1)$. The thin vertical lines show the MLE estimate $\bar{x}$ (orange) and the MAP estimate $\mu_\text{MAP}$ (green); the dotted gray line is the true mean.](../img/map-posterior.png){#fig-mapposterior}
+
+In this particular case, the posterior is itself a normal distribution (the normal prior is said to be **conjugate** to the normal likelihood), whose mean is $\mu_\text{MAP}$ and whose variance $\sigma_N^2$ is given by:
+
+$$
+    \frac{1}{\sigma_N^2} = \frac{N}{\sigma^2} + \frac{1}{\sigma_0^2}
+$$
+
+The more samples we observe, the smaller the variance of the posterior: our uncertainty about the parameter decreases with the amount of data, as for the sampling averages in the central limit theorem.
+
+### MAP and regularization
+
+MAP estimation has a direct interpretation in machine learning. Let's consider a neural network with parameters $\theta$ trained by minimizing the negative log-likelihood of the data, for example the cross-entropy loss of a classifier (@sec-softmax). If we put a normal prior with zero mean on each parameter $\theta_j$:
+
+$$
+    p(\theta) = \prod_j \frac{1}{\sqrt{2\pi \sigma_0^2}} \, \exp{- \frac{\theta_j^2}{2\sigma_0^2}}
+$$
+
+the negative log-prior becomes:
+
+$$
+    - \log p(\theta) = \frac{1}{2 \sigma_0^2} \, \sum_j \theta_j^2 + \text{cst} = \frac{1}{2 \sigma_0^2} \, ||\theta||^2 + \text{cst}
+$$
+
+The MAP objective is then the usual loss function plus a penalty on the squared norm of the parameters:
+
+$$
+    \mathcal{L}(\theta) = \sum_{i=1}^N - \log p_\theta(x_i) + \lambda \, ||\theta||^2 \qquad \text{with} \qquad \lambda = \frac{1}{2 \sigma_0^2}
+$$
+
+This is exactly **L2 regularization** (or weight decay)! Adding weight decay to the loss function is the same as assuming that the parameters are normally distributed around zero, and the regularization coefficient $\lambda$ controls the width of this prior: a strong regularization means a narrow prior, i.e. a strong belief that the parameters should stay small.
+
+Similarly, a Laplace prior $p(\theta_j) \propto \exp{- \frac{|\theta_j|}{b}}$ leads to **L1 regularization** (the lasso), which favors sparse parameters.
+
+### Limitations of MAP
+
+MAP is still a **point estimate**: it returns a single value of the parameters, the mode of the posterior, and discards the rest of the distribution. It therefore does not tell us how uncertain the estimate is. In the normal example above, we could get the variance of the posterior analytically, but this is rarely the case.
+
+**Full Bayesian inference** keeps the whole posterior distribution $p(\theta | X)$, and makes predictions by averaging over all possible values of the parameters, weighted by their posterior probability:
+
+$$
+    p(x | X) = \int_\theta p(x | \theta) \, p(\theta | X) \, d\theta
+$$
+
+This requires computing the evidence $p(X)$ to normalize the posterior, which is precisely the intractable integral that MAP avoids. Approximating such intractable posteriors with a tractable parameterized distribution is the main idea of **variational inference** (@sec-variationalinference).

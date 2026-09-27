@@ -28,7 +28,7 @@ All images live in `src/img/` (referenced as `../img/` from the part subfolders,
 - [x] `1. Information theory.md` → `src/basics/1-InformationTheory.qmd`
 - [x] `2. Maximum Likelihood Estimation (MLE).md` → `src/basics/2-MLE.qmd`
 - [x] `3. Statistical machine learning.md` → split into `src/statisticalml/` (one chapter per former `##` section, headings promoted one level; "Three paradigms" renamed "Learning paradigms")
-- [~] `4. Bayesian estimation.md` → `src/basics/3-Bayesian.qmd` — the source is a stub; the MAP section is empty. Placed in Basics as it continues MLE (CLT → MAP).
+- [x] `4. Bayesian estimation.md` → `src/basics/3-Bayesian.qmd` — the source was a stub; the MAP section was written from scratch. Placed in Basics as it continues MLE (CLT → MAP).
 - [x] `5. Variational inference - ELBO.md` → `src/5-VariationalInference.qmd` — standalone for now; could become a "Generative models" part (ELBO, VAE, …) as content grows.
 
 ## Conversion conventions
@@ -73,5 +73,5 @@ Unused in the notes (not copied): `crossentropy-animation.gif`, `kerneldensityes
 
 ## Todo
 
-- [ ] Write the MAP / Bayesian estimation chapter.
+- [x] Write the MAP section (with `src/img/map-posterior.py` → `map-posterior.png`).
 - [ ] Decide whether the GitHub repo / publishing (gh-pages from `docs/`) should be set up.
