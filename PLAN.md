@@ -4,13 +4,32 @@ Source: `~/Documents/Obsidian/Notes/Machine Learning/Inference/*.md` → `src/*.
 
 Legend: `[ ]` todo · `[x]` done · `[~]` partially done
 
+## Book structure
+
+```
+Preface                         index.qmd
+Basics                          src/basics/
+  Information theory              1-InformationTheory.qmd
+  Maximum likelihood estimation   2-MLE.qmd
+  Bayesian estimation             3-Bayesian.qmd
+Statistical machine learning    src/statisticalml/
+  Learning paradigms              1-Paradigms.qmd
+  KL divergence in ML             2-KL.qmd
+  Softmax classifier              3-Softmax.qmd
+  Mixture density networks        4-MDN.qmd
+Variational inference           src/5-VariationalInference.qmd
+References                      src/references.qmd
+```
+
+All images live in `src/img/` (referenced as `../img/` from the part subfolders, `img/` from `src/`).
+
 ## Chapters
 
-- [x] `1. Information theory.md` → `src/1-InformationTheory.qmd`
-- [x] `2. Maximum Likelihood Estimation (MLE).md` → `src/2-MLE.qmd`
-- [x] `3. Statistical machine learning.md` → `src/3-StatisticalML.qmd`
-- [~] `4. Bayesian estimation.md` → `src/4-Bayesian.qmd` — the source is a stub; the MAP section is empty.
-- [x] `5. Variational inference - ELBO.md` → `src/5-VariationalInference.qmd`
+- [x] `1. Information theory.md` → `src/basics/1-InformationTheory.qmd`
+- [x] `2. Maximum Likelihood Estimation (MLE).md` → `src/basics/2-MLE.qmd`
+- [x] `3. Statistical machine learning.md` → split into `src/statisticalml/` (one chapter per former `##` section, headings promoted one level; "Three paradigms" renamed "Learning paradigms")
+- [~] `4. Bayesian estimation.md` → `src/basics/3-Bayesian.qmd` — the source is a stub; the MAP section is empty. Placed in Basics as it continues MLE (CLT → MAP).
+- [x] `5. Variational inference - ELBO.md` → `src/5-VariationalInference.qmd` — standalone for now; could become a "Generative models" part (ELBO, VAE, …) as content grows.
 
 ## Conversion conventions
 
@@ -46,10 +65,10 @@ Unused in the notes (not copied): `crossentropy-animation.gif`, `kerneldensityes
 
 ## Fixes made during the port (revert any you disagree with)
 
-- [x] Ch1: `H(X|Y) = H(X,Y) - H(Y)` was listed under "if independent"; it holds in general, moved out.
-- [x] Ch2: NLL line said `argmin NLL = argmax Σ -log p`; now `argmin`. Broken bold `**...++` fixed.
-- [x] Ch3: softmax proof differentiated `log(y_i)` where it meant `y_i`; `t_j/y_i` → `t_j/y_j`; MDN list numbered 4./5. → 1./2.; MDN loss now evaluates each component at `t_i` with `x_i`.
-- [x] Ch5: "latent representation $x$" → $z$; "should be too far from the prior" → "should **not** be"; VAE reconstruction term `-log p(x)` → `-log p(x|z)`; `KL(q, p)` → `KL(q || p)`; Jensen stated for concave `f` (the log); the first explanation's intractability equation (which integrated over $x$ and was trivially $p(z)$) replaced by the evidence integral over $z$.
+- [x] Information theory: `H(X|Y) = H(X,Y) - H(Y)` was listed under "if independent"; it holds in general, moved out.
+- [x] MLE: NLL line said `argmin NLL = argmax Σ -log p`; now `argmin`. Broken bold `**...++` fixed.
+- [x] Softmax / MDN: softmax proof differentiated `log(y_i)` where it meant `y_i`; `t_j/y_i` → `t_j/y_j`; MDN list numbered 4./5. → 1./2.; MDN loss now evaluates each component at `t_i` with `x_i`.
+- [x] Variational inference: "latent representation $x$" → $z$; "should be too far from the prior" → "should **not** be"; VAE reconstruction term `-log p(x)` → `-log p(x|z)`; `KL(q, p)` → `KL(q || p)`; Jensen stated for concave `f` (the log); the first explanation's intractability equation (which integrated over $x$ and was trivially $p(z)$) replaced by the evidence integral over $z$.
 - [x] Typos: Bernouilli, substractions, familiy, algoroithm, outputing, Euclidian, "less from", etc.
 
 ## Todo
