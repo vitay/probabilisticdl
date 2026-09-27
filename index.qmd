@@ -1,0 +1,20 @@
+---
+title: Preface
+---
+
+These notes gather the probabilistic concepts that underlie most of modern machine learning: information theory (entropy, cross-entropy, Kullback-Leibler divergence), maximum likelihood estimation, the probabilistic interpretation of supervised and unsupervised learning, Bayesian estimation and variational inference.
+
+The common thread is that virtually every learning algorithm fits a parameterized distribution $p_\theta(x)$ to data sampled from an unknown distribution $p(x)$, which amounts to minimizing the KL divergence between the two.
+
+This document is *work in progress*. Feel free to comment, correct or suggest by writing to <julien.vitay@gmail.com>.
+
+Some figures are taken from other sources ("Source:" in the caption). Their copyright stays to the respective authors, naturally. The rest is my own work and can be distributed, reproduced and modified under CC-BY-SA-NC 4.0.
+
+
+:::{.callout-tip}
+## License
+
+![](https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg)
+
+Except where otherwise noted, this work is licensed under a [Creative Commons Attribution-Non Commercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0).
+:::

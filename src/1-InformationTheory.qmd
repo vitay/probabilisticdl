@@ -1,0 +1,169 @@
+# Information theory {#sec-informationtheory}
+
+## Entropy
+
+Information theory is an interdisciplinary approach to information communication, based on the works of Harry Nyquist, Ralph Hartley, and Claude Shannon.
+
+The key concept of information theory is the **entropy** of a random variable $X$. The entropy measures how much information is contained in the outcomes of a probability distribution. Information is related to **surprise** or **uncertainty**: are the outcomes of a random variable surprising?
+
+* Almost certain outcomes ($P \sim 1$) are not surprising because they happen all the time. Observing certain outcomes carries little information: the fact that the sun rose this morning is not newsworthy.
+* Almost impossible outcomes ($P \sim 0$) are very surprising because they are very rare. If the sun does not rise one morning, this will definitely make the news.
+
+The key application of information theory is signal compression: the only messages that need to be communicated over a network are the surprising ones, i.e. the ones that cannot be predicted by the receiver. The certain ones can be assumed by the receiver.
+
+![Self-information of an outcome.](img/self-information.png){#fig-selfinformation width=60%}
+
+A useful measurement of how surprising an outcome $x$ of a probability distribution $X$ with pdf/pmf $p(x)$ is, is the **self-information**:
+
+$$
+    I(x) = - \log P(X = x) = - \log p(x)
+$$
+
+When $P(X = x)$ is 1, the self-information is 0, as the result is certain and deterministic: it brings no information. When $P(X = x)$ is close to 0, the self-information is very high, as it is very surprising that $x$ happens.
+
+Depending on which log is used, the self-information has different units, but it is just a rescaling: the base never matters as we are going to compare it to other values.
+
+* $\log_2$: bits or shannons.
+* $\log_e = \ln$: nats.
+
+The **entropy** (or Shannon entropy) of a probability distribution is the expected value of the self-information of its outcomes:
+
+$$
+    H(X) = \mathbb{E}_{x \sim p(x)} [I(x)] = \mathbb{E}_{x \sim p(x)} [- \log p(x)]
+$$
+
+It measures the **uncertainty**, **randomness** or **information content** of the random variable.
+
+In the discrete case, the expectation is defined as a sum over the outcomes, weighted by the probability that they happen:
+
+$$
+    H(X) = - \sum_x P(X=x) \, \log P(X=x)
+$$
+
+In the continuous case, we need to use an integral to get the **differential entropy** (or continuous entropy):
+
+$$
+    H(X) = - \int_x p(x) \, \log p(x) \, dx
+$$
+
+The continuous entropy is not an exact equivalent of the discrete entropy, but let's forget about it: <https://en.wikipedia.org/wiki/Differential_entropy>.
+
+The entropy of a Bernoulli variable is maximal when both outcomes are **equiprobable**. If a variable is **deterministic** (probability is either 0 or 1), its entropy is minimal and equal to zero.
+
+![The entropy of a Bernoulli distribution is maximal when the two outcomes are equiprobable.](img/entropy-bernoulli.png){#fig-entropybernoulli width=60%}
+
+The entropy has equivalent properties to probabilities, where products are replaced by additions and divisions are replaced by subtractions:
+
+* The **joint entropy** of two random variables $X$ and $Y$ is defined by the joint probability:
+
+$$
+    H(X, Y) = \mathbb{E}_{x \sim X, y \sim Y} [- \log P(X=x, Y=y)]
+$$
+
+* The **conditional entropy** of two random variables $X$ and $Y$ is defined by:
+
+$$
+    H(X | Y) = \mathbb{E}_{x \sim X, y \sim Y} [- \log p(x | y)]  = \mathbb{E}_{x \sim X, y \sim Y} [- \log \frac{p(x , y)}{p(y)}]
+$$
+
+which gives, as $\log$ turns divisions into subtractions:
+
+$$
+    H(X | Y) = H(X, Y) - H(Y)
+$$
+
+* If the variables are **independent**, we have:
+
+$$
+    H(X, Y) = H(X) + H(Y)
+$$
+
+$$
+    H(X | Y) = H(X)
+$$
+
+* The equivalent of Bayes' rule is:
+
+$$
+    H(Y |X) = H(X |Y) + H(Y) - H(X)
+$$
+
+
+## Mutual information
+
+The most important information measurement between two variables is the **mutual information** MI (or information gain):
+
+$$
+    I(X, Y) = H(X) - H(X | Y) = H(Y) - H(Y | X)
+$$
+
+It measures how much information the variable $Y$ holds on $X$ (and reciprocally):
+
+* If the two variables are **independent**, the MI is 0: $X$ is as uncertain, whether you know $Y$ or not.
+
+$$
+    I (X, Y) = 0
+$$
+
+* If the two variables are **dependent**, knowing $Y$ gives you information on $X$, which becomes less random, i.e. less uncertain / surprising or more predictable.
+
+$$
+    I (X, Y) > 0
+$$
+
+If you can fully predict $X$ when you know $Y$, it becomes deterministic ($H(X|Y)=0$) so the mutual information is maximal ($I(X, Y) = H(X)$).
+
+## Cross-entropy {#sec-crossentropy}
+
+The **cross-entropy** between two distributions $X$ and $Y$ is defined as:
+
+$$
+    H(X, Y) = \mathbb{E}_{x \sim X}[- \log P(Y=x)]
+$$
+
+:::{.callout-warning icon="false"}
+Beware that the notation $H(X, Y)$ is the same as the joint entropy, but it is a different concept!
+:::
+
+It measures the entropy of the outcomes of $X$ for the distribution of $Y$, i.e. how surprising those samples are for $Y$. If $X$ and $Y$ are the same, the cross-entropy is the same as the entropy of $X$. If they are different, the samples of $X$ become surprising for $Y$, i.e. they have a low likelihood $P(Y=x)$.
+
+![The cross-entropy measures the overlap between two probability distributions.](img/cross-entropy.svg){#fig-crossentropy width=60%}
+
+The cross-entropy is the mathematical expectation of the **negative log-likelihood** that a sample $x$ taken from the distribution $X$ could also come from the distribution $Y$. It measures how many bits of information one would need to distinguish the two distributions $X$ and $Y$.
+
+* If the two distributions are the same *almost everywhere*, one cannot distinguish samples from the two distributions. The cross-entropy is the same as the entropy of $X$.
+* If the two distributions are different, one can tell whether a sample $x$ comes from $X$ or $Y$, as it will be unlikely under one of them. The cross-entropy would then be higher than the entropy of $X$.
+
+In layman's terms, the cross-entropy measures the overlap (or distance) between the two distributions: when the distributions are the same, the cross-entropy is minimal; when they are different, it is high.
+
+## Kullback-Leibler divergence {#sec-kl}
+
+In practice, the **Kullback-Leibler (KL) divergence** $\text{KL}(X ||Y)$ is a better measurement of the similarity (statistical distance) between two probability distributions:
+
+$$
+    \text{KL}(X ||Y) = \mathbb{E}_{x \sim X}[- \log \dfrac{P(Y=x)}{P(X=x)}]
+$$
+
+The KL divergence is linked to the cross-entropy by:
+
+$$
+    \text{KL}(X ||Y) = H(X, Y) - H(X)
+$$
+
+as:
+
+$$
+    \mathbb{E}_{x \sim X}[- \log \dfrac{P(Y=x)}{P(X=x)}] = \mathbb{E}_{x \sim X}[- \log P(Y=x)] - \mathbb{E}_{x \sim X}[- \log P(X=x)]
+$$
+
+If the two distributions are the same *almost everywhere*, the KL divergence is zero. If the two distributions are different, the KL divergence is positive. Minimizing the KL between two distributions is therefore the same as making the two distributions "equal" or similar.
+
+However, the KL is not a metric (a distance), as it is not symmetric:
+
+$$
+    \text{KL}(X ||Y) \neq \text{KL}(Y ||X)
+$$
+
+In practice, it does not matter much, but there are other divergences to measure the similarity between two distributions which are symmetric, such as the [Jensen-Shannon divergence](https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence).
+
+Refer to <https://towardsdatascience.com/entropy-cross-entropy-and-kl-divergence-explained-b09cdae917a> for nice visual explanations of the cross-entropy and KL divergence.

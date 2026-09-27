@@ -1,0 +1,51 @@
+project:
+  type: book
+  output-dir: ./docs
+
+book:
+  title: "Probabilistic inference for machine learning"
+  author:
+    - name: Dr. Julien Vitay 
+      email: julien.vitay@gmail.com
+      url: https://julien-vitay.net
+      orcid: 0000-0001-5229-2349
+  
+  page-navigation: true
+  bread-crumbs: false
+
+  sidebar:
+    style: docked
+    background: white
+
+  page-footer:
+    center: |
+      [Creative Commons BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0). Author [Julien Vitay](mailto:julien.vitay@gmail.com)
+
+  chapters:
+    - index.qmd
+    - src/1-InformationTheory.qmd
+    - src/2-MLE.qmd
+    - src/3-StatisticalML.qmd
+    - src/4-Bayesian.qmd
+    - src/5-VariationalInference.qmd
+    - src/references.qmd
+
+bibliography: 
+    - Library.bib
+csl: assets/frontiers.csl
+
+format:
+  html:
+    mainfont: Roboto
+    theme: [lumen, "assets/webpage.scss"]
+    number-sections: false
+    toc: true
+    smooth-scroll: true
+    html-math-method: katex
+    highlight-style: github
+    code-line-numbers: false
+    lightbox: true
+    page-layout: full
+
+    grid:
+      sidebar-width: 300px

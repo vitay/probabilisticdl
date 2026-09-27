@@ -1,0 +1,7 @@
+*.DS_Store
+old/
+docs/
+/.quarto/
+.ruff_cache/
+
+**/*.quarto_ipynb
