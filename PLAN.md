@@ -1,81 +1,139 @@
-# Port plan
+# Book plan
 
-Source: `~/Documents/Obsidian/Notes/Machine Learning/Inference/*.md` → `src/*.qmd`, same Quarto book format as `../DeepReinforcementLearning`.
+*Probabilistic inference for machine learning* — a Quarto book (same format as `../DeepReinforcementLearning`) explaining the probabilistic concepts behind modern machine learning. The common thread: virtually every learning algorithm fits a parameterized distribution $p_\theta$ to data sampled from an unknown distribution $p$, i.e. minimizes a divergence between them, and most of the difficulty comes from intractable expectations (integrals), which are handled either by **sampling** or by **optimization** (variational inference).
 
-Legend: `[ ]` todo · `[x]` done · `[~]` partially done
+Legend: `[x]` written · `[~]` in progress · `[ ]` planned · ★ priority.
 
-## Book structure
+---
 
-```
-Preface                         index.qmd
-Basics                          src/basics/
-  Information theory              1-InformationTheory.qmd
-  Maximum likelihood estimation   2-MLE.qmd
-  Bayesian estimation             3-Bayesian.qmd
-Statistical machine learning    src/statisticalml/
-  Learning paradigms              1-Paradigms.qmd
-  KL divergence in ML             2-KL.qmd
-  Softmax classifier              3-Softmax.qmd
-  Mixture density networks        4-MDN.qmd
-Variational inference           src/variationalinference/
-  Latent variable models          1-LatentVariables.qmd
-  Variational inference           2-VariationalInference.qmd
-  Why maximizing the ELBO works   3-ELBO.qmd
-  Variational autoencoders        4-VAE.qmd
-References                      src/references.qmd
-```
+## Workflow
 
-All images live in `src/img/` (referenced as `../img/` from the part subfolders, `img/` from `src/`).
+For every new chapter:
 
-## Chapters
+1. A detailed outline is written in this file and agreed on (scope, notation, figures).
+2. One section at a time is written in the `.qmd`, rendered, and **waits for approval** before the next one is started.
+3. Figures are proposed in the outline and generated with matplotlib scripts in `src/img/` (`<figure-name>.py` → `<figure-name>.png`), reproducible (fixed seed).
 
-- [x] `1. Information theory.md` → `src/basics/1-InformationTheory.qmd`
-- [x] `2. Maximum Likelihood Estimation (MLE).md` → `src/basics/2-MLE.qmd`
-- [x] `3. Statistical machine learning.md` → split into `src/statisticalml/` (one chapter per former `##` section, headings promoted one level; "Three paradigms" renamed "Learning paradigms")
-- [x] `4. Bayesian estimation.md` → `src/basics/3-Bayesian.qmd` — the source was a stub; the MAP section was written from scratch. Placed in Basics as it continues MLE (CLT → MAP).
-- [x] `5. Variational inference - ELBO.md` → split into `src/variationalinference/` (one chapter per former `##` section; "Generative modeling" → "Latent variable models", "first explanation" → "Variational inference", "second explanation" → "Why maximizing the ELBO works"; one bridging sentence added at the start of chapters 2 and 3)
+## Conventions
 
-## Conversion conventions
+- **Layout:** one subfolder of `src/` per part, chapters numbered inside it (`src/<part>/<n>-<Name>.qmd`); all images in `src/img/` with descriptive kebab-case names, referenced as `../img/…`. Parts and chapter order are defined in `_quarto.yml`.
+- **Build:** `just` copies `~/Articles/bibtex/Library.bib` and runs `quarto render .` into `docs/` (gitignored).
+- **Labels:** every chapter has a `{#sec-…}` label, figures `{#fig-…}`; refer to other chapters with `@sec-…` rather than "see above/below". Citations with `@Key` from `Library.bib`.
+- **Math:** KaTeX. Display math in `$$` blocks indented by 4 spaces, **no blank lines inside `$$`**; multi-line derivations with `\begin{aligned}`, comments as `& \text{(…)}`. `\text{KL}(p || q)`, `\mathbb{E}_{x \sim p(x)}[\cdot]`, `\mathcal{L}` for losses, `\mathcal{N}(\mu, \sigma)` parameterized by the standard deviation.
+- **Callouts:** `:::{.callout-tip|note|warning icon="false"}` with a `##` title; proofs in collapsed `callout-note`.
+- **Diagrams:** `{mermaid}` with HTML labels (`<i>x</i>`, `<sub>θ</sub>`), as mermaid does not render `$…$`.
+- **Style:** step-by-step derivations, bold key terms at their definition, bullet lists to interpret results (limit cases), a sentence linking each chapter to the previous ones. Figures from other sources carry "Source: …" in the caption.
 
-- Obsidian callouts `> [!TIP]` and `---`-delimited boxes → `:::{.callout-* icon="false"}`; proofs are collapsed.
-- `mehrmaid` diagrams → `{mermaid}` with HTML labels (mermaid does not render `$...$`).
-- Blank lines removed inside `$$` blocks (pandoc breaks display math on them); `align` + `\tag*` → `aligned` with `\text{}` comments.
-- Section/figure labels added (`sec-mle`, `sec-kl`, `sec-klnormal`, `sec-mdn`, `sec-vae`, …) and bare "see below"/"explanation 2" replaced by cross-references.
-- Bibliography: `Library.bib` (copied by `just`), because `Bayes1763`, `Nix1994`, `Sluijterman2024` are only there. The arXiv link 2208.11970 became `@Luo2022a`; `@Kingma2013` added for VAEs.
+---
 
-## Images (only the ones referenced were copied, renamed)
+## Current and planned structure
 
-| Obsidian | Book |
-|---|---|
-| `img/selfinformation.png` | `self-information.png` |
-| `img/entropy-binomial.png` | `entropy-bernoulli.png` |
-| `img/crossentropy.svg` | `cross-entropy.svg` |
-| `img/MLE2.png` | `mle-normal-fits.png` |
-| `img/IllustrationCentralTheorem.png` | `central-limit-theorem.png` |
-| `img/softmax-transformation.png` | `softmax-transformation.png` |
-| `img/mdn-image.jpg` | `mve-network.jpg` |
-| `img/multimodal.png` | `multimodal-distribution.png` |
-| `img/mdn.webp` | `mdn-architecture.webp` |
-| `attachments/Pasted image 20250206173409.png` | `mdn-inverse-regression.png` |
-| `attachments/Pasted image 20250206173608.png` | `mdn-halfmoons-pdf.png` |
-| `attachments/Pasted image 20250206213444.png` | `mdn-posterior-density.png` |
-| `attachments/Pasted image 20250206213647.png` | `mdn-halfmoons-sampling.png` |
-| `img/cursedimensionality.png` | `curse-of-dimensionality.png` |
-| `img/latentvariable.png` | `latent-variable-model.png` |
-| `img/VAE-graphical-model.png` | `vae-graphical-model.png` |
-| `img/vae-reparameterization2.png` | `vae-reparameterization.png` |
+### Preface — `index.qmd` [x]
 
-Unused in the notes (not copied): `crossentropy-animation.gif`, `kerneldensityestimation.png`, `langevin.gif`, `manifold.png`, `multimodal.webp`, `softmax.svg`, `Pasted image 20250206140910/141227/142244/142344.png`.
+Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), license.
 
-## Fixes made during the port (revert any you disagree with)
+### Part I — Basics (`src/basics/`)
 
-- [x] Information theory: `H(X|Y) = H(X,Y) - H(Y)` was listed under "if independent"; it holds in general, moved out.
-- [x] MLE: NLL line said `argmin NLL = argmax Σ -log p`; now `argmin`. Broken bold `**...++` fixed.
-- [x] Softmax / MDN: softmax proof differentiated `log(y_i)` where it meant `y_i`; `t_j/y_i` → `t_j/y_j`; MDN list numbered 4./5. → 1./2.; MDN loss now evaluates each component at `t_i` with `x_i`.
-- [x] Variational inference: "latent representation $x$" → $z$; "should be too far from the prior" → "should **not** be"; VAE reconstruction term `-log p(x)` → `-log p(x|z)`; `KL(q, p)` → `KL(q || p)`; Jensen stated for concave `f` (the log); the first explanation's intractability equation (which integrated over $x$ and was trivially $p(z)$) replaced by the evidence integral over $z$.
-- [x] Typos: Bernouilli, substractions, familiy, algoroithm, outputing, Euclidian, "less from", etc.
+- [x] **1. Information theory** `{#sec-informationtheory}` — self-information, entropy (discrete / differential, Bernoulli example), joint and conditional entropy, mutual information, cross-entropy `{#sec-crossentropy}`, KL divergence `{#sec-kl}` (relation to cross-entropy, asymmetry).
+- [x] **2. Maximum likelihood estimation** `{#sec-mle}` — likelihood vs. joint probability, i.i.d. assumption, log-likelihood and NLL; worked derivation of MLE for the univariate normal (empirical mean and variance).
+- [x] **3. Bayesian estimation** `{#sec-bayesian}` — central limit theorem (frequentist view); MAP `{#sec-map}`: Bayes' rule on the parameters (prior, likelihood, evidence, posterior), MLE as MAP with a uniform prior, MAP for the mean of a normal with a normal prior (weighted average of $\bar{x}$ and $\mu_0$, limit cases, conjugate posterior variance, figure `map-posterior.png`), MAP as L2 / L1 regularization, limitations (point estimate, posterior predictive, intractable evidence → VI).
+- [ ] ★ **Forward vs. reverse KL** (section of `statisticalml/2-KL.qmd` or a short chapter here): mode-covering vs. mode-seeking; MLE minimizes the forward KL, VI the reverse one.
 
-## Todo
+### Part II — Statistical machine learning (`src/statisticalml/`)
 
-- [x] Write the MAP section (with `src/img/map-posterior.py` → `map-posterior.png`).
-- [ ] Decide whether the GitHub repo / publishing (gh-pages from `docs/`) should be set up.
+- [x] **1. Learning paradigms** `{#sec-paradigms}` — discriminative (classification, regression, MDN), generative (density estimation vs. generation), autoregressive / self-supervised (LLMs, PixelCNN, masked learning); all of them fit $p_\theta$ to $p$ by minimizing the KL.
+- [x] **2. KL divergence in machine learning** `{#sec-klml}` — closed form between two Gaussians `{#sec-klnormal}` (full derivation, special case $\mathcal{N}(0,1)$); Monte Carlo estimate of the KL; equivalence of KL minimization, cross-entropy minimization and MLE.
+- [x] **3. Softmax classifier** `{#sec-softmax}` — one-hot targets as a multinomial distribution, softmax, cross-entropy loss $-\mathbf{t} \cdot \log \mathbf{y}$, gradient $-(\mathbf{t} - \mathbf{y})$ w.r.t. the logits (collapsed proof).
+- [x] **4. Mixture density networks** `{#sec-mdn}` — mean-variance estimation (NLL of a Gaussian, regression as a special case), multimodal targets (inverse problems, half-moons), mixture of Gaussians output, NLL loss, two-step sampling.
+
+### Part III — Sampling methods (`src/sampling/`) — new
+
+- [~] ★ **1. Monte Carlo and importance sampling** `{#sec-montecarlo}` — detailed plan below. Section 1 written.
+- [ ] ★ **2. Markov chain Monte Carlo** — Markov chains, stationary distribution, detailed balance, Metropolis-Hastings, Gibbs sampling, burn-in / mixing / autocorrelation.
+- [ ] **3. Hamiltonian Monte Carlo and Langevin dynamics** — gradient-based samplers; bridge to score-based diffusion models.
+
+### Part IV — Variational inference (`src/variationalinference/`)
+
+- [x] **1. Latent variable models** `{#sec-latentvariables}` — generative modeling as KL minimization, curse of dimensionality, manifolds, latent variables and the decoder $p_\theta(x|z)$, marginalization.
+- [x] **2. Variational inference** `{#sec-variationalinference}` — intractable posterior, approximate posterior $q_\phi(z|x)$, derivation of the ELBO from $\text{KL}(q_\phi(z|x) || p_\theta(z|x))$, reconstruction and regularization losses.
+- [x] **3. Why maximizing the ELBO works** `{#sec-elbo}` — ELBO from Jensen's inequality, full decomposition $\log p_\theta(x) = \text{ELBO} + \text{KL}$, why maximizing the ELBO w.r.t. $\phi$ minimizes the gap [@Luo2022a].
+- [x] **4. Variational autoencoders** `{#sec-vae}` — $\mathcal{N}(0, 1)$ prior, closed-form regularization loss, log-variance parameterization, reparameterization trick (figure only).
+- [ ] **Gradient estimators** — reparameterization trick in detail vs. score-function (REINFORCE) estimator; link to policy gradients in the DeepRL book.
+- [ ] **Tighter bounds** — IWAE (importance-weighted ELBO, reuses Part III), β-VAE.
+
+### Part V — Deep generative models — planned
+
+- [ ] Normalizing flows — change of variables, exact likelihood.
+- [ ] Energy-based models and score matching.
+- [ ] ★ Diffusion models — port `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/` (~850 lines; its images `langevin.gif`, `kerneldensityestimation.png`, `manifold.png` are in the Obsidian `Inference/img/` folder); hierarchical-VAE derivation of @Luo2022a.
+- [ ] GANs as divergence minimization (f-divergences).
+
+### Part VI — Uncertainty and Bayesian deep learning — optional
+
+- [ ] Aleatoric vs. epistemic uncertainty (MVE / MDN only capture aleatoric uncertainty).
+- [ ] Bayesian neural networks, MC dropout, deep ensembles.
+- [ ] Gaussian processes (mentioned in the MDN chapter, never explained).
+
+### Part VII — Inference over time and for control — optional
+
+- [ ] State-space models: Kalman filter, particle filters (sequential importance sampling); background for world models.
+- [ ] Control as inference [@Levine2018], maximum-entropy RL.
+- [ ] Active inference: variational free energy = negative ELBO, expected free energy, action-perception loop.
+
+### References — `src/references.qmd` [x]
+
+---
+
+## Open items
+
+- [ ] GitHub repository and publishing (e.g. GitHub Pages from `docs/`).
+
+---
+
+## Chapter plan: Monte Carlo and importance sampling
+
+File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter of a new part **Sampling methods** placed between *Statistical machine learning* and *Variational inference*.
+
+**Goal of the chapter:** explain how to estimate expectations $\mathbb{E}_{x \sim p}[f(x)]$ with samples, why this works in high dimensions when numerical integration does not, and what to do when we cannot sample from $p$ directly. It ends on the limits of these methods, which motivate MCMC.
+
+**Notation** (to agree on):
+
+- $p(x)$: the target distribution; $\tilde{p}(x)$ its unnormalized version, $p(x) = \tilde{p}(x) / Z$.
+- $q(x)$: a proposal distribution we can sample from.
+- $f(x)$: the function whose expectation we want.
+- $\hat{f}_N = \frac{1}{N} \sum_{i=1}^N f(x_i)$: the Monte Carlo estimator with $N$ samples.
+- $w(x) = p(x) / q(x)$: importance weights.
+
+### Sections
+
+1. [~] **Why sampling?** — written, waiting for approval.
+    - Nearly everything in the book is an expectation: entropy / cross-entropy / KL, loss functions, the evidence $p(x) = \mathbb{E}_{z}[p(x|z)]$, the posterior predictive, the ELBO.
+    - Closed forms exist only in special cases (KL between Gaussians, conjugate priors).
+    - Numerical integration on a grid needs $M^d$ evaluations: impossible beyond a few dimensions.
+    - Sampling replaces the integral by an average. Requirements: evaluate $f$, sample from $p$. Outline of the chapter.
+2. [ ] **The Monte Carlo estimator**
+    - Definition of $\hat{f}_N$.
+    - Unbiasedness: $\mathbb{E}[\hat{f}_N] = \mathbb{E}_p[f]$ (derivation).
+    - Variance: $\text{Var}(\hat{f}_N) = \text{Var}_p(f) / N$ (derivation, uses i.i.d.).
+    - Consequences: error $\propto 1 / \sqrt{N}$ (CLT, link to @sec-bayesian), **independent of the dimension** $d$; halving the error costs 4× more samples; the constant $\text{Var}_p(f)$ is what matters.
+    - Worked example: estimating $\pi$ with uniform samples in a square (classic, visual).
+    - *Figure (proposed):* `montecarlo-convergence.png` — left: points in the square coloured inside/outside the circle; right: running estimate vs. $N$ (log-scale) with the $\pm 1/\sqrt{N}$ band.
+3. [ ] **Sampling from simple distributions**
+    - Everything starts from uniform pseudo-random numbers.
+    - Inverse transform sampling: $x = F^{-1}(u)$ (short proof; example: exponential distribution). Why it does not scale (needs the inverse CDF, 1D).
+    - Ancestral sampling for latent variable models: sample $z \sim p(z)$, then $x \sim p(x|z)$ — already used for MDNs (@sec-mdn) and the VAE decoder (@sec-vae).
+4. [ ] **Rejection sampling**
+    - Setting: we can evaluate $\tilde{p}(x)$ but not sample from it; proposal $q$ and constant $M$ with $\tilde{p}(x) \leq M q(x)$.
+    - Algorithm; proof that accepted samples follow $p$; acceptance rate $Z / M$.
+    - Failure in high dimensions: $M$ grows exponentially (Gaussian example: two isotropic Gaussians with slightly different variances).
+    - *Figure (proposed):* `rejection-sampling.png` — target, envelope $M q(x)$, accepted/rejected points under the envelope.
+5. [ ] **Importance sampling**
+    - Trick: $\mathbb{E}_p[f] = \mathbb{E}_q[w(x) f(x)]$ (same "introduce $q$" step as in the ELBO derivation, @sec-elbo).
+    - Estimator, unbiasedness, variance; the optimal proposal $q^* \propto |f| p$; bad proposals give heavy-tailed weights (a few samples dominate).
+    - Self-normalized importance sampling when only $\tilde{p}$ is known (biased but consistent).
+    - Effective sample size $\text{ESS} = (\sum w_i)^2 / \sum w_i^2$ as a diagnostic.
+    - Pointer to off-policy RL in the DeepRL book (importance sampling chapter).
+    - *Figure (proposed):* `importance-sampling.png` — same target with a good and a bad proposal, sample weights shown as marker size.
+6. [ ] **Limits: towards MCMC**
+    - Both methods need a proposal that is good **globally**; in high dimensions the probability mass concentrates in a tiny region that a fixed proposal almost never hits.
+    - Idea of MCMC: build samples **locally**, each one from the previous, so that the chain spends its time where the mass is (→ next chapter).
