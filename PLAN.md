@@ -119,10 +119,14 @@ File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter 
     - Back to the $\pi$ example of section 1: variance of $4 \, \mathbb{I}(||x|| \leq 1)$ is $\pi (4 - \pi)$, hence the standard error $\approx 1.64 / \sqrt{N}$.
     - Example: Monte Carlo estimate of the KL divergence $\text{KL}(p || q) \approx \frac{1}{N} \sum_i - \log \frac{q(x_i)}{p(x_i)}$ with $x_i \sim p$ (moved here from the KL chapter; can reuse `cross-entropy.svg`).
     - *Figure (proposed):* `montecarlo-convergence.png` — running estimate of $\pi$ vs. $N$ (log-scale) for a few independent runs, with the $\pm$ standard-error band.
-3. [ ] **Sampling from simple distributions**
-    - Everything starts from uniform pseudo-random numbers.
-    - Inverse transform sampling: $x = F^{-1}(u)$ (short proof; example: exponential distribution). Why it does not scale (needs the inverse CDF, 1D).
-    - Ancestral sampling for latent variable models: sample $z \sim p(z)$, then $x \sim p(x|z)$ — already used for MDNs (@sec-mdn) and the VAE decoder (@sec-vae).
+3. [x] **Sampling from simple distributions** `{#sec-simplesampling}` — approved.
+    - Pseudo-random number generators, seeds; affine transformation of uniforms.
+    - Inverse transform sampling $x = F^{-1}(u)$ (collapsed proof; exponential distribution). Limits: needs the inverse CDF, 1D only.
+    - Normal distributions: Box-Muller (no proof), affine / Cholesky transformation → the VAE reparameterization trick.
+    - Categorical distributions: segments of $[0, 1]$ (softmax, MDN components, LLM tokens).
+    - Ancestral sampling: $z \sim p(z)$ then $x \sim p(x|z)$; discarding $z$ samples the marginal without the integral (MDN, VAE generation, autoregressive models).
+    - The sampling / evaluation asymmetry; unnormalized densities $\tilde{p}(x) = Z \, p(x)$ (posterior) → rejection and importance sampling.
+    - Figure `inverse-transform.png` (`src/img/inverse-transform.py`) — CDF of the exponential with uniform $u$ on the y-axis mapped to $x$, histogram of the samples against the pdf.
 4. [ ] **Rejection sampling**
     - Setting: we can evaluate $\tilde{p}(x)$ but not sample from it; proposal $q$ and constant $M$ with $\tilde{p}(x) \leq M q(x)$.
     - Algorithm; proof that accepted samples follow $p$; acceptance rate $Z / M$.
