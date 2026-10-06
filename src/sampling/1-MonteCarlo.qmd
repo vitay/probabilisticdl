@@ -481,3 +481,113 @@ $$
 i.e. about 20000 proposals for a single accepted sample. In realistic problems, the proposal does not fit the target that well, and the acceptance rate is astronomically small: this is the curse of dimensionality (@sec-curse) again. Rejection sampling is therefore mostly used in low dimensions, for example as a building block inside other algorithms.
 
 The fundamental problem is that all the rejected samples are thrown away, even though we evaluated $\tilde{p}(x)$ for them. Importance sampling, presented in the next section, keeps all the samples but gives them different weights.
+
+## Importance sampling {#sec-importance}
+
+### Principle
+
+Rejection sampling throws away most of its proposals. **Importance sampling** takes a different approach: it keeps all the samples drawn from the proposal $q(x)$, but corrects for the fact that they do not come from the target $p(x)$ by giving each of them a **weight**.
+
+Let's first see the idea on @fig-importancesamplingprinciple. We want the mean $\mathbb{E}_p[x]$ of the target $p(x)$, but we can only sample from the proposal $q(x)$. If we simply average samples from $q(x)$ (left), we obtain an estimate of the mean of $q(x)$, not of $p(x)$: most samples fall in a region where the target is negligible, and they pull the average towards the wrong value. Samples from $q$ alone tell us nothing about $p$.
+
+The solution is to give more **importance** to the samples that are likely under the target than to the ones that are not (right). A sample at $x = -2$ is frequent under $q(x)$ but nearly impossible under $p(x)$: it should count very little in the average. A sample at $x = 2$ is rare under $q(x)$ but likely under $p(x)$: it should count a lot, as it stands for all the samples of $p(x)$ that $q(x)$ fails to produce. With the right weights, the weighted average of the same samples estimates the mean of $p(x)$.
+
+![Principle of importance sampling. The same 30 samples are drawn from the proposal $q(x)$ in both panels. Left: their plain average estimates the mean of the proposal, not of the target. Right: when each sample is weighted by $w(x) = p(x) / q(x)$ (marker area proportional to the weight), the weighted average (self-normalized, see below) estimates the mean of the target.](../img/importance-sampling-principle.png){#fig-importancesamplingprinciple}
+
+What are the right weights? Let's derive them.
+
+The trick is to introduce the proposal into the expectation, multiplying and dividing by $q(x)$:
+
+$$
+\begin{aligned}
+    \mathbb{E}_{x \sim p(x)} [f(x)] &= \int_x f(x) \, p(x) \, dx & \text{(Definition)} \\
+    &= \int_x f(x) \, \dfrac{p(x)}{q(x)} \, q(x) \, dx & \text{(Introduce the proposal)} \\
+    &= \mathbb{E}_{x \sim q(x)} [\dfrac{p(x)}{q(x)} \, f(x)] & \text{(Expectation under the proposal)} \\
+\end{aligned}
+$$
+
+The ratio between the two densities is called the **importance weight**:
+
+$$
+    w(x) = \dfrac{p(x)}{q(x)}
+$$
+
+so that the expectation under the target becomes an expectation under the proposal of the weighted function:
+
+$$
+    \mathbb{E}_{x \sim p(x)} [f(x)] = \mathbb{E}_{x \sim q(x)} [w(x) \, f(x)]
+$$
+
+The only requirement is that $q(x) > 0$ wherever $f(x) \, p(x) \neq 0$: the proposal must be able to produce every sample that matters for the target.
+
+The right-hand side is an expectation under $q(x)$, which we can sample from. The Monte Carlo estimator of @sec-mcestimator applies directly, giving the **importance sampling estimator**:
+
+$$
+    \hat{f}_N^\text{IS} = \dfrac{1}{N} \, \sum_{i=1}^N w(x_i) \, f(x_i) \qquad \text{with} \qquad x_i \sim q(x)
+$$
+
+The weights correct for the mismatch between the two distributions, as on @fig-importancesamplingprinciple. A sample in a region where the proposal is too generous ($q(x) > p(x)$) appears more often than it should under $p(x)$, so its weight is smaller than 1. A sample in a region the proposal neglects ($q(x) < p(x)$) appears too rarely, so its weight is larger than 1.
+
+As a plain Monte Carlo estimator of $\mathbb{E}_q[w f]$, the importance sampling estimator inherits the properties of @sec-mcestimator: it is **unbiased**, and its variance is:
+
+$$
+    \text{Var}(\hat{f}_N^\text{IS}) = \dfrac{\sigma_\text{IS}^2}{N} \qquad \text{with} \qquad \sigma_\text{IS}^2 = \text{Var}_{x \sim q(x)} (w(x) \, f(x))
+$$
+
+### Choosing the proposal
+
+The estimator is unbiased for any proposal that covers the target, but its variance depends a lot on the choice of $q(x)$. The weights $w(x) = p(x) / q(x)$ give the intuition:
+
+* When the proposal is **close to the target**, all the weights are close to 1: every sample counts roughly the same, and importance sampling behaves like plain Monte Carlo sampling from $p(x)$.
+* When the proposal is **much smaller than the target** in some region, the samples from that region are rare but receive huge weights. The estimate then depends on whether, and how many, such samples happen to be drawn.
+
+A good proposal should therefore be as close as possible to the target and, as for rejection sampling, have tails at least as heavy as the target, so that no region of the target is neglected. A proposal that is too narrow produces two kinds of failures, illustrated on @fig-importancesampling with the bimodal target of @fig-rejectionsampling:
+
+* Most of the time, **no sample** falls in the regions neglected by the proposal (run A, the second mode). The weights look perfectly reasonable, but the estimate ignores a part of the distribution and is wrong.
+* Occasionally, a sample falls in such a region and receives a **huge weight**, as $q(x) \ll p(x)$ there (run B). This single sample then dominates the estimate.
+
+The estimate jumps between these two situations from one run to another: this is what a large variance looks like.
+
+![Self-normalized importance sampling of the bimodal target with $N = 50$ samples. Top: target, proposal and samples. Bottom: normalized weights of the samples (note the different scales). Left: a broad proposal covering both modes gives balanced weights and a good estimate of $\mathbb{E}_p[x] = -0.3$. Middle and right: two runs of the same proposal centered on the first mode, too narrow to cover the second one. In run A, no sample reaches the second mode: the weights are nearly uniform, but the estimate is wrong. In run B, one sample reaches the second mode and receives 74% of the total weight.](../img/importance-sampling.png){#fig-importancesampling}
+
+### Self-normalized importance sampling
+
+Computing the weights $w(x) = p(x) / q(x)$ requires the normalized target $p(x)$. When we only know the unnormalized density $\tilde{p}(x) = Z \, p(x)$ (@sec-simplesampling), we compute the weights with $\tilde{p}(x)$ instead, and **normalize** them so that they sum to one:
+
+$$
+    \tilde{w}_i = \dfrac{\tilde{p}(x_i)}{q(x_i)} \qquad\qquad \bar{w}_i = \dfrac{\tilde{w}_i}{\sum_{j=1}^N \tilde{w}_j}
+$$
+
+The expectation is then approximated by the weighted average of the samples:
+
+$$
+    \mathbb{E}_{x \sim p(x)} [f(x)] \approx \sum_{i=1}^N \bar{w}_i \, f(x_i)
+$$
+
+The unknown constant $Z$ multiplies all the weights by the same amount ($\tilde{w}_i = Z \, w(x_i)$), so it disappears in the normalization. This **self-normalized importance sampling** estimator is the one used in @fig-importancesamplingprinciple and @fig-importancesampling. It is slightly biased for a finite number of samples, but the bias vanishes when $N$ increases.
+
+As a by-product, the average of the unnormalized weights is an estimate of the normalization constant itself, as $\mathbb{E}_{x \sim q(x)}[\tilde{w}(x)] = \int_x \tilde{p}(x) \, dx = Z$:
+
+$$
+    Z \approx \dfrac{1}{N} \, \sum_{i=1}^N \tilde{w}_i
+$$
+
+This will be useful later: when $Z$ is the evidence of a model, importance sampling provides an estimate of a quantity that is otherwise intractable.
+
+### Effective sample size
+
+The normalized weights give a simple diagnostic of the quality of the estimate. If all weights are equal ($\bar{w}_i = 1/N$), every sample contributes equally, as in plain Monte Carlo sampling with $N$ samples. If one weight is close to 1 and the others close to 0, the estimate relies on a single sample. The **effective sample size** (ESS) interpolates between these two extremes:
+
+$$
+    \text{ESS} = \dfrac{(\sum_{i=1}^N \tilde{w}_i)^2}{\sum_{i=1}^N \tilde{w}_i^2} = \dfrac{1}{\sum_{i=1}^N \bar{w}_i^2}
+$$
+
+It is equal to $N$ when the weights are uniform and to 1 when a single sample carries all the weight. It can be interpreted as the number of samples from $p(x)$ that would give an estimate of similar quality. In @fig-importancesampling, the broad proposal has an ESS of 34 out of 50 samples, while run B relies on fewer than 2 effective samples.
+
+:::{.callout-warning icon="false"}
+## The ESS cannot see what the proposal misses
+
+In run A of @fig-importancesampling, the ESS is 46 out of 50, better than with the good proposal, although the estimate is completely wrong. The ESS only measures how balanced the weights of the **obtained** samples are: it cannot detect regions of the target that the proposal never visits. A high ESS is necessary for a good estimate, but not sufficient.
+:::
+
+Importance sampling is one of the most widely used tools of machine learning. In reinforcement learning, it allows to reuse samples collected with an older version of the policy to estimate quantities under the current one, as in the ubiquitous PPO algorithm [@Schulman2017a], used in robotics and in the alignment of large language models such as ChatGPT [@Ouyang2022]. Following the lesson of this section, PPO clips the importance weights to stay close to 1, so that the new policy never moves too far from the one that collected the samples. Importance-weighted autoencoders tighten the ELBO with several weighted samples of the encoder, and particle filters track hidden states over time with sequences of weighted samples: both will be presented in later chapters.

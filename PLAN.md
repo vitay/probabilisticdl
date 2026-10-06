@@ -132,13 +132,15 @@ File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter 
     - Acceptance rate $Z / M$; choosing $M$ (too small → silently wrong samples); proposal tails at least as heavy as the target.
     - Failure in high dimensions: two isotropic Gaussians, $M = (\sigma_q / \sigma_p)^d$, $1.01^{-1000} \approx 5 \times 10^{-5}$.
     - Figure `rejection-sampling.png` (`src/img/rejection-sampling.py`): bimodal $\tilde{p}$ with $Z = 3$, proposal $\mathcal{N}(0, 2)$, $M \approx 8.2$; accepted / rejected points under the envelope; histogram of accepted samples vs. $p(x)$.
-5. [ ] **Importance sampling**
-    - Trick: $\mathbb{E}_p[f] = \mathbb{E}_q[w(x) f(x)]$ (same "introduce $q$" step as in the ELBO derivation, @sec-elbo).
-    - Estimator, unbiasedness, variance; the optimal proposal $q^* \propto |f| p$; bad proposals give heavy-tailed weights (a few samples dominate).
-    - Self-normalized importance sampling when only $\tilde{p}$ is known (biased but consistent).
-    - Effective sample size $\text{ESS} = (\sum w_i)^2 / \sum w_i^2$ as a diagnostic.
-    - Pointer to off-policy RL in the DeepRL book (importance sampling chapter).
-    - *Figure (proposed):* `importance-sampling.png` — same target with a good and a bad proposal, sample weights shown as marker size.
+5. [x] **Importance sampling** `{#sec-importance}` — approved.
+    - Intuition first (figure `importance-sampling-principle.png`): plain average of samples from $q$ estimates the mean of $q$; weighting by $p / q$ recovers the mean of $p$ (seed 2, typical run).
+    - Principle: $\mathbb{E}_p[f] = \mathbb{E}_q[w f]$, $w = p / q$; estimator, support condition, unbiased, variance $\text{Var}_q(w f) / N$.
+    - Choosing the proposal (no formula): weights close to 1 when $q \approx p$, huge weights where $q \ll p$; $q$ close to $p$ with heavy enough tails. (Variance integral, optimal $q^* \propto |f| p$ and the rare-event example dropped: not needed later.)
+    - Failures of a too narrow proposal: missed regions (no sample) vs. huge weights (one sample dominates).
+    - Self-normalized importance sampling (short): normalized weights $\bar{w}_i$, $Z$ cancels in the normalization, slightly biased; by-product $Z \approx \frac{1}{N} \sum \tilde{w}_i$ (needed for IWAE / evidence estimation).
+    - Effective sample size $1 / \sum \bar{w}_i^2$; warning callout: the ESS cannot detect missed modes.
+    - Pointers: PPO in RL (robotics, RLHF of ChatGPT) [@Schulman2017a; @Ouyang2022], which clips the weights near 1; IWAE, particle filters.
+    - Figure `importance-sampling.png` (`src/img/importance-sampling.py`): bimodal target of the rejection figure, $N = 50$; good proposal $\mathcal{N}(0, 2)$ vs. two runs (seeds 5 and 3) of $\mathcal{N}(-1.5, 0.8)$: missed mode (ESS 46, estimate $-1.66$) and degenerate weights (ESS 1.8); estimates of $\mathbb{E}_p[x] = -0.3$ in the titles.
 6. [ ] **Limits: towards MCMC**
     - Both methods need a proposal that is good **globally**; in high dimensions the probability mass concentrates in a tiny region that a fixed proposal almost never hits.
     - Idea of MCMC: build samples **locally**, each one from the previous, so that the chain spends its time where the mass is (→ next chapter).
