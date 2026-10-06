@@ -8,7 +8,7 @@ $$
     \text{KL}(X ||Y) = \mathbb{E}_{x \sim X}[- \log \dfrac{P(Y=x)}{P(X=x)}]
 $$
 
-There are basically two ways to compute the KL, one relying on closed analytical forms, the other on sampling.
+There are basically two ways to compute the KL, one relying on closed analytical forms, the other on sampling. We focus here on the first one; sampling methods are the topic of @sec-montecarlo.
 
 ## Closed form of the KL divergence for normal distributions {#sec-klnormal}
 
@@ -104,24 +104,6 @@ $$
     \text{KL}(X || \mathcal{N}(0, 1)) = \dfrac{1}{2} [\sigma_x^2 + \mu_x^2 - 1 - \log \sigma_x^2]
 $$
 
-## Monte Carlo sampling
-
-When we do not have access to the analytical form of the pdf of the distribution (or when the math becomes too complex), the only way to estimate the KL divergence between two distributions is through **Monte Carlo sampling**. To estimate the expectation of a quantity using a random variable, one can take **enough** samples (according to the central limit theorem) from the random variable and compute the **sampling average** of that quantity over the samples.
-
-$$
-    \mathbb{E}_{x \sim X} [f(X)] \approx \dfrac{1}{N} \, \sum_{i=1}^N f(x_i)
-$$
-
-Applied to the KL divergence, this gives us:
-
-$$
-    \text{KL}(X ||Y) = \mathbb{E}_{x \sim X}[- \log \dfrac{P(Y=x)}{P(X=x)}] \approx \dfrac{1}{N} \, \sum_{i=1}^N - \log \dfrac{P(Y=x_i)}{P(X=x_i)}
-$$
-
-If you want to estimate the KL between two distributions $X$ and $Y$, take enough samples from $X$ and average the logarithm of the ratio of the likelihoods.
-
-![The KL can be estimated by sampling from $X$ and comparing the likelihoods.](../img/cross-entropy.svg){#fig-klsampling width=60%}
-
 ## Equivalence between KL and cross-entropy
 
 Let's now consider that the samples $X = \{x_i\}_{i=1}^N$ come from some unknown distribution $p$ (the data), while $Y$ comes from a parameterized family of probability distributions $p_\theta(x)$ with parameters $\theta$ (the model). The KL divergence is expressed as:
@@ -176,7 +158,7 @@ $$
     H(p(x), p_\theta(x)) = \mathbb{E}_{x \sim p(x)}[- \log p_\theta(x)]
 $$
 
-Using $N$ samples $\{x_i\}_{i=1}^N$ from the data, we can approximate it with:
+Using $N$ samples $\{x_i\}_{i=1}^N$ from the data, we can approximate this expectation with a **Monte Carlo estimate** (@sec-montecarlo), i.e. the average of $- \log p_\theta(x)$ over the samples:
 
 $$
     H(p(x), p_\theta(x)) \approx \dfrac{1}{N} \, \sum_{i=1}^N - \log p_\theta(x_i) = - \dfrac{1}{N} \, l(\theta)

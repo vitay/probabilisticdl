@@ -26,9 +26,7 @@ $$
 
 is indeed the log-likelihood of the model on the data that we maximize in **maximum likelihood estimation** (@sec-mle).
 
-The problem is that images are **high-dimensional** (one dimension per pixel), so we would need astronomical numbers of samples to estimate the gradient (once): this is the **curse of dimensionality**.
-
-![The curse of dimensionality. Source: <https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html>](../img/curse-of-dimensionality.png){#fig-cursedimensionality width=70%}
+The problem is that images are **high-dimensional** (one dimension per pixel). We saw in @sec-curse that integrals over such spaces cannot be computed on a grid: this is the **curse of dimensionality**. Sampling avoids the grid, but the probability mass of natural images occupies a tiny fraction of the pixel space, which makes their distribution very hard to model and learn directly.
 
 MLE does not work well in high-dimensional spaces. We need to work in a much lower-dimensional space.
 

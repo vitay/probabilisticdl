@@ -42,7 +42,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 ### Part II — Statistical machine learning (`src/statisticalml/`)
 
 - [x] **1. Learning paradigms** `{#sec-paradigms}` — discriminative (classification, regression, MDN), generative (density estimation vs. generation), autoregressive / self-supervised (LLMs, PixelCNN, masked learning); all of them fit $p_\theta$ to $p$ by minimizing the KL.
-- [x] **2. KL divergence in machine learning** `{#sec-klml}` — closed form between two Gaussians `{#sec-klnormal}` (full derivation, special case $\mathcal{N}(0,1)$); Monte Carlo estimate of the KL; equivalence of KL minimization, cross-entropy minimization and MLE.
+- [x] **2. KL divergence in machine learning** `{#sec-klml}` — closed form between two Gaussians `{#sec-klnormal}` (full derivation, special case $\mathcal{N}(0,1)$); equivalence of KL minimization, cross-entropy minimization and MLE.
 - [x] **3. Softmax classifier** `{#sec-softmax}` — one-hot targets as a multinomial distribution, softmax, cross-entropy loss $-\mathbf{t} \cdot \log \mathbf{y}$, gradient $-(\mathbf{t} - \mathbf{y})$ w.r.t. the logits (collapsed proof).
 - [x] **4. Mixture density networks** `{#sec-mdn}` — mean-variance estimation (NLL of a Gaussian, regression as a special case), multimodal targets (inverse problems, half-moons), mixture of Gaussians output, NLL loss, two-step sampling.
 
@@ -54,7 +54,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 ### Part IV — Variational inference (`src/variationalinference/`)
 
-- [x] **1. Latent variable models** `{#sec-latentvariables}` — generative modeling as KL minimization, curse of dimensionality, manifolds, latent variables and the decoder $p_\theta(x|z)$, marginalization.
+- [x] **1. Latent variable models** `{#sec-latentvariables}` — generative modeling as KL minimization, curse of dimensionality (back-reference to `sec-curse`), manifolds, latent variables and the decoder $p_\theta(x|z)$, marginalization.
 - [x] **2. Variational inference** `{#sec-variationalinference}` — intractable posterior, approximate posterior $q_\phi(z|x)$, derivation of the ELBO from $\text{KL}(q_\phi(z|x) || p_\theta(z|x))$, reconstruction and regularization losses.
 - [x] **3. Why maximizing the ELBO works** `{#sec-elbo}` — ELBO from Jensen's inequality, full decomposition $\log p_\theta(x) = \text{ELBO} + \text{KL}$, why maximizing the ELBO w.r.t. $\phi$ minimizes the gap [@Luo2022a].
 - [x] **4. Variational autoencoders** `{#sec-vae}` — $\mathcal{N}(0, 1)$ prior, closed-form regularization loss, log-variance parameterization, reparameterization trick (figure only).
@@ -106,18 +106,19 @@ File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter 
 
 ### Sections
 
-1. [~] **Why sampling?** — written, waiting for approval.
+1. [x] **Why sampling?** — approved; $\pi$ example added.
     - Nearly everything in the book is an expectation: entropy / cross-entropy / KL, loss functions, the evidence $p(x) = \mathbb{E}_{z}[p(x|z)]$, the posterior predictive, the ELBO.
     - Closed forms exist only in special cases (KL between Gaussians, conjugate priors).
-    - Numerical integration on a grid needs $M^d$ evaluations: impossible beyond a few dimensions.
-    - Sampling replaces the integral by an average. Requirements: evaluate $f$, sample from $p$. Outline of the chapter.
+    - Numerical integration on a grid needs $M^d$ evaluations: impossible beyond a few dimensions. Label `{#sec-curse}`, figure `curse-of-dimensionality.png` (moved here from the latent variables chapter).
+    - Sampling replaces the integral by an average. Example callout: computing $\pi$ with uniform samples in a square (indicator function $\mathbb{I}$), figure `montecarlo-pi.png` ($N$ = 100, 1000, 10000). Requirements: evaluate $f$, sample from $p$. Outline of the chapter.
 2. [ ] **The Monte Carlo estimator**
     - Definition of $\hat{f}_N$.
     - Unbiasedness: $\mathbb{E}[\hat{f}_N] = \mathbb{E}_p[f]$ (derivation).
     - Variance: $\text{Var}(\hat{f}_N) = \text{Var}_p(f) / N$ (derivation, uses i.i.d.).
     - Consequences: error $\propto 1 / \sqrt{N}$ (CLT, link to @sec-bayesian), **independent of the dimension** $d$; halving the error costs 4× more samples; the constant $\text{Var}_p(f)$ is what matters.
-    - Worked example: estimating $\pi$ with uniform samples in a square (classic, visual).
-    - *Figure (proposed):* `montecarlo-convergence.png` — left: points in the square coloured inside/outside the circle; right: running estimate vs. $N$ (log-scale) with the $\pm 1/\sqrt{N}$ band.
+    - Back to the $\pi$ example of section 1: variance of $4 \, \mathbb{I}(||x|| \leq 1)$ is $\pi (4 - \pi)$, hence the standard error $\approx 1.64 / \sqrt{N}$.
+    - Example: Monte Carlo estimate of the KL divergence $\text{KL}(p || q) \approx \frac{1}{N} \sum_i - \log \frac{q(x_i)}{p(x_i)}$ with $x_i \sim p$ (moved here from the KL chapter; can reuse `cross-entropy.svg`).
+    - *Figure (proposed):* `montecarlo-convergence.png` — running estimate of $\pi$ vs. $N$ (log-scale) for a few independent runs, with the $\pm$ standard-error band.
 3. [ ] **Sampling from simple distributions**
     - Everything starts from uniform pseudo-random numbers.
     - Inverse transform sampling: $x = F^{-1}(u)$ (short proof; example: exponential distribution). Why it does not scale (needs the inverse CDF, 1D).
