@@ -37,6 +37,7 @@ book:
     - part: "**Sampling methods**"
       chapters:
         - src/sampling/1-MonteCarlo.qmd
+        - src/sampling/2-MCMC.qmd
     - part: "**Variational inference**"
       chapters:
         - src/variationalinference/1-LatentVariables.qmd

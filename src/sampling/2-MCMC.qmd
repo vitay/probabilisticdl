@@ -1,0 +1,95 @@
+# Markov chain Monte Carlo {#sec-mcmc}
+
+The previous chapter ended on the limits of rejection and importance sampling: a proposal fixed once and for all cannot match a complex target in high dimensions. **Markov chain Monte Carlo** (MCMC) methods build samples **one after the other**, each new sample being proposed in the neighborhood of the current one. To understand why such a sequence of samples ends up following the target distribution, we first need a few notions about Markov chains.
+
+## Markov chains {#sec-markovchains}
+
+### Definition
+
+A **Markov chain** is a sequence of random variables $x_0, x_1, x_2, \ldots$ in which each state only depends on the previous one, not on the rest of the history:
+
+$$
+    p(x_{t+1} | x_t, x_{t-1}, \ldots, x_0) = p(x_{t+1} | x_t)
+$$
+
+This is the **Markov property**: the chain is "memoryless", the current state contains everything needed to predict the next one. The probability of moving from a state $x$ to a state $x'$ in one step is given by the **transition kernel** $T(x' | x)$. We only consider chains where the transition kernel does not change over time.
+
+Simulating a Markov chain is easy: start from an initial state $x_0$, then repeatedly sample the next state from the transition kernel, $x_{t+1} \sim T(x' | x_t)$. When the states are discrete, this is just sampling from a categorical distribution (@sec-simplesampling).
+
+A classical toy example is the weather, with three possible states: sunny, cloudy and rainy. Each day, the weather of the next day is drawn according to the following transition probabilities (each row sums to one):
+
+| Today $\backslash$ tomorrow | sunny | cloudy | rainy |
+|:---|:---:|:---:|:---:|
+| **sunny** | 0.7 | 0.2 | 0.1 |
+| **cloudy** | 0.3 | 0.4 | 0.3 |
+| **rainy** | 0.2 | 0.4 | 0.4 |
+
+A sunny day is followed by another sunny day with probability 0.7, by a cloudy day with probability 0.2, and by a rainy day with probability 0.1. The left part of @fig-markovchain represents the same chain as a graph.
+
+![A Markov chain with three states. Left: transition probabilities. Middle: the distribution $p_t(x)$ of the state at step $t$ converges to the same stationary distribution, whether the chain starts on a sunny (solid lines) or a rainy day (dashed lines). Right: fraction of the time spent in each state by a single long chain, which converges to the stationary distribution (dotted lines).](../img/markov-chain.png){#fig-markovchain}
+
+### Evolution of the distribution
+
+If we know the state today, the state tomorrow is random. More generally, let's call $p_t(x)$ the probability that the chain is in state $x$ at step $t$, i.e. the distribution we would observe over many independent runs of the chain. To be in state $x'$ at step $t+1$, the chain must have been in some state $x$ at step $t$ and then moved from $x$ to $x'$. Summing over all possible states $x$ (law of total probability):
+
+$$
+    p_{t+1}(x') = \sum_x T(x' | x) \, p_t(x)
+$$
+
+In the continuous case, the sum becomes an integral:
+
+$$
+    p_{t+1}(x') = \int_x T(x' | x) \, p_t(x) \, dx
+$$
+
+Let's start on a sunny day: $p_0 = (1, 0, 0)$ for (sunny, cloudy, rainy). The next day, the distribution is given by the first row of the table: $p_1 = (0.7, 0.2, 0.1)$. Applying the formula once more:
+
+$$
+    p_2(\text{sunny}) = 0.7 \times 0.7 + 0.3 \times 0.2 + 0.2 \times 0.1 = 0.57
+$$
+
+and similarly for the two other states, giving $p_2 = (0.57, 0.26, 0.17)$. Repeating this, we get $p_3 = (0.51, 0.29, 0.20)$, $p_4 = (0.48, 0.30, 0.22)$, $p_5 = (0.47, 0.30, 0.22)$... The distribution changes less and less: the chain progressively forgets that it started on a sunny day.
+
+### Stationary distribution
+
+The middle part of @fig-markovchain shows that the distribution converges towards fixed values, around $(0.46, 0.31, 0.23)$, and that these values are the same if we start on a rainy day instead. Once the chain has reached this distribution, applying the transition kernel does not change it anymore. Such a distribution $p(x)$ is called a **stationary distribution** of the chain:
+
+$$
+    p(x') = \sum_x T(x' | x) \, p(x)
+$$
+
+For the weather chain, we can check that $p = (\frac{6}{13}, \frac{4}{13}, \frac{3}{13}) \approx (0.46, 0.31, 0.23)$ is stationary. For example, for the sunny state:
+
+$$
+    0.7 \times \dfrac{6}{13} + 0.3 \times \dfrac{4}{13} + 0.2 \times \dfrac{3}{13} = \dfrac{4.2 + 1.2 + 0.6}{13} = \dfrac{6}{13}
+$$
+
+In the long run, it is sunny 46% of the days, cloudy 31% and rainy 23%, whatever the weather on the first day.
+
+This convergence is not specific to this example. If two mild conditions are satisfied:
+
+* every state can be reached from every other state in a finite number of steps (the chain is **irreducible**),
+* the chain does not cycle deterministically between groups of states (the chain is **aperiodic**),
+
+then the chain has a unique stationary distribution, and $p_t$ converges to it from **any** initial state. We will not prove this result here; see for example @Bishop2006 or @MacKay2003.
+
+### Time averages
+
+The middle part of @fig-markovchain describes many independent runs of the chain. What happens with a **single** run? The right part of the figure shows the fraction of the days spent in each state by one long chain: it also converges to the stationary distribution. A single chain that runs long enough visits each state a fraction of the time equal to its stationary probability.
+
+More generally, the average of any function $f$ over the states visited by the chain converges to its expectation under the stationary distribution:
+
+$$
+    \dfrac{1}{N} \, \sum_{t=1}^N f(x_t) \rightarrow \mathbb{E}_{x \sim p(x)} [f(x)] \qquad \text{when } N \rightarrow \infty
+$$
+
+This is exactly the Monte Carlo estimator of @sec-mcestimator, except that the samples $x_t$ are now the successive states of a chain instead of independent samples. The estimate still converges, but more slowly, as successive states are correlated: today's weather tells us a lot about tomorrow's.
+
+### Turning the problem around
+
+In the usual study of Markov chains, the transition kernel $T$ is given (the physics of the weather) and we want to find the stationary distribution. MCMC turns the problem around:
+
+* the target distribution $p(x) = \tilde{p}(x) / Z$ is given, at least up to its normalization constant;
+* we **design** a transition kernel $T$ whose stationary distribution is $p(x)$, and which is easy to simulate.
+
+We then simulate the chain for a long time, and use its successive states as (correlated) samples of $p(x)$. The next section explains how to build such a transition kernel.

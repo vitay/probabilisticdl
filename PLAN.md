@@ -49,7 +49,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 ### Part III — Sampling methods (`src/sampling/`) — new
 
 - [x] ★ **1. Monte Carlo and importance sampling** `{#sec-montecarlo}` — why sampling (expectations everywhere, curse of dimensionality `{#sec-curse}`, $\pi$ example), the Monte Carlo estimator `{#sec-mcestimator}` (unbiased, $\sigma_f / \sqrt{N}$, KL estimate), sampling from simple distributions `{#sec-simplesampling}` (inverse transform, normal, categorical, ancestral), rejection sampling `{#sec-rejection}`, importance sampling `{#sec-importance}` (self-normalized, ESS, PPO), limits `{#sec-mclimits}` (ESS collapse, idea of MCMC, summary table). Detailed plan below.
-- [ ] ★ **2. Markov chain Monte Carlo** — Markov chains, stationary distribution, detailed balance, Metropolis-Hastings, Gibbs sampling, burn-in / mixing / autocorrelation.
+- [~] ★ **2. Markov chain Monte Carlo** `{#sec-mcmc}` — outline below, waiting for approval.
 - [ ] **3. Hamiltonian Monte Carlo and Langevin dynamics** — gradient-based samplers; bridge to score-based diffusion models.
 
 ### Part IV — Variational inference (`src/variationalinference/`)
@@ -146,3 +146,76 @@ File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter 
     - Fixed proposals must be good everywhere, but the mass is concentrated in an unknown tiny region.
     - Idea of MCMC: local proposals, accept with a probability depending on $\tilde{p}(x') / \tilde{p}(x)$ ($Z$ cancels); correlated samples → larger variance.
     - Summary table of the chapter: method / requires / produces / fails when.
+
+---
+
+## Chapter plan: Markov chain Monte Carlo
+
+File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Sampling methods*.
+
+**Goal of the chapter:** show how a Markov chain that only ever compares $\tilde{p}$ at two points can produce samples of $p$, why Metropolis-Hastings works, how to use it in practice (step size, burn-in, correlated samples), and Gibbs sampling as the other classical method. Theory is kept light, as in the previous chapter: results on Markov chains are stated with intuition, the only proof (detailed balance → stationarity) is short and collapsed.
+
+**Notation** (to agree on):
+
+- $p(x) = \tilde{p}(x) / Z$: the target, as in @sec-montecarlo.
+- $x_0, x_1, \ldots, x_t, \ldots$: the chain; $t$ is the step.
+- $T(x' | x)$: the transition kernel (probability of moving from $x$ to $x'$ in one step).
+- $p_t(x)$: the distribution of the chain at step $t$ (over many independent runs).
+- $q(x' | x)$: the proposal of Metropolis-Hastings — keeps the name "proposal" of the previous chapter, now conditioned on the current sample. 
+- $\alpha(x, x')$: the acceptance probability.
+
+**References** (not yet in `Library.bib` — to add to Zotero if wanted): Metropolis et al. (1953), Hastings (1970), Geman & Geman (1984) for Gibbs sampling, Roberts, Gelman & Gilks (1997) for the optimal acceptance rate; textbooks: Bishop (2006, ch. 11), MacKay (2003, ch. 29-30).
+
+### Sections
+
+1. [x] **Markov chains** `{#sec-markovchains}` — approved.
+    - Markov property, transition kernel, simulation; weather example as a table.
+    - Evolution of the distribution (law of total probability), worked numbers $p_1, p_2, \ldots$.
+    - Stationary distribution $(6/13, 4/13, 3/13)$, checked by hand; irreducible + aperiodic → unique, convergence from any start (stated, @Bishop2006, @MacKay2003).
+    - Time averages of a single chain converge to $\mathbb{E}_p[f]$ (correlated Monte Carlo estimator).
+    - Turning the problem around: design $T$ for a given $p$.
+    - Figure `markov-chain.png` (`src/img/markov-chain.py`): graph, $p_t$ from two initial states, and (added) the time fractions of one chain of 10000 steps.
+2. [ ] **Detailed balance**
+    - Condition $p(x) \, T(x'|x) = p(x') \, T(x|x')$: the probability flow from $x$ to $x'$ equals the flow back.
+    - Short collapsed proof that it implies stationarity (integrate both sides over $x$).
+    - Sufficient, not necessary; it is the design principle of Metropolis-Hastings.
+3. [ ] **The Metropolis-Hastings algorithm**
+    - Algorithm: propose $x' \sim q(x'|x_t)$; accept with $\alpha = \min(1, \frac{\tilde{p}(x') \, q(x_t|x')}{\tilde{p}(x_t) \, q(x'|x_t)})$; otherwise $x_{t+1} = x_t$.
+    - Symmetric (random-walk) proposal $q(x'|x) = \mathcal{N}(x, s^2)$ → Metropolis rule $\min(1, \tilde{p}(x') / \tilde{p}(x_t))$: always go uphill, sometimes downhill.
+    - $Z$ cancels: only $\tilde{p}$ is needed (link to the unnormalized posteriors of @sec-simplesampling).
+    - Difference with rejection sampling: a rejected proposal **repeats** the current sample instead of being discarded.
+    - Collapsed proof that the MH kernel satisfies detailed balance.
+    - *Figure (proposed):* `metropolis-hastings.png` — the bimodal target of the previous chapter: left: trace $x_t$ vs. $t$ (with rejected steps visible as flat segments); right: histogram of the chain vs. the target.
+4. [ ] **Using MCMC in practice**
+    - Step size $s$ of the random-walk proposal: too small → most proposals accepted but the chain moves slowly (random walk); too large → most proposals rejected, the chain stays still. Rule of thumb: acceptance rate around 25-50% (≈ 23% in high dimensions, Roberts et al.).
+    - Burn-in: the first samples depend on the initial state and are discarded.
+    - Correlated samples: autocorrelation; effective sample size of a chain $N / (1 + 2 \sum_k \rho_k)$ (same name and meaning as in @sec-importance); thinning.
+    - Multimodality: with a small step size, the chain can stay stuck in one mode for a long time — the same "missed mode" failure as with a too narrow importance sampling proposal; running several chains from different initial states as a diagnostic.
+    - *Figure (proposed):* `metropolis-stepsize.png` — three traces on the bimodal target for a too small, a good and a too large step size, with their acceptance rates and ESS in the titles.
+5. [ ] **Gibbs sampling**
+    - In several dimensions, update one coordinate at a time by sampling from its conditional $p(x_k | x_{-k})$ (all other coordinates fixed).
+    - Special case of Metropolis-Hastings where every proposal is accepted.
+    - Useful when the conditionals are simple even if the joint is not (conjugate models, latent variable models: sample $z | x$, then parameters).
+    - Limitation: strongly correlated coordinates → tiny axis-aligned steps, slow mixing.
+    - Worked example: correlated bivariate normal, whose conditionals are 1D normal distributions (formula given).
+    - *Figure (proposed):* `gibbs-sampling.png` — Gibbs path (axis-aligned steps) on a correlated 2D Gaussian, compared to a random-walk Metropolis path with the same number of steps.
+6. [ ] **Example: sampling a posterior** (optional — to decide)
+    - Back to @sec-map: posterior of the mean **and** standard deviation of a normal distribution from data (no simple closed form for the joint posterior with a non-conjugate prior); MH on $(\mu, \log \sigma)$; posterior histograms and the posterior predictive as a Monte Carlo average over the chain.
+    - Closes the loop with the limitations of MAP (point estimate vs. full posterior).
+    - *Figure (proposed):* `mcmc-posterior.png` — samples of $(\mu, \sigma)$ in 2D with marginal histograms.
+7. [ ] **Limits: towards gradient-based samplers**
+    - Random-walk proposals ignore the shape of the target: in high dimensions the step size must shrink and exploration becomes very slow.
+    - Using the gradient $\nabla_x \log \tilde{p}(x)$ to propose moves towards high probability (Langevin dynamics, Hamiltonian Monte Carlo) → next chapter, and the bridge to score-based diffusion models.
+
+### Decisions
+
+- Proposal notation: $q(x'|x)$.
+- Section 6 (posterior example): kept for now.
+- Figures: all five.
+- References: to be added to Zotero by the author (DOIs checked against doi.org):
+    - Metropolis et al. (1953), *Equation of State Calculations by Fast Computing Machines*, J. Chem. Phys. — doi:10.1063/1.1699114
+    - Hastings (1970), *Monte Carlo sampling methods using Markov chains and their applications*, Biometrika — doi:10.1093/biomet/57.1.97
+    - Geman & Geman (1984), *Stochastic Relaxation, Gibbs Distributions, and the Bayesian Restoration of Images*, IEEE TPAMI — doi:10.1109/TPAMI.1984.4767596
+    - Roberts, Gelman & Gilks (1997), *Weak convergence and optimal scaling of random walk Metropolis algorithms*, Ann. Appl. Probab. — doi:10.1214/aoap/1034625254
+    - Bishop (2006), *Pattern Recognition and Machine Learning*, Springer (ch. 11) — <https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/>
+    - MacKay (2003), *Information Theory, Inference, and Learning Algorithms*, Cambridge University Press (ch. 29-30) — <https://www.inference.org.uk/itila/book.html>
