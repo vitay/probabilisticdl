@@ -111,7 +111,7 @@ File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter 
     - Closed forms exist only in special cases (KL between Gaussians, conjugate priors).
     - Numerical integration on a grid needs $M^d$ evaluations: impossible beyond a few dimensions. Label `{#sec-curse}`, figure `curse-of-dimensionality.png` (moved here from the latent variables chapter).
     - Sampling replaces the integral by an average. Example callout: computing $\pi$ with uniform samples in a square (indicator function $\mathbb{I}$), figure `montecarlo-pi.png` ($N$ = 100, 1000, 10000). Requirements: evaluate $f$, sample from $p$. Outline of the chapter.
-2. [ ] **The Monte Carlo estimator**
+2. [x] **The Monte Carlo estimator** `{#sec-mcestimator}` — approved. Figure `montecarlo-convergence.png` (runs + standard-error band; RMSE vs. $1.64/\sqrt{N}$ on log-log).
     - Definition of $\hat{f}_N$.
     - Unbiasedness: $\mathbb{E}[\hat{f}_N] = \mathbb{E}_p[f]$ (derivation).
     - Variance: $\text{Var}(\hat{f}_N) = \text{Var}_p(f) / N$ (derivation, uses i.i.d.).

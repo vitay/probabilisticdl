@@ -116,3 +116,129 @@ The first requirement is usually easy. The second one is the difficult part, and
 * We then see how to sample from **simple distributions**, for which dedicated methods exist.
 * When $p(x)$ is too complex to be sampled directly, **rejection sampling** and **importance sampling** use a simpler proposal distribution $q(x)$ instead.
 * Finally, we will see why these methods also break down in high dimensions, which motivates Markov chain Monte Carlo (MCMC) methods in the next chapter.
+
+## The Monte Carlo estimator {#sec-mcestimator}
+
+### Definition
+
+Let's draw $N$ samples $x_1, x_2, \ldots, x_N$ **independently** from $p(x)$ (i.i.d., as in @sec-mle). The **Monte Carlo estimator** of $\mathbb{E}_{x \sim p(x)} [f(x)]$ is the sampling average of $f$:
+
+$$
+    \hat{f}_N = \dfrac{1}{N} \, \sum_{i=1}^N f(x_i)
+$$
+
+It is important to realize that $\hat{f}_N$ is itself a **random variable**: if we draw another set of $N$ samples, we obtain a different value. In the example of $\pi$, each panel of @fig-montecarlopi gave a different estimate, and repeating the experiment with other random points would give yet other values. The questions we need to answer are therefore statistical:
+
+1. Is $\hat{f}_N$ correct **on average**, i.e. is its expectation equal to the quantity we want?
+2. How far from the true value is a **single** estimate likely to be, i.e. what is its variance?
+
+To simplify the notations, let's call $\mu_f$ and $\sigma_f^2$ the mean and variance of $f(x)$ when $x \sim p(x)$:
+
+$$
+    \mu_f = \mathbb{E}_{x \sim p(x)} [f(x)] \qquad\qquad \sigma_f^2 = \text{Var}_{x \sim p(x)} (f(x)) = \mathbb{E}_{x \sim p(x)} [(f(x) - \mu_f)^2]
+$$
+
+$\mu_f$ is the quantity we want to estimate. $\sigma_f^2$ measures how much the values of $f$ fluctuate from one sample to another.
+
+### The estimator is unbiased
+
+The expectation of the estimator (over all possible sets of $N$ samples) is, by linearity of the expectation:
+
+$$
+\begin{aligned}
+    \mathbb{E}[\hat{f}_N] &= \mathbb{E}[\dfrac{1}{N} \, \sum_{i=1}^N f(x_i)] & \text{(Definition)} \\
+    &= \dfrac{1}{N} \, \sum_{i=1}^N \mathbb{E}_{x_i \sim p(x)}[f(x_i)] & \text{(Linearity of the expectation)} \\
+    &= \dfrac{1}{N} \, \sum_{i=1}^N \mu_f & \text{(All samples come from } p(x)) \\
+    &= \mu_f & \\
+\end{aligned}
+$$
+
+On average, the Monte Carlo estimator gives exactly the right value: it is an **unbiased** estimator of $\mu_f$. Note that this holds for **any** number of samples, even $N=1$: a single sample $f(x_1)$ is an unbiased (but very noisy) estimate of $\mu_f$.
+
+This is what we do implicitly when we train a neural network with stochastic gradient descent: the gradient of the loss is estimated on a small minibatch of samples instead of the whole dataset. The estimate is noisy, but it is correct on average, which is enough for gradient descent to converge. Variational autoencoders (@sec-vae) even estimate the reconstruction loss with a single sample $z \sim q_\phi(z|x)$ per input.
+
+### The variance decreases with $N$
+
+The variance of the estimator tells us how much a single estimate deviates from $\mu_f$. Because the samples are **independent**, the variance of their sum is the sum of their variances. Moreover, multiplying a random variable by a constant $a$ multiplies its variance by $a^2$:
+
+$$
+\begin{aligned}
+    \text{Var}(\hat{f}_N) &= \text{Var}(\dfrac{1}{N} \, \sum_{i=1}^N f(x_i)) & \text{(Definition)} \\
+    &= \dfrac{1}{N^2} \, \text{Var}(\sum_{i=1}^N f(x_i)) & (\text{Var}(a X) = a^2 \, \text{Var}(X)) \\
+    &= \dfrac{1}{N^2} \, \sum_{i=1}^N \text{Var}_{x_i \sim p(x)} (f(x_i)) & \text{(Independent samples)} \\
+    &= \dfrac{1}{N^2} \, N \, \sigma_f^2 & \text{(All samples come from } p(x)) \\
+    &= \dfrac{\sigma_f^2}{N} & \\
+\end{aligned}
+$$
+
+The standard deviation of the estimator, also called its **standard error**, is therefore:
+
+$$
+    \sqrt{\text{Var}(\hat{f}_N)} = \dfrac{\sigma_f}{\sqrt{N}}
+$$
+
+Moreover, as $\hat{f}_N$ is a sampling average of i.i.d. variables, the **central limit theorem** (@sec-bayesian) tells us that it is approximately normally distributed for large $N$, whatever the distribution of $f(x)$:
+
+$$
+    \hat{f}_N \sim \mathcal{N}(\mu_f, \dfrac{\sigma_f}{\sqrt{N}})
+$$
+
+This allows to quantify the error of a single estimate: as for any normal distribution, $\hat{f}_N$ falls within two standard errors of the true value $\mu_f$ about 95% of the time.
+
+### Consequences
+
+The formula $\sigma_f / \sqrt{N}$ is the most important result of this chapter. Let's look at what it means:
+
+* **The error decreases as $1/\sqrt{N}$.** More samples always help, but slowly: to divide the error by 2, we need 4 times more samples; to gain one decimal (divide the error by 10), we need 100 times more samples. Monte Carlo methods are good at giving a rough estimate quickly, not at reaching a high precision.
+
+* **The error does not depend on the dimension $d$ of $x$.** The dimension does not appear anywhere in the formula: estimating an expectation over a 784-dimensional space converges at the same rate $1/\sqrt{N}$ as in one dimension. This is the fundamental reason why sampling escapes the curse of dimensionality (@sec-curse), while the grid needed $M^d$ points.
+
+* **The constant $\sigma_f$ matters.** For a fixed budget of samples, the error is proportional to the standard deviation of $f(x)$ under $p(x)$. A function that fluctuates a lot between samples needs many more samples than a nearly constant one. This is where the dimension can come back in disguise: in high dimensions, $\sigma_f$ itself can become very large. Reducing $\sigma_f$ is the goal of **variance reduction** techniques, among which importance sampling (see below).
+
+In practice, $\sigma_f$ is unknown, as it is an expectation itself. But it can be estimated from the same samples, using the empirical variance:
+
+$$
+    \sigma_f^2 \approx \dfrac{1}{N-1} \, \sum_{i=1}^N (f(x_i) - \hat{f}_N)^2
+$$
+
+so that every Monte Carlo estimate can come with an estimate of its own error bar.
+
+:::{.callout-tip icon="false"}
+## Example: convergence of the estimate of $\pi$
+
+Let's come back to the computation of $\pi$, where $f(x) = 4 \, \mathbb{I}(||x|| \leq 1)$ takes the value 4 with probability $\pi / 4$ and 0 otherwise. Its mean is $\mu_f = 4 \times \frac{\pi}{4} = \pi$, as expected. As $f(x)^2$ takes the value 16 with probability $\pi / 4$, its variance is:
+
+$$
+    \sigma_f^2 = \mathbb{E}[f(x)^2] - \mu_f^2 = 16 \, \dfrac{\pi}{4} - \pi^2 = \pi \, (4 - \pi) \approx 2.70
+$$
+
+The standard error of the estimate is therefore:
+
+$$
+    \dfrac{\sigma_f}{\sqrt{N}} \approx \dfrac{1.64}{\sqrt{N}}
+$$
+
+With $N = 10000$ samples, the standard error is about $0.016$: the error of $0.003$ we obtained in @fig-montecarlopi was actually on the lucky side. To get 6 correct decimals, we would need an error around $10^{-6}$, i.e. $N \approx 2.7 \times 10^{12}$ samples...
+
+![Left: five independent runs of the Monte Carlo estimate of $\pi$ as a function of the number of samples $N$ (log-scale). The gray band shows one standard error $\sigma_f / \sqrt{N}$ around $\pi$. Right: root mean square error of the estimate over 200 runs (log-log scale), compared to the theoretical standard error.](../img/montecarlo-convergence.png){#fig-montecarloconvergence}
+
+@fig-montecarloconvergence shows both aspects. On the left, each run fluctuates a lot for small $N$, then all runs converge towards $\pi$, staying most of the time within one or two standard errors. On the right, the measured error on a log-log scale is a straight line of slope $-1/2$, exactly following the theoretical $1.64 / \sqrt{N}$.
+:::
+
+:::{.callout-tip icon="false"}
+## Example: Monte Carlo estimate of the KL divergence
+
+When the two distributions are not normal, the KL divergence (@sec-kl) has no closed form. But it is an expectation over the first distribution:
+
+$$
+    \text{KL}(p || q) = \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}]
+$$
+
+If we can sample from $p(x)$ and evaluate both densities $p(x)$ and $q(x)$, the Monte Carlo estimator applies with $f(x) = - \log \frac{q(x)}{p(x)}$:
+
+$$
+    \text{KL}(p || q) \approx \dfrac{1}{N} \, \sum_{i=1}^N - \log \dfrac{q(x_i)}{p(x_i)} \qquad \text{with} \qquad x_i \sim p(x)
+$$
+
+In words: take samples from $p$, and average the log-ratio of their likelihoods under $p$ and $q$ (@fig-crossentropy). Note that individual terms of the sum can be negative (for samples where $q(x_i) > p(x_i)$), even though the KL itself is always positive: only the average is guaranteed to be correct. With few samples, the estimate can even be negative.
+:::
