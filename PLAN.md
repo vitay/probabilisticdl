@@ -127,11 +127,11 @@ File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter 
     - Ancestral sampling: $z \sim p(z)$ then $x \sim p(x|z)$; discarding $z$ samples the marginal without the integral (MDN, VAE generation, autoregressive models).
     - The sampling / evaluation asymmetry; unnormalized densities $\tilde{p}(x) = Z \, p(x)$ (posterior) → rejection and importance sampling.
     - Figure `inverse-transform.png` (`src/img/inverse-transform.py`) — CDF of the exponential with uniform $u$ on the y-axis mapped to $x$, histogram of the samples against the pdf.
-4. [ ] **Rejection sampling**
-    - Setting: we can evaluate $\tilde{p}(x)$ but not sample from it; proposal $q$ and constant $M$ with $\tilde{p}(x) \leq M q(x)$.
-    - Algorithm; proof that accepted samples follow $p$; acceptance rate $Z / M$.
-    - Failure in high dimensions: $M$ grows exponentially (Gaussian example: two isotropic Gaussians with slightly different variances).
-    - *Figure (proposed):* `rejection-sampling.png` — target, envelope $M q(x)$, accepted/rejected points under the envelope.
+4. [x] **Rejection sampling** `{#sec-rejection}` — approved.
+    - Setting: evaluate $\tilde{p}(x)$, proposal $q$, envelope $M q(x) \geq \tilde{p}(x)$; algorithm; geometric interpretation (uniform points under the envelope); collapsed proof; $Z$ never needed.
+    - Acceptance rate $Z / M$; choosing $M$ (too small → silently wrong samples); proposal tails at least as heavy as the target.
+    - Failure in high dimensions: two isotropic Gaussians, $M = (\sigma_q / \sigma_p)^d$, $1.01^{-1000} \approx 5 \times 10^{-5}$.
+    - Figure `rejection-sampling.png` (`src/img/rejection-sampling.py`): bimodal $\tilde{p}$ with $Z = 3$, proposal $\mathcal{N}(0, 2)$, $M \approx 8.2$; accepted / rejected points under the envelope; histogram of accepted samples vs. $p(x)$.
 5. [ ] **Importance sampling**
     - Trick: $\mathbb{E}_p[f] = \mathbb{E}_q[w(x) f(x)]$ (same "introduce $q$" step as in the ELBO derivation, @sec-elbo).
     - Estimator, unbiasedness, variance; the optimal proposal $q^* \propto |f| p$; bad proposals give heavy-tailed weights (a few samples dominate).
