@@ -48,7 +48,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 ### Part III — Sampling methods (`src/sampling/`) — new
 
-- [~] ★ **1. Monte Carlo and importance sampling** `{#sec-montecarlo}` — detailed plan below. Section 1 written.
+- [x] ★ **1. Monte Carlo and importance sampling** `{#sec-montecarlo}` — why sampling (expectations everywhere, curse of dimensionality `{#sec-curse}`, $\pi$ example), the Monte Carlo estimator `{#sec-mcestimator}` (unbiased, $\sigma_f / \sqrt{N}$, KL estimate), sampling from simple distributions `{#sec-simplesampling}` (inverse transform, normal, categorical, ancestral), rejection sampling `{#sec-rejection}`, importance sampling `{#sec-importance}` (self-normalized, ESS, PPO), limits `{#sec-mclimits}` (ESS collapse, idea of MCMC, summary table). Detailed plan below.
 - [ ] ★ **2. Markov chain Monte Carlo** — Markov chains, stationary distribution, detailed balance, Metropolis-Hastings, Gibbs sampling, burn-in / mixing / autocorrelation.
 - [ ] **3. Hamiltonian Monte Carlo and Langevin dynamics** — gradient-based samplers; bridge to score-based diffusion models.
 
@@ -141,6 +141,8 @@ File: `src/sampling/1-MonteCarlo.qmd`, label `{#sec-montecarlo}`, first chapter 
     - Effective sample size $1 / \sum \bar{w}_i^2$; warning callout: the ESS cannot detect missed modes.
     - Pointers: PPO in RL (robotics, RLHF of ChatGPT) [@Schulman2017a; @Ouyang2022], which clips the weights near 1; IWAE, particle filters.
     - Figure `importance-sampling.png` (`src/img/importance-sampling.py`): bimodal target of the rejection figure, $N = 50$; good proposal $\mathcal{N}(0, 2)$ vs. two runs (seeds 5 and 3) of $\mathcal{N}(-1.5, 0.8)$: missed mode (ESS 46, estimate $-1.66$) and degenerate weights (ESS 1.8); estimates of $\mathbb{E}_p[x] = -0.3$ in the titles.
-6. [ ] **Limits: towards MCMC**
-    - Both methods need a proposal that is good **globally**; in high dimensions the probability mass concentrates in a tiny region that a fixed proposal almost never hits.
-    - Idea of MCMC: build samples **locally**, each one from the previous, so that the chain spends its time where the mass is (→ next chapter).
+6. [x] **Limits: towards MCMC** `{#sec-mclimits}` — approved.
+    - Importance sampling in high dimensions: weights are products of $d$ factors ($1.1^{100}$ vs. $0.9^{100}$); table of ESS/N for $\sigma_q = 1.2 \, \sigma_p$ (analytical $(\sqrt{1.88}/1.44)^d$, checked by simulation).
+    - Fixed proposals must be good everywhere, but the mass is concentrated in an unknown tiny region.
+    - Idea of MCMC: local proposals, accept with a probability depending on $\tilde{p}(x') / \tilde{p}(x)$ ($Z$ cancels); correlated samples → larger variance.
+    - Summary table of the chapter: method / requires / produces / fails when.

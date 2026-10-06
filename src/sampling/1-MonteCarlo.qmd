@@ -591,3 +591,47 @@ In run A of @fig-importancesampling, the ESS is 46 out of 50, better than with t
 :::
 
 Importance sampling is one of the most widely used tools of machine learning. In reinforcement learning, it allows to reuse samples collected with an older version of the policy to estimate quantities under the current one, as in the ubiquitous PPO algorithm [@Schulman2017a], used in robotics and in the alignment of large language models such as ChatGPT [@Ouyang2022]. Following the lesson of this section, PPO clips the importance weights to stay close to 1, so that the new policy never moves too far from the one that collected the samples. Importance-weighted autoencoders tighten the ELBO with several weighted samples of the encoder, and particle filters track hidden states over time with sequences of weighted samples: both will be presented in later chapters.
+
+## Limits: towards MCMC {#sec-mclimits}
+
+### Importance sampling in high dimensions
+
+We saw that rejection sampling collapses in high dimensions, as its acceptance rate decreases exponentially with the dimension (@sec-rejection). Importance sampling suffers from the same problem, in a different form: it keeps all the samples, but their weights become extremely unbalanced.
+
+The reason is easy to see when the dimensions are independent, for example when the target and the proposal are both isotropic normal distributions. The densities are then products over the $d$ dimensions, and so is the importance weight of a sample $\mathbf{x} = (x_1, \ldots, x_d)$:
+
+$$
+    w(\mathbf{x}) = \dfrac{p(\mathbf{x})}{q(\mathbf{x})} = \prod_{k=1}^d \dfrac{p(x_k)}{q(x_k)}
+$$
+
+Even if the proposal is close to the target, each factor is only *roughly* equal to 1: a bit larger for some samples, a bit smaller for others. A product of hundreds of such factors behaves very differently: a factor of $1.1$ repeated 100 times gives $1.1^{100} \approx 14000$, while a factor of $0.9$ gives $0.9^{100} \approx 3 \times 10^{-5}$. The weights of different samples therefore end up differing by many orders of magnitude, and the normalized weight of the luckiest sample gets close to 1: the effective sample size collapses.
+
+Let's take the example of @sec-rejection again: the target is $\mathcal{N}(\mathbf{0}, \sigma_p^2 \, I)$ and the proposal $\mathcal{N}(\mathbf{0}, \sigma_q^2 \, I)$ is 20% broader ($\sigma_q = 1.2 \, \sigma_p$). In this case, the fraction of effective samples $\text{ESS} / N$ can be computed analytically. It is approximately:
+
+| Dimension $d$ | 1 | 10 | 100 | 1000 |
+|:---:|:---:|:---:|:---:|:---:|
+| $\text{ESS} / N$ | 0.95 | 0.61 | 0.007 | $5 \times 10^{-22}$ |
+
+In 100 dimensions, only one sample in 130 is effectively useful; in 1000 dimensions, no realistic number of samples gives a usable estimate. Real problems are much worse: the proposal is not a slightly broader copy of the target, and dimensions are counted in thousands or millions.
+
+### The problem with fixed proposals
+
+Rejection sampling and importance sampling share the same weakness: the proposal $q(x)$ is chosen **once and for all**, before seeing any sample, and must be good **everywhere**. In high dimensions, the probability mass of the target is concentrated in a tiny region of the space (@sec-curse). A fixed proposal that does not match this region almost perfectly wastes nearly all its samples, either by rejecting them or by giving them negligible weights. And we usually do not know where this region is: finding it is precisely the problem.
+
+### The idea of MCMC
+
+**Markov chain Monte Carlo** (MCMC) methods, presented in the next chapter, take a different route. Instead of drawing independent samples from a fixed global proposal, they build a **chain** of samples $x_0, x_1, x_2, \ldots$, where each new sample is proposed **locally**, in the neighborhood of the current one:
+
+* If the proposed sample is more probable under the target, the chain moves there.
+* If it is less probable, the chain moves there only with some probability, and otherwise stays where it is.
+
+Like rejection sampling, this only requires to compare the target at two points: the ratio $\tilde{p}(x') / \tilde{p}(x)$ does not depend on the normalization constant $Z$, which cancels out. The chain progressively finds the regions of high probability and then wanders around them, spending in each region a time proportional to its probability. The price to pay is that successive samples are no longer independent: they carry partly redundant information, so the variance of the estimator is larger than the $\sigma_f^2 / N$ of @sec-mcestimator.
+
+### Summary
+
+| Method | Requires | Produces | Fails when |
+|:---|:---|:---|:---|
+| Monte Carlo estimator | samples from $p(x)$ | estimate of $\mathbb{E}_p[f]$, error $\sigma_f / \sqrt{N}$ | we cannot sample from $p(x)$ |
+| Inverse transform, ancestral sampling | known inverse CDF or simple conditionals | exact samples of $p(x)$ | $p(x)$ has no simple structure |
+| Rejection sampling | $\tilde{p}(x)$, proposal $q(x)$, envelope $M \, q(x) \geq \tilde{p}(x)$ | exact samples of $p(x)$ | the envelope is loose (high dimensions) |
+| Importance sampling | $\tilde{p}(x)$, proposal $q(x)$ | weighted samples, estimate of $\mathbb{E}_p[f]$ and $Z$ | the proposal misses parts of the target (high dimensions) |
