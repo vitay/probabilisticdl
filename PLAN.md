@@ -188,12 +188,12 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
     - Rejected candidates are repeated: repetitions give each state its weight.
     - Collapsed proof of detailed balance (flow $= \min(p(x) q(x'|x), p(x') q(x|x'))$, symmetric), read as slowing down the larger flow.
     - Figure `metropolis-hastings.png` (`src/img/metropolis-hastings.py`, seed 1): bimodal target, $s = 1$, $x_0 = 0$; trace of 200 steps with rejected candidates, histogram of 10000 steps; acceptance 65%, mean $-0.34$ (true $-0.3$), ~25 steps per mode on average.
-4. [ ] **Using MCMC in practice**
-    - Step size $s$ of the random-walk proposal: too small → most proposals accepted but the chain moves slowly (random walk); too large → most proposals rejected, the chain stays still. Rule of thumb: acceptance rate around 25-50% (≈ 23% in high dimensions, Roberts et al.).
-    - Burn-in: the first samples depend on the initial state and are discarded.
-    - Correlated samples: autocorrelation; effective sample size of a chain $N / (1 + 2 \sum_k \rho_k)$ (same name and meaning as in @sec-importance); thinning.
-    - Multimodality: with a small step size, the chain can stay stuck in one mode for a long time — the same "missed mode" failure as with a too narrow importance sampling proposal; running several chains from different initial states as a diagnostic.
-    - *Figure (proposed):* `metropolis-stepsize.png` — three traces on the bimodal target for a too small, a good and a too large step size, with their acceptance rates and ESS in the titles.
+4. [x] **Using MCMC in practice** `{#sec-mcmcpractice}` — approved.
+    - Step size: too small (random walk, high acceptance), too large (rejections), good; acceptance 25-50%, 23% in high dimensions [@Roberts1997]; $s = 1$ of section 3 was a bit small.
+    - Burn-in: discard the steps that still depend on $x_0$, chosen from the trace.
+    - Correlated samples in words (autocorrelation, ESS with the same meaning as in importance sampling, thinning); formulas of $\rho_k$ and the ESS in a collapsed callout.
+    - Multimodality: stuck chains look converged (missed mode); several chains from different initial states as a diagnostic, no proof of convergence. No numbers.
+    - Figure `metropolis-stepsize.png` (`src/img/metropolis-stepsize.py`, seed 0): $s = 0.1, 3, 50$ from $x_0 = 8$; trace with burn-in, histogram, autocorrelation; acceptance 96 / 42 / 3%, ESS 8 / 1584 / 193 out of 9500.
 5. [ ] **Gibbs sampling**
     - In several dimensions, update one coordinate at a time by sampling from its conditional $p(x_k | x_{-k})$ (all other coordinates fixed).
     - Special case of Metropolis-Hastings where every proposal is accepted.

@@ -242,3 +242,69 @@ The trace on the left shows the typical behavior of the chain:
 Over 10000 steps, 65% of the candidates are accepted, and the histogram of the chain matches the target (right). The average of the chain, $-0.34$, is close to the true mean $\mathbb{E}_p[x] = -0.3$.
 
 Two things are visible in the trace, however. First, successive samples are strongly correlated: the chain moves by small steps, and stays in the same mode for many steps in a row (about 25 on average over the whole chain, 140 at the beginning of the trace). Second, the result depends on the step size $s$ and on the initial state $x_0$. The next section discusses these practical aspects.
+
+## Using MCMC in practice {#sec-mcmcpractice}
+
+Metropolis-Hastings is guaranteed to produce samples of $p(x)$ **in the limit** of infinitely long chains. With a finite chain, the quality of the estimates depends on choices that the algorithm leaves open: the step size of the proposal, the initial state, and the number of steps. This section discusses them on the bimodal target, with three different step sizes (@fig-metropolisstepsize).
+
+![Random-walk Metropolis on the bimodal target with three step sizes, all chains starting in the tail at $x_0 = 8$. Left: first 1000 steps of the chain, the first 500 being discarded as burn-in (shaded). Middle: histogram of the chain after burn-in (9500 steps) against the target. Right: autocorrelation $\rho_k$ of the chain after burn-in, as a function of the lag $k$.](../img/metropolis-stepsize.png){#fig-metropolisstepsize}
+
+### Choosing the step size
+
+The step size $s$ of the random-walk proposal $q(x' | x) = \mathcal{N}(x, s)$ controls a trade-off between the size of the moves and their acceptance:
+
+* **Too small** ($s = 0.1$, top row): the candidates are so close to the current state that their probability is almost the same, and nearly all of them are accepted (96%). But each move is tiny: the chain behaves like a random walk with small steps and explores the distribution very slowly. After 10000 steps, it has spent most of its time in the minor mode on the right, and the histogram does not match the target.
+* **Too large** ($s = 50$, bottom row): the candidates land anywhere, mostly far in the tails where the target is negligible, and nearly all of them are rejected (3%). The chain stays still for tens of steps, and the few accepted moves are large jumps.
+* **Good** ($s = 3$, middle row): the candidates are far enough to explore the distribution quickly, and close enough to be accepted reasonably often (42%). The chain jumps between the two modes all the time, and its histogram matches the target.
+
+A high acceptance rate is therefore **not** a sign of a good sampler: it is often the sign of a too small step size. The usual rule of thumb is to tune the step size so that the acceptance rate is between 25% and 50%. In high dimensions, the optimal acceptance rate of random-walk Metropolis approaches 23% [@Roberts1997]. In practice, the step size is adapted during the burn-in period (see below) until the acceptance rate falls into this range.
+
+Note that the step size $s = 1$ used in @fig-metropolishastings was a bit too small: its acceptance rate is higher (65%), but it produces about four times fewer effective samples than $s = 3$ (in the sense defined below).
+
+### Burn-in
+
+The chain starts from an arbitrary initial state $x_0$, often far from the regions of high probability: in @fig-metropolisstepsize, all chains start at $x_0 = 8$, deep in the tail of the target. The first states of the chain depend on this initial state, not on the target: the distribution $p_t$ of the chain has not converged to its stationary distribution yet (@sec-markovchains).
+
+These first samples are therefore discarded: this is the **burn-in** (or warm-up) period. Its required length depends on how fast the chain converges. With the good step size, the chain reaches the target in a couple of steps; with the too small one, it needs hundreds of steps just to walk down from $x_0 = 8$ to the region of high probability. In practice, the burn-in length is chosen by looking at the trace: the chain should have "forgotten" its initial state, i.e. fluctuate around a stable level. Discarding a few hundred or thousand steps is common.
+
+### Correlated samples
+
+After burn-in, the samples of the chain follow the target, but they are not independent: each state is close to the previous one, or even equal to it when a candidate is rejected. Two successive samples therefore carry partly the same information, and a chain of $N$ steps is worth less than $N$ independent samples.
+
+The right column of @fig-metropolisstepsize measures this dependence with the **autocorrelation** of the chain: how similar two states $k$ steps apart are, on a scale from 1 (identical) to 0 (unrelated). With the good step size, the similarity fades within a few steps. With the too large step size, it takes almost a hundred steps, as the chain repeats the same state for tens of steps. With the too small one, two states 200 steps apart are still strongly related.
+
+The **effective sample size** (ESS) of the chain summarizes this: it is the number of independent samples that would give an estimate of the same precision. It has the same meaning as the effective sample size of importance sampling (@sec-importance). In @fig-metropolisstepsize, the 9500 samples kept after burn-in are worth about 1600 independent samples with the good step size, 190 with the too large one, and only 8 with the too small one. The ESS is the number to look at when comparing samplers: a sampler that is twice as slow per step but produces three times more effective samples is the better one.
+
+:::{.callout-note icon="false" collapse="true"}
+## Autocorrelation and effective sample size
+
+The autocorrelation of the chain at lag $k$ is the correlation between the states $x_t$ and $x_{t+k}$:
+
+$$
+    \rho_k = \dfrac{\text{Cov}(x_t, x_{t+k})}{\text{Var}(x_t)}
+$$
+
+with $\rho_0 = 1$, and $\rho_k = 0$ for all $k > 0$ if the samples are independent. For $N$ correlated samples, the variance $\sigma_f^2 / N$ of the Monte Carlo estimator (@sec-mcestimator) becomes approximately (we admit this result):
+
+$$
+    \text{Var}(\hat{f}_N) \approx \dfrac{\sigma_f^2}{N} \, \left(1 + 2 \, \sum_{k=1}^\infty \rho_k \right)
+$$
+
+This is the variance that $N / (1 + 2 \sum_k \rho_k)$ independent samples would give, hence the effective sample size:
+
+$$
+    \text{ESS} = \dfrac{N}{1 + 2 \, \sum_{k=1}^\infty \rho_k}
+$$
+
+In practice, the autocorrelations are estimated from the chain itself, and the sum is truncated when they become negligible (in @fig-metropolisstepsize, at the first negative value).
+:::
+
+Some implementations keep only one state every $k$ steps, which is called **thinning**. It saves memory, but does not add any information: the thinned chain is not worth more independent samples than the full one.
+
+### Multimodality and multiple chains
+
+The too small step size illustrates the most dangerous failure of MCMC. A chain that moves by small steps can stay in one mode for a very long time, as crossing the low-probability valley between two modes requires many unlikely moves in a row. Nothing in its trace reveals this: the chain fluctuates around a stable level and looks converged. This is the same "missed mode" problem as with a too narrow importance sampling proposal (@sec-importance).
+
+The standard diagnostic is to run **several chains** from different initial states and to compare their estimates. If they disagree, at least some of them have not explored the whole target. With the too small step size, chains started on different sides of the target indeed give very different estimates of the mean, while with the good step size they all agree. Probabilistic programming libraries automate this comparison.
+
+Agreement between chains is, however, not a proof of convergence: if all chains start in the same mode, they can all miss the other ones.
