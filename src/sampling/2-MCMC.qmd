@@ -93,3 +93,65 @@ In the usual study of Markov chains, the transition kernel $T$ is given (the phy
 * we **design** a transition kernel $T$ whose stationary distribution is $p(x)$, and which is easy to simulate.
 
 We then simulate the chain for a long time, and use its successive states as (correlated) samples of $p(x)$. The next section explains how to build such a transition kernel.
+
+## Detailed balance {#sec-detailedbalance}
+
+### Probability flows
+
+To design a transition kernel $T$ with a given stationary distribution $p(x)$, we could try to satisfy the stationarity condition directly:
+
+$$
+    p(x') = \sum_x T(x' | x) \, p(x) \qquad \text{for all } x'
+$$
+
+This condition is easier to interpret in terms of **flows** of probability. The term $p(x) \, T(x' | x)$ is the probability that, at stationarity, the chain is in state $x$ **and** moves to $x'$ at the next step: it is the flow of probability going from $x$ to $x'$. As the chain must go somewhere after $x'$, we have $\sum_x T(x | x') = 1$, so the left-hand side can be written $p(x') = \sum_x p(x') \, T(x | x')$, and stationarity becomes:
+
+$$
+    \underbrace{\sum_x p(x) \, T(x' | x)}_{\text{flow into } x'} = \underbrace{\sum_x p(x') \, T(x | x')}_{\text{flow out of } x'} \qquad \text{for all } x'
+$$
+
+For every state, the total flow coming in must equal the total flow going out. This is sometimes called **global balance**. Think of a crowd of people moving between the rooms of a building: the number of people in each room stays constant as long as, for every room, as many people enter as leave. Where they come from and where they go does not matter. People could, for example, all walk around the building in a loop A → B → C → A, without anybody ever walking back: the occupancy of the rooms would still be stationary.
+
+Designing $T$ with this condition is difficult: for every state $x'$, it involves a sum (or an integral) over **all** the states of the space, which is exactly the kind of computation we want to avoid.
+
+### A local condition
+
+Fortunately, there is a stronger condition that is much simpler to satisfy. A transition kernel satisfies **detailed balance** with respect to $p(x)$ if, for every pair of states $x$ and $x'$:
+
+$$
+    p(x) \, T(x' | x) = p(x') \, T(x | x')
+$$
+
+Instead of balancing the total flows of each state, detailed balance requires that the flows are balanced **for every pair of states**: the flow from $x$ to $x'$ equals the flow from $x'$ to $x$. In the analogy of the crowd, between every pair of rooms, as many people go one way as the other. This condition only involves **two states at a time**: there is no sum over the whole space anymore.
+
+Detailed balance implies global balance, hence stationarity: summing both sides over $x$ gives exactly the flow into $x'$ on the left and the flow out of $x'$ on the right:
+
+$$
+    \sum_x p(x) \, T(x' | x) = \sum_x p(x') \, T(x | x') = p(x') \, \sum_x T(x | x') = p(x')
+$$
+
+The converse is not true. In the loop A → B → C → A, the flow from A to B is positive, but there is no flow from B to A: detailed balance is violated, although the distribution is stationary. More generally, detailed balance requires every move to be possible in both directions: if $T(x' | x) > 0$, then $T(x | x') > 0$. Such chains are called **reversible**: at stationarity, a film of the chain looks statistically the same when played backwards, whereas a chain circulating in a loop has a preferred direction.
+
+The weather chain of @sec-markovchains satisfies detailed balance with respect to its stationary distribution $p = (\frac{6}{13}, \frac{4}{13}, \frac{3}{13})$. For each pair of states, the two flows are equal:
+
+| Pair of states | flow one way | flow the other way |
+|:---|:---:|:---:|
+| sunny, cloudy | $\frac{6}{13} \times 0.2 = \frac{1.2}{13}$ | $\frac{4}{13} \times 0.3 = \frac{1.2}{13}$ |
+| sunny, rainy | $\frac{6}{13} \times 0.1 = \frac{0.6}{13}$ | $\frac{3}{13} \times 0.2 = \frac{0.6}{13}$ |
+| cloudy, rainy | $\frac{4}{13} \times 0.3 = \frac{1.2}{13}$ | $\frac{3}{13} \times 0.4 = \frac{1.2}{13}$ |
+
+### Sufficient, but not necessary
+
+Detailed balance is therefore a **sufficient** condition for stationarity, not a necessary one. The loop A → B → C → A is an extreme case (the chain is moreover periodic, so it does not converge), but the same happens with less extreme chains. Consider three states placed on a circle, and a chain that moves clockwise with probability 0.6 and counter-clockwise with probability 0.4. By symmetry, the uniform distribution $p = (\frac{1}{3}, \frac{1}{3}, \frac{1}{3})$ is stationary: each state receives as much probability as it gives away. But between two neighboring states, the clockwise flow $\frac{1}{3} \times 0.6$ is larger than the counter-clockwise flow $\frac{1}{3} \times 0.4$: probability keeps circulating around the circle, while the distribution stays the same.
+
+For MCMC, we do not need to characterize all the chains that have $p(x)$ as stationary distribution: it is enough to build **one** of them. Detailed balance is the design principle of most MCMC methods.
+
+### Why detailed balance suits MCMC
+
+Detailed balance can be rewritten as a condition on the ratio of the transitions in both directions:
+
+$$
+    \dfrac{T(x' | x)}{T(x | x')} = \dfrac{p(x')}{p(x)} = \dfrac{\tilde{p}(x')}{\tilde{p}(x)}
+$$
+
+The last equality is the key: the ratio of the probabilities of two states does not depend on the normalization constant $Z$, which cancels out. To build a transition kernel satisfying detailed balance, we only need to evaluate the unnormalized target $\tilde{p}(x)$, at two points at a time. The Metropolis-Hastings algorithm, presented in the next section, does exactly that.

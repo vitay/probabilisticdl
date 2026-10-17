@@ -175,10 +175,13 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
     - Time averages of a single chain converge to $\mathbb{E}_p[f]$ (correlated Monte Carlo estimator).
     - Turning the problem around: design $T$ for a given $p$.
     - Figure `markov-chain.png` (`src/img/markov-chain.py`): graph, $p_t$ from two initial states, and (added) the time fractions of one chain of 10000 steps.
-2. [ ] **Detailed balance**
-    - Condition $p(x) \, T(x'|x) = p(x') \, T(x|x')$: the probability flow from $x$ to $x'$ equals the flow back.
-    - Short collapsed proof that it implies stationarity (integrate both sides over $x$).
-    - Sufficient, not necessary; it is the design principle of Metropolis-Hastings.
+2. [x] **Detailed balance** `{#sec-detailedbalance}` — approved.
+    - Probability flows $p(x) T(x'|x)$; stationarity as global balance (inflow = outflow for each state), which allows one-way loops A → B → C → A (crowd analogy).
+    - Detailed balance $p(x) T(x'|x) = p(x') T(x|x')$: stronger, pairwise condition; summing over $x$ gives global balance (inline one-line proof); requires every move to be possible backwards (reversible chains).
+    - The weather chain satisfies it (table of the three pairs of flows).
+    - Sufficient, not necessary: the loop (extreme, periodic) and the rotating 3-state chain (0.6 / 0.4), uniform stationary distribution with a circulating flow.
+    - Ratio form $T(x'|x) / T(x|x') = \tilde{p}(x') / \tilde{p}(x)$: $Z$ cancels → Metropolis-Hastings.
+    - No figure.
 3. [ ] **The Metropolis-Hastings algorithm**
     - Algorithm: propose $x' \sim q(x'|x_t)$; accept with $\alpha = \min(1, \frac{\tilde{p}(x') \, q(x_t|x')}{\tilde{p}(x_t) \, q(x'|x_t)})$; otherwise $x_{t+1} = x_t$.
     - Symmetric (random-walk) proposal $q(x'|x) = \mathcal{N}(x, s^2)$ → Metropolis rule $\min(1, \tilde{p}(x') / \tilde{p}(x_t))$: always go uphill, sometimes downhill.
