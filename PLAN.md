@@ -194,13 +194,11 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
     - Correlated samples in words (autocorrelation, ESS with the same meaning as in importance sampling, thinning); formulas of $\rho_k$ and the ESS in a collapsed callout.
     - Multimodality: stuck chains look converged (missed mode); several chains from different initial states as a diagnostic, no proof of convergence. No numbers.
     - Figure `metropolis-stepsize.png` (`src/img/metropolis-stepsize.py`, seed 0): $s = 0.1, 3, 50$ from $x_0 = 8$; trace with burn-in, histogram, autocorrelation; acceptance 96 / 42 / 3%, ESS 8 / 1584 / 193 out of 9500.
-5. [ ] **Gibbs sampling**
-    - In several dimensions, update one coordinate at a time by sampling from its conditional $p(x_k | x_{-k})$ (all other coordinates fixed).
-    - Special case of Metropolis-Hastings where every proposal is accepted.
-    - Useful when the conditionals are simple even if the joint is not (conjugate models, latent variable models: sample $z | x$, then parameters).
-    - Limitation: strongly correlated coordinates → tiny axis-aligned steps, slow mixing.
-    - Worked example: correlated bivariate normal, whose conditionals are 1D normal distributions (formula given).
-    - *Figure (proposed):* `gibbs-sampling.png` — Gibbs path (axis-aligned steps) on a correlated 2D Gaussian, compared to a random-walk Metropolis path with the same number of steps.
+5. [x] **Gibbs sampling** `{#sec-gibbs}` — approved.
+    - One coordinate at a time from its full conditional, sweeps, no acceptance step [@Geman1984]; special case of MH with $\alpha = 1$ (collapsed proof).
+    - Useful when the conditionals are simple: conjugate models, latent variable models; image restoration.
+    - Example: bivariate normal, conditionals $\mathcal{N}(\rho x_2, \sqrt{1 - \rho^2})$ (admitted); independent vs. strongly correlated coordinates; blocked Gibbs in one sentence.
+    - Figure `gibbs-sampling.png` (`src/img/gibbs-sampling.py`, seed 0): Gibbs on $\rho = 0$ vs. $\rho = 0.95$, 30 sweeps from $(-3, -3)$ (instead of Gibbs vs. random-walk Metropolis).
 6. [ ] **Example: sampling a posterior** (optional — to decide)
     - Back to @sec-map: posterior of the mean **and** standard deviation of a normal distribution from data (no simple closed form for the joint posterior with a non-conjugate prior); MH on $(\mu, \log \sigma)$; posterior histograms and the posterior predictive as a Monte Carlo average over the chain.
     - Closes the loop with the limitations of MAP (point estimate vs. full posterior).

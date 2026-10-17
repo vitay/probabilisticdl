@@ -308,3 +308,61 @@ The too small step size illustrates the most dangerous failure of MCMC. A chain 
 The standard diagnostic is to run **several chains** from different initial states and to compare their estimates. If they disagree, at least some of them have not explored the whole target. With the too small step size, chains started on different sides of the target indeed give very different estimates of the mean, while with the good step size they all agree. Probabilistic programming libraries automate this comparison.
 
 Agreement between chains is, however, not a proof of convergence: if all chains start in the same mode, they can all miss the other ones.
+
+## Gibbs sampling {#sec-gibbs}
+
+### One coordinate at a time
+
+Metropolis-Hastings needs a proposal distribution, whose step size must be tuned. **Gibbs sampling** [@Geman1984] avoids this choice in multidimensional problems, by updating the coordinates of $x = (x_1, x_2, \ldots, x_d)$ **one at a time**. Each coordinate $x_k$ is sampled from its distribution given the current values of all the other coordinates, noted $x_{-k}$:
+
+$$
+    x_k \sim p(x_k | x_{-k})
+$$
+
+This distribution is called the **full conditional** of $x_k$. A complete pass over the coordinates is called a **sweep**:
+
+1. sample $x_1 \sim p(x_1 | x_2, x_3, \ldots, x_d)$,
+2. sample $x_2 \sim p(x_2 | x_1, x_3, \ldots, x_d)$, using the new value of $x_1$,
+3. ... and so on until $x_d$.
+
+The state at the end of each sweep is a new sample of the chain. There is no acceptance step: every new value is kept.
+
+Gibbs sampling is in fact a special case of Metropolis-Hastings, where the proposal changes only one coordinate, by sampling it from its full conditional. With this proposal, the acceptance probability is always exactly 1, which is why no candidate is ever rejected.
+
+:::{.callout-note icon="false" collapse="true"}
+## Proof that the acceptance probability is 1
+
+Let's consider the update of the coordinate $x_k$: the candidate $x'$ is equal to $x$, except for its coordinate $x'_k$, which is sampled from $q(x' | x) = p(x'_k | x_{-k})$. As the other coordinates are unchanged, $x'_{-k} = x_{-k}$. Using $p(x) = p(x_k | x_{-k}) \, p(x_{-k})$, the ratio in the acceptance probability of Metropolis-Hastings is:
+
+$$
+    \dfrac{p(x') \, q(x | x')}{p(x) \, q(x' | x)} = \dfrac{p(x'_k | x_{-k}) \, p(x_{-k}) \; p(x_k | x_{-k})}{p(x_k | x_{-k}) \, p(x_{-k}) \; p(x'_k | x_{-k})} = 1
+$$
+
+All terms cancel: the candidate is always accepted. As Metropolis-Hastings satisfies detailed balance (@sec-metropolishastings), each coordinate update leaves $p(x)$ stationary, and so does a whole sweep.
+:::
+
+### When is it useful?
+
+Gibbs sampling only makes sense when the full conditionals are easy to sample from, which happens more often than one might think: the joint distribution $p(x)$ can be very complex, while each coordinate taken separately, all others being fixed, follows a simple distribution. This is typically the case in models built from simple conditional distributions:
+
+* in Bayesian models with conjugate priors (@sec-map), the conditional distribution of each parameter, given the data and the other parameters, is a known distribution;
+* in latent variable models (@sec-latentvariables), we can alternate between sampling the latent variables given the parameters, and the parameters given the latent variables.
+
+Gibbs sampling was originally introduced for image restoration [@Geman1984], where each pixel only depends on its neighbors, and was for a long time the workhorse of Bayesian statistics.
+
+### Example: correlated coordinates
+
+Let's apply Gibbs sampling to a bivariate normal distribution, with zero mean, unit variances and correlation $\rho$. Its full conditionals are one-dimensional normal distributions (we admit this result):
+
+$$
+    p(x_1 | x_2) = \mathcal{N}(\rho \, x_2, \sqrt{1 - \rho^2}) \qquad p(x_2 | x_1) = \mathcal{N}(\rho \, x_1, \sqrt{1 - \rho^2})
+$$
+
+Each update moves the chain parallel to one axis: horizontally when $x_1$ is updated, vertically when $x_2$ is. @fig-gibbssampling shows the path of the chain in two cases.
+
+![Gibbs sampling of a bivariate normal distribution with unit variances, starting from $(-3, -3)$, for 30 sweeps. The blue ellipses delimit 1, 2 and 3 standard deviations. Each update moves the chain parallel to one axis. Left: uncorrelated coordinates. Right: strongly correlated coordinates.](../img/gibbs-sampling.png){#fig-gibbssampling}
+
+* When the coordinates are **independent** ($\rho = 0$, left), each conditional is the full distribution of the coordinate: every sweep produces an independent sample, wherever the chain was before. The first sweep immediately brings the chain from its initial state to the center of the distribution.
+* When the coordinates are **strongly correlated** ($\rho = 0.95$, right), the conditionals are very narrow: once $x_2$ is fixed, $x_1$ can only change a little, and vice versa. The chain can only move along the diagonal of the distribution with small, staircase-like steps, and successive samples are strongly correlated.
+
+This is the main limitation of Gibbs sampling: it explores the distribution efficiently only when the coordinates are weakly dependent. Strong dependencies, which are common in practice (for example between the parameters of a model), make it as slow as a random walk with a too small step size. Grouping strongly correlated coordinates and sampling them jointly (**blocked** Gibbs sampling) reduces the problem, when their joint conditional is still simple.
