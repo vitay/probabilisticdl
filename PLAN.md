@@ -164,7 +164,7 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
 - $q(x' | x)$: the proposal of Metropolis-Hastings — keeps the name "proposal" of the previous chapter, now conditioned on the current sample. 
 - $\alpha(x, x')$: the acceptance probability.
 
-**References** (not yet in `Library.bib` — to add to Zotero if wanted): Metropolis et al. (1953), Hastings (1970), Geman & Geman (1984) for Gibbs sampling, Roberts, Gelman & Gilks (1997) for the optimal acceptance rate; textbooks: Bishop (2006, ch. 11), MacKay (2003, ch. 29-30).
+**References** (in `Library.bib`, see Decisions): Metropolis et al. (1953), Hastings (1970), Geman & Geman (1984) for Gibbs sampling, Roberts, Gelman & Gilks (1997) for the optimal acceptance rate; textbooks: Bishop (2006, ch. 11), MacKay (2003, ch. 29-30).
 
 ### Sections
 
@@ -182,13 +182,12 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
     - Sufficient, not necessary: the loop (extreme, periodic) and the rotating 3-state chain (0.6 / 0.4), uniform stationary distribution with a circulating flow.
     - Ratio form $T(x'|x) / T(x|x') = \tilde{p}(x') / \tilde{p}(x)$: $Z$ cancels → Metropolis-Hastings.
     - No figure.
-3. [ ] **The Metropolis-Hastings algorithm**
-    - Algorithm: propose $x' \sim q(x'|x_t)$; accept with $\alpha = \min(1, \frac{\tilde{p}(x') \, q(x_t|x')}{\tilde{p}(x_t) \, q(x'|x_t)})$; otherwise $x_{t+1} = x_t$.
-    - Symmetric (random-walk) proposal $q(x'|x) = \mathcal{N}(x, s^2)$ → Metropolis rule $\min(1, \tilde{p}(x') / \tilde{p}(x_t))$: always go uphill, sometimes downhill.
-    - $Z$ cancels: only $\tilde{p}$ is needed (link to the unnormalized posteriors of @sec-simplesampling).
-    - Difference with rejection sampling: a rejected proposal **repeats** the current sample instead of being discarded.
-    - Collapsed proof that the MH kernel satisfies detailed balance.
-    - *Figure (proposed):* `metropolis-hastings.png` — the bimodal target of the previous chapter: left: trace $x_t$ vs. $t$ (with rejected steps visible as flat segments); right: histogram of the chain vs. the target.
+3. [x] **The Metropolis-Hastings algorithm** `{#sec-metropolishastings}` — approved.
+    - Algorithm with $q(x'|x)$ and $\alpha = \min(1, \frac{\tilde{p}(x') q(x_t|x')}{\tilde{p}(x_t) q(x'|x_t)})$ [@Metropolis1953; @Hastings1970]; $Z$ cancels (posteriors).
+    - Symmetric proposal $\mathcal{N}(x, s)$ → Metropolis rule, random-walk Metropolis: always uphill, sometimes downhill (otherwise an optimizer).
+    - Rejected candidates are repeated: repetitions give each state its weight.
+    - Collapsed proof of detailed balance (flow $= \min(p(x) q(x'|x), p(x') q(x|x'))$, symmetric), read as slowing down the larger flow.
+    - Figure `metropolis-hastings.png` (`src/img/metropolis-hastings.py`, seed 1): bimodal target, $s = 1$, $x_0 = 0$; trace of 200 steps with rejected candidates, histogram of 10000 steps; acceptance 65%, mean $-0.34$ (true $-0.3$), ~25 steps per mode on average.
 4. [ ] **Using MCMC in practice**
     - Step size $s$ of the random-walk proposal: too small → most proposals accepted but the chain moves slowly (random walk); too large → most proposals rejected, the chain stays still. Rule of thumb: acceptance rate around 25-50% (≈ 23% in high dimensions, Roberts et al.).
     - Burn-in: the first samples depend on the initial state and are discarded.
@@ -215,7 +214,7 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
 - Proposal notation: $q(x'|x)$.
 - Section 6 (posterior example): kept for now.
 - Figures: all five.
-- References: to be added to Zotero by the author (DOIs checked against doi.org):
+- References: all in `Library.bib` as `Metropolis1953`, `Hastings1970`, `Geman1984`, `Roberts1997` (plus `Bishop2006`, `MacKay2003`):
     - Metropolis et al. (1953), *Equation of State Calculations by Fast Computing Machines*, J. Chem. Phys. — doi:10.1063/1.1699114
     - Hastings (1970), *Monte Carlo sampling methods using Markov chains and their applications*, Biometrika — doi:10.1093/biomet/57.1.97
     - Geman & Geman (1984), *Stochastic Relaxation, Gibbs Distributions, and the Bayesian Restoration of Images*, IEEE TPAMI — doi:10.1109/TPAMI.1984.4767596

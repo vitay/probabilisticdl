@@ -155,3 +155,90 @@ $$
 $$
 
 The last equality is the key: the ratio of the probabilities of two states does not depend on the normalization constant $Z$, which cancels out. To build a transition kernel satisfying detailed balance, we only need to evaluate the unnormalized target $\tilde{p}(x)$, at two points at a time. The Metropolis-Hastings algorithm, presented in the next section, does exactly that.
+
+## The Metropolis-Hastings algorithm {#sec-metropolishastings}
+
+### The algorithm
+
+The **Metropolis-Hastings** algorithm [@Metropolis1953; @Hastings1970] builds a Markov chain satisfying detailed balance in two steps: a proposal step, which suggests a new state, and an acceptance step, which corrects the proposal so that the chain has the right stationary distribution.
+
+The **proposal distribution** $q(x' | x)$ plays the same role as in rejection and importance sampling (@sec-rejection), except that it now depends on the current state $x$: it proposes a new state **in the neighborhood** of the current one. A typical choice is a normal distribution centered on the current state, $q(x' | x) = \mathcal{N}(x, s)$, where the standard deviation $s$ is the **step size**. Starting from an initial state $x_0$, the algorithm repeats the following steps:
+
+1. sample a candidate $x' \sim q(x' | x_t)$,
+2. compute the **acceptance probability**:
+
+$$
+    \alpha(x_t, x') = \min \left(1, \dfrac{\tilde{p}(x') \, q(x_t | x')}{\tilde{p}(x_t) \, q(x' | x_t)} \right)
+$$
+
+3. sample $u \sim \mathcal{U}(0, 1)$: if $u \leq \alpha(x_t, x')$, **accept** the candidate, $x_{t+1} = x'$; otherwise **reject** it and stay where we are, $x_{t+1} = x_t$.
+
+The successive states $x_0, x_1, x_2, \ldots$ are (correlated) samples of $p(x)$, once the chain has converged to its stationary distribution.
+
+As announced in @sec-detailedbalance, the target only appears through the ratio $\tilde{p}(x') / \tilde{p}(x_t)$: the normalization constant $Z$ cancels out, and we only need to evaluate the unnormalized target $\tilde{p}(x)$. This is exactly the situation of the posterior distributions of @sec-simplesampling, whose numerator (likelihood times prior) is easy to evaluate but whose evidence is not.
+
+### The Metropolis rule
+
+The ratio $q(x_t | x') / q(x' | x_t)$ corrects for proposals that are asymmetric, i.e. that propose some moves more easily than the reverse moves. For the most common proposals, it simply disappears. A normal distribution centered on the current state is **symmetric**: the probability of proposing $x'$ from $x$ is the same as the probability of proposing $x$ from $x'$, as both only depend on the distance $|x' - x|$:
+
+$$
+    q(x' | x) = \mathcal{N}(x' ; x, s) = \mathcal{N}(x ; x', s) = q(x | x')
+$$
+
+With such a symmetric proposal, the acceptance probability reduces to the original rule of @Metropolis1953:
+
+$$
+    \alpha(x_t, x') = \min \left(1, \dfrac{\tilde{p}(x')}{\tilde{p}(x_t)} \right)
+$$
+
+The algorithm is then called **random-walk Metropolis**, and its behavior is very intuitive:
+
+* if the candidate is **more probable** than the current state ($\tilde{p}(x') \geq \tilde{p}(x_t)$), it is always accepted: the chain always goes uphill;
+* if it is **less probable**, it is accepted with a probability equal to the ratio of the probabilities: a candidate half as probable as the current state is accepted half of the time, a candidate a thousand times less probable almost never.
+
+Without the second rule, the chain would climb to the nearest mode and stay there, as an optimization algorithm would. Accepting some downhill moves is what allows the chain to explore the whole distribution, spending in each region a time proportional to its probability.
+
+### Rejected candidates are repeated
+
+The acceptance step looks similar to rejection sampling (@sec-rejection), but there is an essential difference: when a candidate is rejected, the current state is **repeated** in the chain, $x_{t+1} = x_t$. It is not discarded, and the algorithm does not simply try again.
+
+These repetitions are what gives each state its correct weight. A state of high probability is hard to leave: most candidates around it are less probable and get rejected, so the chain stays there for several steps, and the state appears several times in the chain. A state of low probability is left quickly. If we only kept the accepted candidates, the chain would spend as much "time" in the low-probability regions as in the high-probability ones, and its samples would not follow $p(x)$.
+
+:::{.callout-note icon="false" collapse="true"}
+## Proof that Metropolis-Hastings satisfies detailed balance
+
+We need to show that $p(x) \, T(x' | x) = p(x') \, T(x | x')$ for every pair of states. When $x' = x$, both sides are equal, so let's suppose $x' \neq x$. The only way to move from $x$ to $x'$ is to propose $x'$ and to accept it, so the transition kernel is:
+
+$$
+    T(x' | x) = q(x' | x) \, \alpha(x, x')
+$$
+
+The flow from $x$ to $x'$ is then:
+
+$$
+\begin{aligned}
+    p(x) \, T(x' | x) &= p(x) \, q(x' | x) \, \min \left(1, \dfrac{p(x') \, q(x | x')}{p(x) \, q(x' | x)} \right) & \text{(} Z \text{ cancels, so we can use } p \text{ instead of } \tilde{p} \text{)} \\
+    &= \min \left( p(x) \, q(x' | x), \; p(x') \, q(x | x') \right) & \text{(multiplying both terms of the min)} \\
+\end{aligned}
+$$
+
+This expression is symmetric in $x$ and $x'$: swapping the two states gives the same result. The flow from $x'$ to $x$, $p(x') \, T(x | x')$, is therefore equal to the flow from $x$ to $x'$: detailed balance holds, and $p(x)$ is a stationary distribution of the chain (@sec-detailedbalance).
+:::
+
+The acceptance probability is in fact built for this: the minimum makes the flow from $x$ to $x'$ equal to the smaller of the two "proposal flows" $p(x) \, q(x' | x)$ and $p(x') \, q(x | x')$. The direction with the larger proposal flow is slowed down by rejecting some of its moves, until both directions are balanced.
+
+### Example
+
+@fig-metropolishastings applies random-walk Metropolis to the bimodal target of @fig-rejectionsampling, with the step size $s = 1$ and the initial state $x_0 = 0$. Only the unnormalized target $\tilde{p}(x)$ (with $Z = 3$) is used.
+
+![Random-walk Metropolis on the bimodal target of @fig-rejectionsampling, with the proposal $q(x'|x) = \mathcal{N}(x, 1)$. Left: the first 200 steps of the chain. Each rejected candidate (crosses) leaves the chain at the same position, creating a flat segment. Right: the histogram of a chain of 10000 steps matches the target.](../img/metropolis-hastings.png){#fig-metropolishastings}
+
+The trace on the left shows the typical behavior of the chain:
+
+* it wanders around the first mode ($x \approx -1.5$) for about 140 steps, then moves to the second one ($x \approx 1.5$);
+* most rejected candidates fall in regions of low probability: in the tails, or in the valley between the modes;
+* rejections create flat segments, where the same state is repeated.
+
+Over 10000 steps, 65% of the candidates are accepted, and the histogram of the chain matches the target (right). The average of the chain, $-0.34$, is close to the true mean $\mathbb{E}_p[x] = -0.3$.
+
+Two things are visible in the trace, however. First, successive samples are strongly correlated: the chain moves by small steps, and stays in the same mode for many steps in a row (about 25 on average over the whole chain, 140 at the beginning of the trace). Second, the result depends on the step size $s$ and on the initial state $x_0$. The next section discusses these practical aspects.
