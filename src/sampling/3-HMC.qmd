@@ -1,0 +1,29 @@
+# Langevin dynamics and Hamiltonian Monte Carlo {#sec-hmc}
+
+The previous chapter ended on the main weakness of Metropolis-Hastings: its random-walk proposals are blind, and explore the target more and more slowly when the dimension increases (@sec-mcmclimits). This chapter presents two samplers that use the **gradient** of the log-density to propose moves that follow the shape of the target: Langevin dynamics and Hamiltonian Monte Carlo. The gradient of the log-density will also be the central quantity of score-based diffusion models.
+
+## The score {#sec-score}
+
+The gradient of the log-density with respect to $x$ is called the **score** of the distribution:
+
+$$
+    \nabla_x \log p(x)
+$$
+
+It is a vector with the same dimension as $x$, which points, at each state, in the direction where the log-density increases the fastest. As seen in @sec-mcmclimits, it does not depend on the normalization constant: $\nabla_x \log p(x) = \nabla_x \log \tilde{p}(x)$, as $\log Z$ is a constant whose gradient is zero. Like the acceptance ratio of Metropolis-Hastings, the score can therefore be computed from the unnormalized target only.
+
+For a normal distribution $\mathcal{N}(\mu, \sigma)$, the log-density is $\log p(x) = - \frac{(x - \mu)^2}{2 \sigma^2} + \text{cst}$, so its score is:
+
+$$
+    \nabla_x \log p(x) = - \dfrac{x - \mu}{\sigma^2}
+$$
+
+The score acts like a spring pulling $x$ back towards the mean $\mu$: it is zero at the mean, and its strength increases linearly with the distance to the mean. The narrower the distribution (small $\sigma$), the stiffer the spring.
+
+For the bimodal target of the previous chapters (@fig-score, left), the score points towards the nearest mode: it is positive on the left of each mode (go right) and negative on its right (go left). It is zero at the two modes, but also at the bottom of the valley between them: a zero score only means that the density is flat locally, not that it is high. The right part of the figure shows the same behavior in two dimensions, for a mixture of two Gaussians: the score is a **vector field**, whose arrows point towards the modes, and become longer far away from them.
+
+![The score of two mixtures of Gaussians. Left: the bimodal target of @sec-montecarlo (top) and its score (bottom), which is zero at the two modes and at the bottom of the valley (dotted lines). Right: a 2D mixture of two Gaussians, with the log-density as contours and the score as arrows. Inspired by the figures of <https://yang-song.net/blog/2021/score/>.](../img/score.png){#fig-score}
+
+Following the arrows of the score from any initial state leads to a mode: this is gradient ascent on the log-density, the method we would use to find the MAP estimate of @sec-map. To sample the distribution instead of finding its modes, we need to add noise to these moves, which is the topic of the next section.
+
+The score of a simple distribution can be derived by hand, as above. For more complex models, for example when the likelihood involves a neural network, it is computed by **automatic differentiation**, exactly like the gradient of a loss function during training. This requires the target to be differentiable with respect to $x$: gradient-based samplers only apply to continuous variables.

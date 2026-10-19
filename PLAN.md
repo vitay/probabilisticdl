@@ -50,7 +50,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 - [x] ★ **1. Monte Carlo and importance sampling** `{#sec-montecarlo}` — why sampling (expectations everywhere, curse of dimensionality `{#sec-curse}`, $\pi$ example), the Monte Carlo estimator `{#sec-mcestimator}` (unbiased, $\sigma_f / \sqrt{N}$, KL estimate), sampling from simple distributions `{#sec-simplesampling}` (inverse transform, normal, categorical, ancestral), rejection sampling `{#sec-rejection}`, importance sampling `{#sec-importance}` (self-normalized, ESS, PPO), limits `{#sec-mclimits}` (ESS collapse, idea of MCMC, summary table). Detailed plan below.
 - [x] ★ **2. Markov chain Monte Carlo** `{#sec-mcmc}` — Markov chains `{#sec-markovchains}` (weather example, stationary distribution, time averages), detailed balance `{#sec-detailedbalance}` (global vs. pairwise balance of flows), Metropolis-Hastings `{#sec-metropolishastings}`, using MCMC in practice `{#sec-mcmcpractice}` (step size, burn-in, ESS, multiple chains), Gibbs sampling `{#sec-gibbs}`, posterior example `{#sec-mcmcposterior}` (posterior predictive), limits `{#sec-mcmclimits}` (gradients, score, summary table). Detailed plan below.
-- [ ] **3. Hamiltonian Monte Carlo and Langevin dynamics** — gradient-based samplers; bridge to score-based diffusion models.
+- [~] **3. Langevin dynamics and Hamiltonian Monte Carlo** `{#sec-hmc}` — outline below, agreed; section 1 next.
 
 ### Part IV — Variational inference (`src/variationalinference/`)
 
@@ -221,3 +221,66 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
     - Roberts, Gelman & Gilks (1997), *Weak convergence and optimal scaling of random walk Metropolis algorithms*, Ann. Appl. Probab. — doi:10.1214/aoap/1034625254
     - Bishop (2006), *Pattern Recognition and Machine Learning*, Springer (ch. 11) — <https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/>
     - MacKay (2003), *Information Theory, Inference, and Learning Algorithms*, Cambridge University Press (ch. 29-30) — <https://www.inference.org.uk/itila/book.html>
+
+---
+
+## Chapter plan: Langevin dynamics and Hamiltonian Monte Carlo
+
+File: `src/sampling/3-HMC.qmd`, label `{#sec-hmc}`, third and last chapter of *Sampling methods*.
+
+**Goal of the chapter:** show how the gradient of the log-density (the score) lets a sampler make large moves that are still accepted, through two methods: Langevin dynamics (gradient ascent plus noise) and Hamiltonian Monte Carlo (a ball rolling without friction on the landscape of the target). The chapter ends with the bridge to score-based diffusion models: if the score can be learned from data, Langevin dynamics generates new samples. As in the previous chapters, the main text keeps to the main ideas; the physics (Hamiltonian dynamics, leapfrog) is kept minimal and the convergence results are stated, not proved.
+
+**Notation** (to agree on):
+
+- $p(x) = \tilde{p}(x) / Z$: the target, as in @sec-montecarlo and @sec-mcmc.
+- $\nabla_x \log p(x)$: the **score**, always written out (no symbol: $s$ was the step size of random-walk Metropolis); $s_\theta(x)$ only for a learned score at the end of the chapter, as in the diffusion literature.
+- $\epsilon$: the step size of Langevin dynamics and of the leapfrog integrator (standard in the literature, replaces $s$).
+- $U(x) = - \log \tilde{p}(x)$: the **potential energy** (HMC only).
+- $v$: the momentum (instead of the usual $p$ of physics, which would clash with the densities); $K(v) = \frac{1}{2} ||v||^2$ the kinetic energy; $H(x, v) = U(x) + K(v)$ the Hamiltonian.
+- $L$: the number of leapfrog steps per HMC iteration.
+
+**References** (only `Song2020a` is in `Library.bib`; identifiers to be checked before adding them to Zotero):
+
+- Duane, Kennedy, Pendleton & Roweth (1987), *Hybrid Monte Carlo*, Phys. Lett. B — doi:10.1016/0370-2693(87)91197-X
+- Roberts & Tweedie (1996), *Exponential convergence of Langevin distributions and their discrete approximations*, Bernoulli (MALA) — doi:10.2307/3318418
+- Neal (2011), *MCMC using Hamiltonian dynamics*, Handbook of Markov Chain Monte Carlo — arXiv:1206.1901
+- Welling & Teh (2011), *Bayesian learning via stochastic gradient Langevin dynamics*, ICML (SGLD)
+- Hoffman & Gelman (2014), *The No-U-Turn Sampler*, JMLR — arXiv:1111.4246
+- Betancourt (2017), *A Conceptual Introduction to Hamiltonian Monte Carlo* — arXiv:1701.02434
+- Song & Ermon (2019), *Generative Modeling by Estimating Gradients of the Data Distribution* — `Song2020a` (already in the library)
+
+### Sections
+
+1. [x] **The score** `{#sec-score}` — approved (no subsections).
+    - Recap of @sec-mcmclimits: random-walk proposals are blind; the gradient of the log-density points uphill, and does not depend on $Z$.
+    - Examples: the score of $\mathcal{N}(\mu, \sigma)$ is $-(x - \mu) / \sigma^2$ (a spring pulling back to the mean, stronger for narrow distributions); for the bimodal target, the score points towards the nearest mode and vanishes at the modes and at the bottom of the valley.
+    - Computing it: by hand for simple models, by automatic differentiation otherwise (the same backpropagation as for training neural networks); the target must be differentiable (continuous $x$ only).
+    - Figure `score.png` (`src/img/score.py`, redone in the style of the book after @Song2020a's blog post): left, the 1D bimodal target of the previous chapters and its score; right, a 2D mixture of two Gaussians with the score as a vector field.
+2. [ ] **Langevin dynamics** `{#sec-langevin}`
+    - Update $x_{t+1} = x_t + \epsilon \, \nabla_x \log \tilde{p}(x_t) + \sqrt{2 \epsilon} \, \xi_t$, $\xi_t \sim \mathcal{N}(0, 1)$.
+    - Limit cases: without noise, gradient ascent on $\log p$ → converges to a mode (the MAP of @sec-map); without gradient, a random walk. The $\sqrt{2 \epsilon}$ factor balances the two so that $p$ is stationary (stated, for $\epsilon \rightarrow 0$; no proof).
+    - With a finite $\epsilon$, the samples are slightly biased. **MALA** (Metropolis-adjusted Langevin algorithm) uses the Langevin step as the proposal of Metropolis-Hastings; this proposal is not symmetric, which is a use case for the Hastings correction $q(x_t | x') / q(x' | x_t)$ of @sec-metropolishastings.
+    - Pointer (one paragraph): stochastic gradient Langevin dynamics for Bayesian deep learning, where the gradient is estimated on minibatches.
+    - Figure `langevin.png` (`src/img/langevin.py`, redone after the blog post's `langevin.gif`): many Langevin chains on the 2D mixture of `score.png`, starting on a regular grid, snapshots at a few steps; plus the histogram of 1D chains against the bimodal target.
+3. [ ] **Hamiltonian Monte Carlo** `{#sec-hmcalgorithm}`
+    - Physical analogy: $U(x) = - \log \tilde{p}(x)$ is a landscape whose valleys are the modes; a ball given a random push rolls without friction, travels far, and spends more time in the valleys.
+    - Auxiliary momentum $v \sim \mathcal{N}(0, 1)$; joint $p(x, v) \propto \exp(- H(x, v))$ whose marginal on $x$ is the target: sampling $(x, v)$ and dropping $v$ samples $p(x)$ (ancestral-sampling argument of @sec-simplesampling in reverse).
+    - The dynamics conserves $H$: the ball moves along a level set of $H$, i.e. can travel far while staying in regions of high probability.
+    - Leapfrog integrator (three lines of updates using the score, in a collapsed callout); $H$ is only approximately conserved → Metropolis-Hastings correction with $\min(1, \exp(H(x, v) - H(x', v')))$, close to 1 for a small $\epsilon$.
+    - Algorithm: resample $v$, $L$ leapfrog steps, accept / reject.
+    - Tuning: $\epsilon$ (acceptance) and $L$ (length of the trajectory: too short → random walk, too long → U-turns back); NUTS chooses $L$ automatically, the default in Stan, PyMC and NumPyro.
+    - Figure `hmc.png` (own matplotlib script `src/img/hmc.py`, no equivalent in the blog post) — the correlated 2D Gaussian of @fig-gibbssampling ($\rho = 0.95$), same starting point: random-walk Metropolis, Gibbs, and HMC (with the leapfrog trajectories drawn) for the same number of iterations.
+4. [ ] **Limits and the bridge to diffusion models** `{#sec-hmclimits}`
+    - One sentence on scaling (merged former section 4): the number of steps needed grows roughly like $d$ for random-walk Metropolis, $d^{1/3}$ for MALA and $d^{1/4}$ for HMC; no figure.
+    - Still local: the score points to the nearest mode, so crossing the valleys between distant modes remains hard (one sentence on tempering / annealing).
+    - Requires a differentiable $\tilde{p}(x)$: no discrete variables.
+    - The key observation: Langevin dynamics only needs the score, not the density. If we only have **data** and no $\tilde{p}$, but can **learn** the score $s_\theta(x) \approx \nabla_x \log p(x)$ with a neural network, Langevin dynamics generates new samples: this is the idea of score-based generative models [@Song2020a]. Adding noise at several levels makes the score easier to learn and solves the multimodality problem → diffusion models (Part V).
+    - Summary table of the chapter: Langevin / MALA, HMC (requires / produces / fails when), same format as the previous chapters.
+    - Figures from the blog post: `score-matching-langevin.jpg` (data samples → score matching → scores → Langevin dynamics → new samples) and `score-pitfalls.jpg` (the learned score is only accurate near the modes, motivating the noise levels of diffusion models).
+
+### Decisions
+
+- Title and label: "Langevin dynamics and Hamiltonian Monte Carlo", `{#sec-hmc}`.
+- Former section 4 (scaling with the dimension) merged into the limits section as one sentence; its figure `sampler-dimension.png` is dropped.
+- Momentum $v$.
+- Figures: `score.png`, `langevin.png` and `hmc.png` from own scripts (house style, same targets as the previous chapters); `score-matching-langevin.jpg` and `score-pitfalls.jpg` from Yang Song's blog post, captions with "Source: <https://yang-song.net/blog/2021/score/>".
