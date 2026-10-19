@@ -262,7 +262,7 @@ File: `src/sampling/3-HMC.qmd`, label `{#sec-hmc}`, third and last chapter of *S
     - With a finite $\epsilon$, the samples are slightly biased. **MALA** (Metropolis-adjusted Langevin algorithm) uses the Langevin step as the proposal of Metropolis-Hastings; this proposal is not symmetric, which is a use case for the Hastings correction $q(x_t | x') / q(x' | x_t)$ of @sec-metropolishastings.
     - Pointer (one paragraph): stochastic gradient Langevin dynamics for Bayesian deep learning, where the gradient is estimated on minibatches.
     - Figure `langevin.png` (`src/img/langevin.py`, redone after the blog post's `langevin.gif`): 400 Langevin chains on the 2D mixture of `score.png`, starting on a regular grid, snapshots at $t$ = 0, 10, 100, 1000 (the 1D histogram panel was dropped). Note for section 4: the chains first split about 50/50 between the modes and only slowly reach the 60/40 weights of the target.
-3. [ ] **Hamiltonian Monte Carlo** `{#sec-hmcalgorithm}`
+3. [x] **Hamiltonian Monte Carlo** `{#sec-hmcalgorithm}` — approved (subsections: ball on the landscape, algorithm, tuning).
     - Physical analogy: $U(x) = - \log \tilde{p}(x)$ is a landscape whose valleys are the modes; a ball given a random push rolls without friction, travels far, and spends more time in the valleys.
     - Auxiliary momentum $v \sim \mathcal{N}(0, 1)$; joint $p(x, v) \propto \exp(- H(x, v))$ whose marginal on $x$ is the target: sampling $(x, v)$ and dropping $v$ samples $p(x)$ (ancestral-sampling argument of @sec-simplesampling in reverse).
     - The dynamics conserves $H$: the ball moves along a level set of $H$, i.e. can travel far while staying in regions of high probability.

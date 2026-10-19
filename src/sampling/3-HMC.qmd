@@ -58,3 +58,77 @@ $$
 Unlike the random-walk proposal of @sec-metropolishastings, this proposal is **not symmetric**: from a state $x$ on the side of a mode, it favors moves towards the mode, and the reverse move is less likely to be proposed. This is precisely the situation for which Hastings introduced the correction $q(x_t | x') / q(x' | x_t)$ in the acceptance probability. With a small step size, nearly all candidates are accepted, and MALA behaves like Langevin dynamics without its error.
 
 Langevin dynamics is also used to sample the posterior over the weights $\theta$ of a neural network (Bayesian deep learning). The score of the posterior $p(\theta | X) \propto p(X | \theta) \, p(\theta)$ with respect to the weights is the gradient of the log-likelihood plus the gradient of the log-prior, i.e. exactly the gradient used to train the network with MAP (@sec-map). A Langevin step is then a gradient step on the training loss plus some noise. **Stochastic gradient Langevin dynamics** (SGLD) [@Welling2011] estimates this gradient on minibatches, as stochastic gradient descent does: with a decreasing step size, training the network with the right amount of noise produces samples of the posterior instead of a single set of weights.
+
+## Hamiltonian Monte Carlo {#sec-hmcalgorithm}
+
+### A ball rolling on the landscape
+
+**Hamiltonian Monte Carlo** (HMC) [@Duane1987; @Neal2012] borrows its idea from physics. Let's define the **potential energy** of a state as minus its log-density:
+
+$$
+    U(x) = - \log \tilde{p}(x)
+$$
+
+The regions of high probability become the valleys of an energy landscape, the modes being at the bottom of the valleys. Langevin dynamics moves a particle on this landscape as if it was in honey: it slides slowly downhill, shaken by the noise. HMC instead launches a **ball without friction**: given a random push, the ball rolls down into a valley, gaining speed, climbs up the other side, and keeps going. In a single trajectory, it can travel a long way across the region of high probability.
+
+To describe this motion, HMC adds to each state $x$ a **momentum** $v$ (the velocity of the ball), of the same dimension as $x$. The ball has a **kinetic energy** $K(v) = \frac{1}{2} ||v||^2$, and its total energy is the **Hamiltonian**:
+
+$$
+    H(x, v) = U(x) + K(v)
+$$
+
+The laws of physics (Hamilton's equations) state that the position changes with the momentum, and the momentum with the force, which is minus the gradient of the potential energy, i.e. the score:
+
+$$
+    \dfrac{dx}{dt} = v \qquad \dfrac{dv}{dt} = - \nabla_x U(x) = \nabla_x \log \tilde{p}(x)
+$$
+
+Without friction, the total energy $H(x, v)$ is **conserved** along the trajectory: the ball converts potential energy into kinetic energy when it goes down, and back when it goes up.
+
+How does this help to sample $p(x)$? HMC samples the pair $(x, v)$ from the joint distribution:
+
+$$
+    p(x, v) \propto \exp(- H(x, v)) = \tilde{p}(x) \, \exp(- \frac{1}{2} ||v||^2)
+$$
+
+In this distribution, $x$ and $v$ are independent: $x$ follows the target, and $v$ a standard normal distribution. If we can sample pairs $(x, v)$, we simply drop the momentum and keep $x$, which is a sample of the target (the same trick as ancestral sampling in @sec-simplesampling, where we dropped the latent variable). And as $H(x, v)$ is conserved along the trajectory, so is the density $p(x, v)$: moving the ball along its trajectory does not change the probability of the pair, even though the position can change a lot.
+
+### The algorithm
+
+Each iteration of HMC consists of the following steps, starting from the current state $x_t$:
+
+1. sample a new momentum $v \sim \mathcal{N}(0, 1)$: this is the random push, which sets the energy level of the trajectory;
+2. simulate the motion of the ball during $L$ small time steps of size $\epsilon$, using the **leapfrog** integrator, which gives a candidate $(x', v')$;
+3. accept the candidate with the probability $\min(1, \exp(H(x_t, v) - H(x', v')))$, otherwise stay at $x_{t+1} = x_t$;
+4. drop the momentum.
+
+If the motion was simulated exactly, the energy would be conserved and the candidate always accepted. The leapfrog integrator only simulates it approximately, so the energy changes a little: the acceptance step of Metropolis-Hastings corrects this error, as for MALA. With a small step size, the error is small and nearly all candidates are accepted.
+
+:::{.callout-note icon="false" collapse="true"}
+## The leapfrog integrator
+
+Each leapfrog step updates the momentum and the position in turn, using the score at the current position:
+
+$$
+\begin{aligned}
+    v &\leftarrow v + \frac{\epsilon}{2} \, \nabla_x \log \tilde{p}(x) & \text{(half step on the momentum)} \\
+    x &\leftarrow x + \epsilon \, v & \text{(full step on the position)} \\
+    v &\leftarrow v + \frac{\epsilon}{2} \, \nabla_x \log \tilde{p}(x) & \text{(half step on the momentum, at the new position)} \\
+\end{aligned}
+$$
+
+Each step requires one evaluation of the score, so an iteration of HMC costs $L$ gradient evaluations. The leapfrog integrator is preferred to simpler methods because it has two properties that make the acceptance probability above correct without any additional Hastings ratio: it is reversible (running it backwards from $(x', -v')$ brings back $(x, -v)$), and it preserves volumes in the $(x, v)$ space. We admit these results; see @Neal2012 for details.
+:::
+
+@fig-hmc compares HMC with random-walk Metropolis and Gibbs sampling on the correlated normal distribution of @fig-gibbssampling. The first trajectory of HMC brings the chain from its initial state to the center of the distribution in a single iteration, and the following samples are spread over the whole distribution, almost independently of each other. Random-walk Metropolis and Gibbs sampling are still crawling along the diagonal. The comparison is not entirely fair, as each iteration of HMC costs 15 gradient evaluations. Counted per evaluation, HMC still produces several times more effective samples than the two other methods, and the gap widens quickly in higher dimensions.
+
+![30 iterations of random-walk Metropolis, Gibbs sampling and HMC on the correlated normal distribution of @fig-gibbssampling, from the same initial state. For HMC, the first three leapfrog trajectories are drawn; each iteration uses $L = 15$ leapfrog steps.](../img/hmc.png){#fig-hmc}
+
+### Tuning HMC
+
+HMC has two parameters:
+
+* The **step size** $\epsilon$ controls the accuracy of the simulation. Too large, and the energy is badly conserved, so that many candidates are rejected; too small, and many steps are needed to travel the same distance.
+* The **number of steps** $L$ controls the length of the trajectories. Too short, and HMC loses its advantage: with a single leapfrog step, HMC is actually equivalent to MALA. Too long, and the trajectory makes a U-turn and comes back towards its starting point, wasting computations.
+
+The **No-U-Turn Sampler** (NUTS) [@Hoffman2011] removes the need to choose $L$: it extends each trajectory until it starts to turn back, and adapts the step size during the burn-in period. NUTS is the default sampler of probabilistic programming libraries such as Stan, PyMC or NumPyro, where the user only writes the model, and the gradients are computed by automatic differentiation. @Betancourt2017 gives a very intuitive introduction to the geometry behind HMC.
