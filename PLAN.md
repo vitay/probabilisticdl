@@ -50,7 +50,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 - [x] ★ **1. Monte Carlo and importance sampling** `{#sec-montecarlo}` — why sampling (expectations everywhere, curse of dimensionality `{#sec-curse}`, $\pi$ example), the Monte Carlo estimator `{#sec-mcestimator}` (unbiased, $\sigma_f / \sqrt{N}$, KL estimate), sampling from simple distributions `{#sec-simplesampling}` (inverse transform, normal, categorical, ancestral), rejection sampling `{#sec-rejection}`, importance sampling `{#sec-importance}` (self-normalized, ESS, PPO), limits `{#sec-mclimits}` (ESS collapse, idea of MCMC, summary table). Detailed plan below.
 - [x] ★ **2. Markov chain Monte Carlo** `{#sec-mcmc}` — Markov chains `{#sec-markovchains}` (weather example, stationary distribution, time averages), detailed balance `{#sec-detailedbalance}` (global vs. pairwise balance of flows), Metropolis-Hastings `{#sec-metropolishastings}`, using MCMC in practice `{#sec-mcmcpractice}` (step size, burn-in, ESS, multiple chains), Gibbs sampling `{#sec-gibbs}`, posterior example `{#sec-mcmcposterior}` (posterior predictive), limits `{#sec-mcmclimits}` (gradients, score, summary table). Detailed plan below.
-- [~] **3. Langevin dynamics and Hamiltonian Monte Carlo** `{#sec-hmc}` — outline below, agreed; section 1 next.
+- [x] **3. Langevin dynamics and Hamiltonian Monte Carlo** `{#sec-hmc}` — the score `{#sec-score}`, Langevin dynamics `{#sec-langevin}` (MALA, SGLD), Hamiltonian Monte Carlo `{#sec-hmcalgorithm}` (leapfrog, NUTS), limits and the bridge to diffusion models `{#sec-hmclimits}` (scaling, multimodality, learned score, noise levels, summary table). Detailed plan below.
 
 ### Part IV — Variational inference (`src/variationalinference/`)
 
@@ -270,7 +270,7 @@ File: `src/sampling/3-HMC.qmd`, label `{#sec-hmc}`, third and last chapter of *S
     - Algorithm: resample $v$, $L$ leapfrog steps, accept / reject.
     - Tuning: $\epsilon$ (acceptance) and $L$ (length of the trajectory: too short → random walk, too long → U-turns back); NUTS chooses $L$ automatically, the default in Stan, PyMC and NumPyro.
     - Figure `hmc.png` (own matplotlib script `src/img/hmc.py`, no equivalent in the blog post) — the correlated 2D Gaussian of @fig-gibbssampling ($\rho = 0.95$), same starting point: random-walk Metropolis, Gibbs, and HMC (with the leapfrog trajectories drawn) for the same number of iterations.
-4. [ ] **Limits and the bridge to diffusion models** `{#sec-hmclimits}`
+4. [x] **Limits and the bridge to diffusion models** `{#sec-hmclimits}` — approved (subsections: limits, learning the score, summary).
     - One sentence on scaling (merged former section 4): the number of steps needed grows roughly like $d$ for random-walk Metropolis, $d^{1/3}$ for MALA and $d^{1/4}$ for HMC; no figure.
     - Still local: the score points to the nearest mode, so crossing the valleys between distant modes remains hard (one sentence on tempering / annealing).
     - Requires a differentiable $\tilde{p}(x)$: no discrete variables.

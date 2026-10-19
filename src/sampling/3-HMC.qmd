@@ -132,3 +132,43 @@ HMC has two parameters:
 * The **number of steps** $L$ controls the length of the trajectories. Too short, and HMC loses its advantage: with a single leapfrog step, HMC is actually equivalent to MALA. Too long, and the trajectory makes a U-turn and comes back towards its starting point, wasting computations.
 
 The **No-U-Turn Sampler** (NUTS) [@Hoffman2011] removes the need to choose $L$: it extends each trajectory until it starts to turn back, and adapts the step size during the burn-in period. NUTS is the default sampler of probabilistic programming libraries such as Stan, PyMC or NumPyro, where the user only writes the model, and the gradients are computed by automatic differentiation. @Betancourt2017 gives a very intuitive introduction to the geometry behind HMC.
+
+## Limits and the bridge to diffusion models {#sec-hmclimits}
+
+### Limits of gradient-based samplers
+
+Using the score makes a huge difference in high dimensions. To obtain a new independent sample, the number of steps needed grows roughly like the dimension $d$ for random-walk Metropolis, but only like $d^{1/3}$ for MALA and $d^{1/4}$ for HMC [@Roberts1997; @Neal2012]. This is why HMC (with NUTS) is today the method of choice to sample posterior distributions with thousands of parameters.
+
+Gradient-based samplers keep two limitations, however:
+
+* They are still **local** methods. The score points towards the nearest mode, so the valleys between distant modes remain difficult to cross. In @fig-langevin, the chains starting on the grid first split equally between the two modes, while the target puts 60% of its mass in the lower-left one: the correct proportions are only restored very slowly, by the few chains that manage to cross the valley. Methods such as **tempering**, which run additional chains on flattened versions of the target, help with this problem, but multimodal distributions remain the hardest case for MCMC.
+* They require a **differentiable** target: they do not apply to discrete variables, such as the categories of a classifier or the tokens of a language model.
+
+### Learning the score
+
+There is one more observation to make about Langevin dynamics: it only needs the **score** $\nabla_x \log p(x)$, never the density $p(x)$ itself. Until now, we always assumed that the unnormalized target $\tilde{p}(x)$ was known, for example a likelihood times a prior. In generative modeling (@sec-paradigms), the situation is different: we have **data**, samples $x_i$ of an unknown distribution $p(x)$, for example images, and want to generate new samples of the same distribution.
+
+If we could **learn** the score of the data distribution with a neural network $s_\theta(x) \approx \nabla_x \log p(x)$, Langevin dynamics would use this learned score to generate new samples, without ever knowing $p(x)$. This is the idea of **score-based generative models** [@Song2020a] (@fig-scorematchinglangevin). Learning the score from data is possible with methods called **score matching**, which, conveniently, never require the normalization constant either.
+
+![Score-based generative modeling: the score of the data distribution is learned from data samples (score matching), and Langevin dynamics uses the learned score to generate new samples. Source: <https://yang-song.net/blog/2021/score/>.](../img/score-matching-langevin.jpg){#fig-scorematchinglangevin}
+
+A naive application of this idea does not work well, for two reasons:
+
+* The learned score is only accurate where there is data, i.e. close to the modes (@fig-scorepitfalls). In the low-probability regions between and around the modes, where Langevin chains usually start, the network has seen almost no data, and its score is unreliable.
+* The data distribution is extremely multimodal (think of all possible images), and we saw above that Langevin dynamics struggles to distribute the samples correctly between distant modes.
+
+![The learned score (right) is only accurate in the regions of high probability, where there is enough data to learn it; it is inaccurate elsewhere. Source: <https://yang-song.net/blog/2021/score/>.](../img/score-pitfalls.jpg){#fig-scorepitfalls}
+
+The solution is to **add noise** to the data. Perturbing the data with a lot of Gaussian noise spreads it over the whole space: the score of the noisy distribution can be learned everywhere, and its modes are merged into a single smooth bump. Learning the score at several noise levels, and running Langevin dynamics while progressively decreasing the noise, guides the chains from anywhere in the space towards the data, while distributing them correctly between the modes. This is the principle of **diffusion models**, which will be presented in a later part of this book.
+
+### Summary
+
+The methods of this chapter can be summarized as follows, in the same format as at the end of @sec-montecarlo and @sec-mcmc:
+
+| Method | Requires | Produces | Fails when |
+|:---|:---|:---|:---|
+| Langevin dynamics | score $\nabla_x \log \tilde{p}(x)$ | approximate, correlated samples of $p(x)$ | the step size is too large, the modes are far apart |
+| MALA | $\tilde{p}(x)$ and its score | correlated samples of $p(x)$ | the modes are far apart |
+| Hamiltonian Monte Carlo | $\tilde{p}(x)$ and its score | nearly independent samples of $p(x)$ | the modes are far apart, the variables are discrete |
+
+This chapter closes the part on sampling methods. Sampling estimates intractable expectations by averaging over samples; the next part presents the other approach to intractable distributions, **variational inference**, which replaces sampling by optimization.
