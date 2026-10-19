@@ -1,22 +1,12 @@
 # Variational inference {#sec-variationalinference}
 
-In a latent variable model (@sec-latentvariables), we need the distribution $p_\theta(z)$ of the latent space to generate data, but we only observe $x$. To estimate $p_\theta(z)$, we could again marginalize over $x$:
-
-$$
-    p_\theta(z) = \mathbb{E}_{x \sim p_\theta(x)} [p_\theta(z | x)] = \int_x p_\theta(z | x) \, p_\theta(x) \, dx
-$$
-
-$p_\theta(z | x)$ is the **encoder**: given an input $x \sim p_\theta(x)$, what is its latent representation $z$?
-
-The Bayes rule tells us:
+The previous chapter ended on a circular problem. To train a latent variable model (@sec-latentvariables), we need to know which latent variables $z$ explain an observation $x$, i.e. the **posterior** $p_\theta(z | x)$, also called the **encoder**. Bayes' rule tells us:
 
 $$
     p_\theta(z | x) = p_\theta(x |z) \, \dfrac{p_\theta(z)}{p_\theta(x)}
 $$
 
-The **posterior** probability (encoder) $p_\theta(z | x)$ depends on the **model** (decoder) $p_\theta(x|z)$, the **prior** (assumption) $p_\theta(z)$ and the **evidence** (data) $p_\theta(x)$.
-
-The posterior is **intractable**, as the evidence $p_\theta(x) = \int_z p_\theta(x | z) \, p_\theta(z) \, dz$ would require to integrate over all possible latent representations $z$.
+The posterior depends on the **model** (decoder) $p_\theta(x|z)$, the **prior** $p_\theta(z)$ and the **evidence** $p_\theta(x)$. It is **intractable**, as the evidence $p_\theta(x) = \int_z p_\theta(x | z) \, p_\theta(z) \, dz$ would require to integrate over all possible latent representations $z$.
 
 **Variational inference** proposes to approximate the true posterior (encoder) $p_\theta(z | x)$ by another parameterized distribution $q_\phi(z|x)$.
 

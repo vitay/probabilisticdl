@@ -1,47 +1,52 @@
 # Latent variable models {#sec-latentvariables}
 
-The input data $X = \{x_i\}_{i=1}^N$ comes from an unknown distribution of pdf $p(x)$. The training set $\mathcal{D}$ is formed by **samples** of that distribution. Learning the distribution of the data means learning a **parameterized distribution** $p_\theta(x)$ that is as close as possible to the true distribution $p(x)$.
-
-The parameterized distribution could be a family of known distributions (e.g. normal) or a neural network with a softmax output layer.
-
-This means that we want to minimize the KL between the two distributions:
+In generative modeling (@sec-paradigms), the data $X = \{x_i\}_{i=1}^N$ are samples of an unknown distribution $p(x)$, for example the distribution of natural images, and we want to learn a parameterized distribution $p_\theta(x)$ as close as possible to it, in order to generate new samples. As seen in @sec-klml, minimizing the KL divergence between $p(x)$ and $p_\theta(x)$ is the same as maximizing the log-likelihood of the model on the data:
 
 $$
-    \min_\theta \, \text{KL}(p(x) || p_\theta(x)) = \mathbb{E}_{x \sim p(x)} [- \log \dfrac{p_\theta(x)}{p(x)}]
+    \max_\theta \, \mathbb{E}_{x \sim p(x)} [\log p_\theta(x)] \approx \max_\theta \, \dfrac{1}{N} \, \sum_{i=1}^N \log p_\theta(x_i)
 $$
 
-The problem is that we do not know $p(x)$ as it is what we want to learn, so we cannot estimate the KL directly. When trying to learn the distribution $p(x)$ of the data directly, we could use the same trick as in maximum likelihood estimation (@sec-klml):
+For images, this is much harder than it looks, because of the dimension of the data. This chapter introduces the main idea used to tame it: describing the data with a few hidden variables.
+
+## Images live on a manifold
+
+A grayscale image of $32 \times 32$ pixels is a point in a space with 1024 dimensions, one per pixel. This space is huge, and almost all of it is noise: if we pick a point at random, i.e. a random value for each pixel, we obtain an image of static, never a face or a digit. Natural images occupy a tiny fraction of the pixel space, which is why their distribution is so hard to model directly (@sec-curse).
+
+These images are not scattered randomly in the pixel space either: they are organized. Let's take a simple example: images of a digit "7", which only differ by their **rotation** and their **size** (@fig-imagemanifold). Each image is a point in the 1024-dimensional pixel space, but as only two factors vary, two numbers are enough to describe it. When the rotation or the size changes a little, the image changes a little: the images form a continuous **2D surface** inside the pixel space. The left part of @fig-imagemanifold shows this surface, projected on the three directions of the pixel space along which the images vary the most: it is curved and folded, but it is a surface, and each of its points is an image.
+
+![A manifold of images. Images of $32 \times 32$ pixels of a digit "7" only differing by their rotation and their size. Left: each image is a point of the 1024-dimensional pixel space; as only two factors vary, the images form a 2D surface, shown here projected on the three main directions of variation of the images (principal component analysis). Right: the same images, arranged by their two factors.](../img/image-manifold.png){#fig-imagemanifold}
+
+Such a surface is called a **manifold**: a space that looks flat when seen up close, but can be curved globally. The surface of the earth is the classical example: it is locally flat and two-dimensional (a map of a city works fine), but globally a sphere in three dimensions. The right part of @fig-imagemanifold shows the same images on a flat 2D map, where each image is described by its two coordinates: its rotation and its size.
+
+Natural images vary along many more factors than our "7": the identity of a person, their pose, their expression, the lighting, the background... But these factors are still far fewer than the number of pixels. The **manifold hypothesis** states that natural data lie close to a manifold of much lower dimension than the space they live in. Learning the distribution of the data then comes down to learning where the data are on this low-dimensional manifold, which is a much easier problem.
+
+## Latent variables
+
+The coordinates of the data on the manifold are called **latent variables**, and noted $z$. They are the actual causes of the observations: in our example, choosing a rotation and a size determines the image. A **latent variable model** describes how the data are generated in two steps:
+
+1. sample the latent variables from a simple distribution, the **prior** $p_\theta(z)$, in the low-dimensional latent space;
+2. sample the observation from the **decoder** $p_\theta(x | z)$, typically a neural network, which maps a point of the latent space to a point of the data space.
+
+![Latent variable model: the latent variables $z$ cause the observations $x$. Source: <https://blog.evjang.com/2016/08/variational-bayes.html>](../img/latent-variable-model.png){#fig-latentvariable width=50%}
+
+Generating new data is therefore easy: this is ancestral sampling (@sec-simplesampling). The decoder plays the role of the map from the right part of @fig-imagemanifold to its left part.
+
+There is one major difference with our toy example: for real data, the latent variables are not given. Nobody labels the images with their pose or their lighting, and the factors of variation are not even known in advance. The latent variables are **hidden**: we only observe $x$, and the latent space has to be learned together with the decoder. The learned latent variables do not need to be interpretable; they just need to explain the data.
+
+## The marginal likelihood is intractable
+
+To train a latent variable model by maximum likelihood, we need the likelihood $p_\theta(x)$ of each observation. The model only defines it indirectly: an image $x$ can be produced by many different latent variables $z$, so its probability is obtained by summing over all of them (**marginalization**):
 
 $$
-    \nabla_\theta \, \text{KL}(p(x) || p_\theta(x)) = \nabla_\theta \, H(p(x), p_\theta(x)) = \nabla_\theta \, \mathbb{E}_{x \sim p(x)} [- \log p_\theta(x)]
+    p_\theta(x) = \int_z p_\theta(x | z) \, p_\theta(z) \, dz = \mathbb{E}_{z \sim p_\theta(z)} [p_\theta(x | z)]
 $$
 
-i.e. maximize the log-likelihood of the model on the data $\mathcal{D}$.
+This integral over the whole latent space has no closed form when the decoder is a neural network. As it is an expectation, we could estimate it with Monte Carlo (@sec-mcestimator): sample latent variables from the prior, and average $p_\theta(x | z)$. But for a given image $x$, almost all the latent variables sampled from the prior generate completely different images, for which $p_\theta(x | z)$ is essentially zero: the estimate is dominated by the rare samples that happen to land in the right region, and its variance is enormous. This is the same problem as importance sampling with a bad proposal (@sec-importance).
 
-If we use $N$ data samples to estimate the expectation, we notice that:
-
-$$
-    \mathbb{E}_{x \sim p(x)} [\log p_\theta(x)] \approx \dfrac{1}{N} \, \sum_{i=1}^N \log p_\theta(x_i) = \dfrac{1}{N} \, \log \prod_{i=1}^N p_\theta(x_i) = \dfrac{1}{N} \, \log L(\theta)
-$$
-
-is indeed the log-likelihood of the model on the data that we maximize in **maximum likelihood estimation** (@sec-mle).
-
-The problem is that images are **high-dimensional** (one dimension per pixel). We saw in @sec-curse that integrals over such spaces cannot be computed on a grid: this is the **curse of dimensionality**. Sampling avoids the grid, but the probability mass of natural images occupies a tiny fraction of the pixel space, which makes their distribution very hard to model and learn directly.
-
-MLE does not work well in high-dimensional spaces. We need to work in a much lower-dimensional space.
-
-Images are not random samples of the pixel space: **natural images** are embedded in a much lower-dimensional space called a **manifold**. A manifold is a **locally Euclidean** topological space of lower dimension. The surface of the earth is locally flat and 2D, but globally spherical and 3D.
-
-> If we have a **generative model** $p(x | z)$ telling us how a sample $z$ on the manifold maps to the image space, we would only need to learn the distribution of the data in the lower-dimensional **latent space**.
-
-The low-dimensional **latent variables** $z$ are the actual cause for the observations $x$. Given a sample $z$ on the manifold, we can train a **generative model** $p_\theta(x | z)$ to recreate the input $x$. $p_\theta(x | z)$ is the **decoder**: given a latent representation $z$, what is the corresponding observation $x$?
-
-![Latent variable model. Source: <https://blog.evjang.com/2016/08/variational-bayes.html>](../img/latent-variable-model.png){#fig-latentvariable width=50%}
-
-If we learn the distribution $p_\theta(z)$ of the manifold (latent space), we can infer the distribution of the data $p_\theta(x)$ using that model (**marginalization**):
+To estimate $p_\theta(x)$ efficiently, we would need to sample the latent variables that are likely to have generated $x$, i.e. to sample from the **posterior** $p_\theta(z | x)$. This posterior is exactly what an **encoder** computes: given an image, which latent variables explain it? Unfortunately, Bayes' rule gives:
 
 $$
-    p_\theta(x) = \mathbb{E}_{z \sim p_\theta(z)} [p_\theta(x | z)] = \int_z p_\theta(x | z) \, p_\theta(z) \, dz
+    p_\theta(z | x) = \dfrac{p_\theta(x | z) \, p_\theta(z)}{p_\theta(x)}
 $$
 
-Problem: we do not know $p_\theta(z)$, as the only data we see is $x$: $z$ is called a **latent variable** because it explains the data but is hidden.
+so computing the posterior requires the evidence $p_\theta(x)$, which is the intractable integral we started from. **Variational inference**, presented in the next chapter, breaks this circle by approximating the posterior with a learned encoder.
