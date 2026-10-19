@@ -3198,6 +3198,19 @@
   file = {/Users/vitay/Documents/Zotero/storage/D4HNJZVT/Beste et al_2016_Altered perceptual binding in Gilles de la Tourette syndrome.pdf;/Users/vitay/Documents/Zotero/storage/VPU7JNCJ/S0010945216302143.html}
 }
 
+@misc{Betancourt2017,
+  title = {A {{Conceptual Introduction}} to {{Hamiltonian Monte Carlo}}},
+  author = {Betancourt, Michael},
+  year = 2017,
+  month = jan,
+  journal = {arXiv.org},
+  urldate = {2026-10-19},
+  abstract = {Hamiltonian Monte Carlo has proven a remarkable empirical success, but only recently have we begun to develop a rigorous understanding of why it performs so well on difficult problems and how it is best applied in practice. Unfortunately, that understanding is confined within the mathematics of differential geometry which has limited its dissemination, especially to the applied communities for which it is particularly important. In this review I provide a comprehensive conceptual account of these theoretical foundations, focusing on developing a principled intuition behind the method and its optimal implementations rather of any exhaustive rigor. Whether a practitioner or a statistician, the dedicated reader will acquire a solid grasp of how Hamiltonian Monte Carlo works, when it succeeds, and, perhaps most importantly, when it fails.},
+  howpublished = {https://arxiv.org/abs/1701.02434v2},
+  langid = {english},
+  file = {/Users/vitay/Documents/Zotero/storage/TR4KAGF5/Betancourt - 2017 - A Conceptual Introduction to Hamiltonian Monte Carlo.pdf}
+}
+
 @article{Betzel2017,
   title = {Multi-Scale Brain Networks},
   author = {Betzel, Richard F. and Bassett, Danielle S.},
@@ -9879,6 +9892,22 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Computer Science - Neural and Evolutionary Computing,Statistics - Machine Learning},
   file = {/Users/vitay/Documents/Zotero/storage/WLGIAAJR/Duan_et_al_2016_RL$^2$.pdf;/Users/vitay/Documents/Zotero/storage/789YVKQY/1611.html}
+}
+
+@article{Duane1987,
+  title = {Hybrid {{Monte Carlo}}},
+  author = {Duane, Simon and Kennedy, A.D. and Pendleton, Brian J. and Roweth, Duncan},
+  year = 1987,
+  month = sep,
+  journal = {Physics Letters B},
+  volume = {195},
+  number = {2},
+  pages = {216--222},
+  issn = {03702693},
+  doi = {10.1016/0370-2693(87)91197-X},
+  urldate = {2026-10-19},
+  copyright = {https://www.elsevier.com/tdm/userlicense/1.0/},
+  langid = {english}
 }
 
 @article{Dubal2011,
@@ -17062,6 +17091,20 @@
   pmid = {23146969},
   keywords = {Action Potentials,Computer Simulation,cortical microcircuit model,cortical plasticity,Humans,Learning,Models Neurological,Neural Networks Computer,Neurons,pattern generation,Reward,working memory},
   file = {/Users/vitay/Documents/Zotero/storage/YVVKC9EL/Hoerzer_et_al_2014_Emergence_of_complex_computational_structures_from_chaotic_neural_networks.pdf}
+}
+
+@misc{Hoffman2011,
+  title = {The {{No-U-Turn Sampler}}: {{Adaptively Setting Path Lengths}} in {{Hamiltonian Monte Carlo}}},
+  shorttitle = {The {{No-U-Turn Sampler}}},
+  author = {Hoffman, Matthew D. and Gelman, Andrew},
+  year = 2011,
+  month = nov,
+  journal = {arXiv.org},
+  urldate = {2026-10-19},
+  abstract = {Hamiltonian Monte Carlo (HMC) is a Markov chain Monte Carlo (MCMC) algorithm that avoids the random walk behavior and sensitivity to correlated parameters that plague many MCMC methods by taking a series of steps informed by first-order gradient information. These features allow it to converge to high-dimensional target distributions much more quickly than simpler methods such as random walk Metropolis or Gibbs sampling. However, HMC's performance is highly sensitive to two user-specified parameters: a step size \textbraceleft\textbackslash epsilon\textbraceright{} and a desired number of steps L. In particular, if L is too small then the algorithm exhibits undesirable random walk behavior, while if L is too large the algorithm wastes computation. We introduce the No-U-Turn Sampler (NUTS), an extension to HMC that eliminates the need to set a number of steps L. NUTS uses a recursive algorithm to build a set of likely candidate points that spans a wide swath of the target distribution, stopping automatically when it starts to double back and retrace its steps. Empirically, NUTS perform at least as efficiently as and sometimes more efficiently than a well tuned standard HMC method, without requiring user intervention or costly tuning runs. We also derive a method for adapting the step size parameter \textbraceleft\textbackslash epsilon\textbraceright{} on the fly based on primal-dual averaging. NUTS can thus be used with no hand-tuning at all. NUTS is also suitable for applications such as BUGS-style automatic inference engines that require efficient "turnkey" sampling algorithms.},
+  howpublished = {https://arxiv.org/abs/1111.4246v1},
+  langid = {english},
+  file = {/Users/vitay/Documents/Zotero/storage/F8WLRMI2/Hoffman and Gelman - 2011 - The No-U-Turn Sampler Adaptively Setting Path Lengths in Hamiltonian Monte Carlo.pdf}
 }
 
 @article{Hofstotter2002,
@@ -28227,6 +28270,20 @@
   file = {/Users/vitay/Documents/Zotero/storage/7RE8XCUB/Naya et al_2003_Forward Processing of Long-Term Associative Memory in Monkey Inferotemporal.pdf}
 }
 
+@misc{Neal2012,
+  title = {{{MCMC}} Using {{Hamiltonian}} Dynamics},
+  author = {Neal, Radford M.},
+  year = 2012,
+  month = jun,
+  journal = {arXiv.org},
+  doi = {10.1201/b10905},
+  urldate = {2026-10-19},
+  abstract = {Hamiltonian dynamics can be used to produce distant proposals for the Metropolis algorithm, thereby avoiding the slow exploration of the state space that results from the diffusive behaviour of simple random-walk proposals. Though originating in physics, Hamiltonian dynamics can be applied to most problems with continuous state spaces by simply introducing fictitious "momentum" variables. A key to its usefulness is that Hamiltonian dynamics preserves volume, and its trajectories can thus be used to define complex mappings without the need to account for a hard-to-compute Jacobian factor - a property that can be exactly maintained even when the dynamics is approximated by discretizing time. In this review, I discuss theoretical and practical aspects of Hamiltonian Monte Carlo, and present some of its variations, including using windows of states for deciding on acceptance or rejection, computing trajectories using fast approximations, tempering during the course of a trajectory to handle isolated modes, and short-cut methods that prevent useless trajectories from taking much computation time.},
+  howpublished = {https://arxiv.org/abs/1206.1901v1},
+  langid = {english},
+  file = {/Users/vitay/Documents/Zotero/storage/LCNZXZR9/Neal - 2012 - MCMC using Hamiltonian dynamics.pdf}
+}
+
 @article{Neftci2019,
   title = {Reinforcement Learning in Artificial and Biological Systems},
   author = {Neftci, Emre O. and Averbeck, Bruno B.},
@@ -32993,6 +33050,22 @@
   urldate = {2021-11-30},
   abstract = {Basal forebrain cholinergic neurons (BFCNs) project throughout the cortex to regulate arousal, stimulus salience, plasticity, and learning. Although often treated as a monolithic structure, the basal forebrain features distinct connectivity along its rostrocaudal axis that could impart regional differences in BFCN processing. Here, we performed simultaneous bulk calcium imaging from rostral and caudal BFCNs over a one-month period of variable reinforcement learning in mice. BFCNs in both regions showed equivalently weak responses to unconditioned visual stimuli and anticipated rewards. Rostral BFCNs in the horizontal limb of the diagonal band were more responsive to reward omission, more accurately classified behavioral outcomes, and more closely tracked fluctuations in pupil-indexed global brain state. Caudal tail BFCNs in globus pallidus and substantia innominata were more responsive to unconditioned auditory stimuli, orofacial movements, aversive reinforcement, and showed robust associative plasticity for punishment-predicting cues. These results identify a functional topography that diversifies cholinergic modulatory signals broadcast to downstream brain regions.},
   file = {/Users/vitay/Documents/Zotero/storage/PUWU5LAZ/Robert_et_al_2021_A_functional_topography_within_the_cholinergic_basal_forebrain_for_encoding.pdf}
+}
+
+@article{Roberts1996,
+  title = {Exponential {{Convergence}} of {{Langevin Distributions}} and {{Their Discrete Approximations}}},
+  author = {Roberts, Gareth O. and Tweedie, Richard L.},
+  year = 1996,
+  month = dec,
+  journal = {Bernoulli},
+  volume = {2},
+  number = {4},
+  eprint = {3318418},
+  eprinttype = {jstor},
+  pages = {341},
+  issn = {13507265},
+  doi = {10.2307/3318418},
+  urldate = {2026-10-19}
 }
 
 @article{Roberts1997,
@@ -41500,6 +41573,21 @@
   eprinttype = {pubmed},
   pages = {91--7},
   keywords = {Psychology,Psychology: instrumentation}
+}
+
+@inproceedings{Welling2011,
+  title = {Bayesian Learning via Stochastic Gradient Langevin Dynamics},
+  booktitle = {Proceedings of the 28th {{International Conference}} on {{International Conference}} on {{Machine Learning}}},
+  author = {Welling, Max and Teh, Yee Whye},
+  year = 2011,
+  month = jun,
+  series = {{{ICML}}'11},
+  pages = {681--688},
+  publisher = {Omnipress},
+  address = {Madison, WI, USA},
+  urldate = {2026-10-19},
+  abstract = {In this paper we propose a new framework for learning from large scale datasets based on iterative learning from small mini-batches. By adding the right amount of noise to a standard stochastic gradient optimization algorithm we show that the iterates will converge to samples from the true posterior distribution as we anneal the stepsize. This seamless transition between optimization and Bayesian posterior sampling provides an inbuilt protection against overfitting. We also propose a practical method for Monte Carlo estimates of posterior statistics which monitors a "sampling threshold" and collects samples after it has been surpassed. We apply the method to three models: a mixture of Gaussians, logistic regression and ICA with natural gradients.},
+  isbn = {978-1-4503-0619-5}
 }
 
 @article{Welniarz2021,
