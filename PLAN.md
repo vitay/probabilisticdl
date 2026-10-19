@@ -49,7 +49,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 ### Part III — Sampling methods (`src/sampling/`) — new
 
 - [x] ★ **1. Monte Carlo and importance sampling** `{#sec-montecarlo}` — why sampling (expectations everywhere, curse of dimensionality `{#sec-curse}`, $\pi$ example), the Monte Carlo estimator `{#sec-mcestimator}` (unbiased, $\sigma_f / \sqrt{N}$, KL estimate), sampling from simple distributions `{#sec-simplesampling}` (inverse transform, normal, categorical, ancestral), rejection sampling `{#sec-rejection}`, importance sampling `{#sec-importance}` (self-normalized, ESS, PPO), limits `{#sec-mclimits}` (ESS collapse, idea of MCMC, summary table). Detailed plan below.
-- [~] ★ **2. Markov chain Monte Carlo** `{#sec-mcmc}` — outline below, waiting for approval.
+- [x] ★ **2. Markov chain Monte Carlo** `{#sec-mcmc}` — Markov chains `{#sec-markovchains}` (weather example, stationary distribution, time averages), detailed balance `{#sec-detailedbalance}` (global vs. pairwise balance of flows), Metropolis-Hastings `{#sec-metropolishastings}`, using MCMC in practice `{#sec-mcmcpractice}` (step size, burn-in, ESS, multiple chains), Gibbs sampling `{#sec-gibbs}`, posterior example `{#sec-mcmcposterior}` (posterior predictive), limits `{#sec-mcmclimits}` (gradients, score, summary table). Detailed plan below.
 - [ ] **3. Hamiltonian Monte Carlo and Langevin dynamics** — gradient-based samplers; bridge to score-based diffusion models.
 
 ### Part IV — Variational inference (`src/variationalinference/`)
@@ -204,9 +204,10 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
     - Random-walk Metropolis on $(\mu, \sigma)$ directly, negative $\sigma$ rejected; acceptance test in the log domain.
     - Whole posterior instead of a point estimate; posterior predictive as an average of $\mathcal{N}(x; \mu_t, \sigma_t)$ over the chain.
     - Figure `mcmc-posterior.png` (`src/img/mcmc-posterior.py`, seed 0): joint samples with marginals, posterior predictive with a few individual densities and the data.
-7. [ ] **Limits: towards gradient-based samplers**
-    - Random-walk proposals ignore the shape of the target: in high dimensions the step size must shrink and exploration becomes very slow.
-    - Using the gradient $\nabla_x \log \tilde{p}(x)$ to propose moves towards high probability (Langevin dynamics, Hamiltonian Monte Carlo) → next chapter, and the bridge to score-based diffusion models.
+7. [x] **Limits: towards gradient-based samplers** `{#sec-mcmclimits}` — approved (no subsections, no figure).
+    - Random-walk moves are blind; in high dimensions the step size must shrink and exploration slows down (distance $\propto \sqrt{t}$); Gibbs: correlated coordinates.
+    - Gradient $\nabla_x \log \tilde{p}(x) = \nabla_x \log p(x)$ ($Z$ disappears); Langevin dynamics, HMC → next chapter; the score → diffusion models.
+    - Summary table: Metropolis-Hastings, Gibbs sampling (requires / produces / fails when).
 
 ### Decisions
 

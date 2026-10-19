@@ -402,3 +402,24 @@ $$
 The right part of @fig-mcmcposterior shows the result. Each sample of the chain is a plausible normal distribution for the data; their average is broader than each of them, as it also takes into account our uncertainty about the parameters. With more data, the posterior would become narrower, and the predictive distribution would get closer to a single normal distribution.
 
 This example is small, but it contains the whole workflow of Bayesian inference with MCMC: write down the unnormalized posterior (likelihood times prior), sample it with a Markov chain, and compute any quantity of interest as an average over the chain.
+
+## Limits: towards gradient-based samplers {#sec-mcmclimits}
+
+Metropolis-Hastings and Gibbs sampling solve the main problem of the previous chapter: they do not need a global proposal matching the whole target, only local moves and the ability to evaluate $\tilde{p}(x)$. Their weakness is that these local moves are **blind**: a random-walk proposal draws candidates in random directions, without using any information about the shape of the target, and the acceptance step only corrects them afterwards.
+
+In a few dimensions, this is not a problem, as a reasonable fraction of the random directions leads to regions of high probability. In high dimensions, almost all random directions lead away from the small region where the probability mass is concentrated (@sec-curse): a large step is then almost certainly rejected. To keep a reasonable acceptance rate, the step size must shrink when the dimension increases, and the chain explores the target with smaller and smaller steps. As for a random walk, the distance travelled only grows with the square root of the number of steps, so the number of steps needed to explore the target grows with the dimension. Gibbs sampling has the same problem as soon as the coordinates are correlated (@sec-gibbs), and it additionally requires simple conditional distributions.
+
+The solution is to propose moves that **follow the shape of the target**. The gradient of the log-density $\nabla_x \log \tilde{p}(x)$ points, at each state, in the direction where the probability increases fastest. Like the ratio $\tilde{p}(x') / \tilde{p}(x)$, it does not depend on the normalization constant, as $\log Z$ is a constant whose gradient is zero:
+
+$$
+    \nabla_x \log p(x) = \nabla_x \log \tilde{p}(x) - \nabla_x \log Z = \nabla_x \log \tilde{p}(x)
+$$
+
+Moving along the gradient, plus some noise to keep exploring, is the idea of **Langevin dynamics**; simulating the motion of a particle on the landscape of the log-density is the idea of **Hamiltonian Monte Carlo**. Both methods make large moves that are nevertheless accepted with a high probability, and scale much better with the dimension. They are presented in the next chapter. The gradient of the log-density, called the **score**, will also be at the heart of score-based diffusion models.
+
+The methods of this chapter can be summarized as follows, in the same format as at the end of @sec-montecarlo:
+
+| Method | Requires | Produces | Fails when |
+|:---|:---|:---|:---|
+| Metropolis-Hastings | $\tilde{p}(x)$, local proposal $q(x' \mid x)$ | correlated samples of $p(x)$ | the step size is badly tuned, the modes are far apart, high dimensions |
+| Gibbs sampling | simple full conditionals $p(x_k \mid x_{-k})$ | correlated samples of $p(x)$ | the coordinates are strongly correlated |
