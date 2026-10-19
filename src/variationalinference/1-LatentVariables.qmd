@@ -33,6 +33,38 @@ Generating new data is therefore easy: this is ancestral sampling (@sec-simplesa
 
 There is one major difference with our toy example: for real data, the latent variables are not given. Nobody labels the images with their pose or their lighting, and the factors of variation are not even known in advance. The latent variables are **hidden**: we only observe $x$, and the latent space has to be learned together with the decoder. The learned latent variables do not need to be interpretable; they just need to explain the data.
 
+## Inverse problems {#sec-inverseproblems}
+
+The decoder goes from the causes to the observations: given latent variables $z$, it produces an image $x$. This is the **forward model**, and it is easy to evaluate: we just run the network. Going the other way, from an observation $x$ to the latent variables $z$ that produced it, is an **inverse problem**. Inverse problems are usually much harder than the corresponding forward problems, because several causes can explain the same observation. We already met this situation in @sec-mdn (@fig-mdninverse): a forward model can be a simple function, while its inverse has several solutions.
+
+The answer to an inverse problem is therefore not a single value, but a **distribution** over all the possible causes, which can be multimodal: the posterior $p_\theta(z | x)$. In a latent variable model, this posterior is the encoder.
+
+Inverse problems are everywhere in science and engineering. We often observe a degraded version $y$ of the signal $x$ we are interested in:
+
+$$
+    y = A(x) + \text{noise}
+$$
+
+where $A$ describes the measurement process: noise (denoising), missing pixels (inpainting), a lower resolution (super-resolution), a blur, the projections of a CT scanner, or the sparse measurements of weather stations from which the state of the atmosphere must be reconstructed (data assimilation). Recovering $x$ from $y$ is **ill-posed**: there are infinitely many signals consistent with the observation. If pixels are missing, any value of these pixels explains the observed ones equally well.
+
+Bayes' rule tells us how to combine the observation with prior knowledge about the signal:
+
+$$
+    p(x | y) \propto p(y | x) \, p(x)
+$$
+
+The likelihood $p(y | x)$ measures how well a candidate signal $x$ explains the observation, using the known measurement process $A$ and the noise. The prior $p(x)$ says which signals are plausible in the first place. This is where generative models come in: a latent variable model is a prior over the data, which restricts the candidates to the manifold of plausible signals. With $x$ generated from $z$ by the decoder, the inverse problem becomes a much smaller one, over the latent variables:
+
+$$
+    p(z | y) \propto p(y | z) \, p_\theta(z)
+$$
+
+@fig-inverseproblem shows this on the images of @fig-imagemanifold. Only a strip of three rows through the middle of an image is observed, with noise. In the pixel space, the 928 unobserved pixels could take any value. On the manifold, only two unknowns remain, the rotation and the size, and their posterior is concentrated on a narrow curve: all the combinations whose diagonal stroke crosses the strip at the observed position. Each sample of the posterior is a plausible restoration: they all look like a "7", differ in their size and rotation, and the true image is one of them.
+
+![An inverse problem on the manifold of @fig-imagemanifold. Only a noisy strip of three rows of the true image is observed. With a uniform prior over the rotation and the size, the posterior over these latent variables is concentrated on a curve; its samples are plausible restorations of the image.](../img/inverse-problem.png){#fig-inverseproblem}
+
+The posterior does not only give a restoration, it also tells us how uncertain it is: here, the observation constrains the position of the stroke, but not the size of the digit. A point estimate such as the MAP (@sec-map) would return a single image and hide this uncertainty. Modern generative models, in particular diffusion models, are now used as priors to solve inverse problems in this way, for example in medical imaging [@Song2022a] or data assimilation [@Rozet2023].
+
 ## The marginal likelihood is intractable
 
 To train a latent variable model by maximum likelihood, we need the likelihood $p_\theta(x)$ of each observation. The model only defines it indirectly: an image $x$ can be produced by many different latent variables $z$, so its probability is obtained by summing over all of them (**marginalization**):
@@ -43,7 +75,7 @@ $$
 
 This integral over the whole latent space has no closed form when the decoder is a neural network. As it is an expectation, we could estimate it with Monte Carlo (@sec-mcestimator): sample latent variables from the prior, and average $p_\theta(x | z)$. But for a given image $x$, almost all the latent variables sampled from the prior generate completely different images, for which $p_\theta(x | z)$ is essentially zero: the estimate is dominated by the rare samples that happen to land in the right region, and its variance is enormous. This is the same problem as importance sampling with a bad proposal (@sec-importance).
 
-To estimate $p_\theta(x)$ efficiently, we would need to sample the latent variables that are likely to have generated $x$, i.e. to sample from the **posterior** $p_\theta(z | x)$. This posterior is exactly what an **encoder** computes: given an image, which latent variables explain it? Unfortunately, Bayes' rule gives:
+To estimate $p_\theta(x)$ efficiently, we would need to sample the latent variables that are likely to have generated $x$, i.e. to sample from the **posterior** $p_\theta(z | x)$: we are back to the inverse problem of @sec-inverseproblems. In @fig-inverseproblem, we could compute the posterior on a grid, as there were only two latent variables; with tens or hundreds of latent variables, no grid is possible (@sec-curse). Bayes' rule gives:
 
 $$
     p_\theta(z | x) = \dfrac{p_\theta(x | z) \, p_\theta(z)}{p_\theta(x)}
