@@ -366,3 +366,39 @@ Each update moves the chain parallel to one axis: horizontally when $x_1$ is upd
 * When the coordinates are **strongly correlated** ($\rho = 0.95$, right), the conditionals are very narrow: once $x_2$ is fixed, $x_1$ can only change a little, and vice versa. The chain can only move along the diagonal of the distribution with small, staircase-like steps, and successive samples are strongly correlated.
 
 This is the main limitation of Gibbs sampling: it explores the distribution efficiently only when the coordinates are weakly dependent. Strong dependencies, which are common in practice (for example between the parameters of a model), make it as slow as a random walk with a too small step size. Grouping strongly correlated coordinates and sampling them jointly (**blocked** Gibbs sampling) reduces the problem, when their joint conditional is still simple.
+
+## Example: sampling a posterior {#sec-mcmcposterior}
+
+Let's go back to the Bayesian estimation of the parameters of a normal distribution (@sec-map). To keep the math simple, the MAP example assumed that the standard deviation $\sigma$ of the data was known, and chose a normal prior for the mean $\mu$, so that the posterior was a normal distribution. Let's now estimate **both** parameters $\theta = (\mu, \sigma)$ from $N = 20$ samples $X = \{x_i\}$ of $\mathcal{N}(3, 2)$, with priors that are not conjugate: a broad normal prior $\mathcal{N}(0, 5)$ for $\mu$, and a broad half-normal prior for $\sigma$ (a normal distribution $\mathcal{N}(0, 5)$ restricted to positive values).
+
+The posterior has no simple closed form, but its unnormalized version, the likelihood times the prior, is easy to evaluate for any $(\mu, \sigma)$:
+
+$$
+    \tilde{p}(\mu, \sigma | X) = p(X | \mu, \sigma) \, p(\mu) \, p(\sigma) = \prod_{i=1}^N \mathcal{N}(x_i ; \mu, \sigma) \; \mathcal{N}(\mu ; 0, 5) \; p(\sigma)
+$$
+
+This is all Metropolis-Hastings needs: the evidence $p(X)$ is never computed. With only two parameters, we could still normalize the posterior numerically on a grid, but the same code would work with hundreds of parameters, where no grid is possible (@sec-curse).
+
+We use random-walk Metropolis in the two-dimensional space of the parameters, with the proposal $\mathcal{N}((\mu, \sigma), 0.7)$ (the same step size in both directions), during 20000 steps after a burn-in of 1000 steps. Candidates with a negative standard deviation have a probability of zero under the prior: they are simply always rejected.
+
+One practical detail matters: the likelihood is a product of $N$ densities, which quickly becomes too small to be represented by floating-point numbers. The acceptance test is therefore computed in the log domain, by comparing $\log u$ with the difference $\log \tilde{p}(\mu', \sigma' | X) - \log \tilde{p}(\mu, \sigma | X)$, where the log-likelihood is a sum instead of a product, as in @sec-mle.
+
+The left part of @fig-mcmcposterior shows the samples of the chain. Instead of a single point estimate, we get the whole posterior distribution of the parameters, and in particular how uncertain they are: with 20 data points, the mean is somewhere between about 1.8 and 3.5, and the standard deviation between 1.3 and 2.6. Any other quantity is a simple Monte Carlo average over the chain: the posterior mean of a parameter is the average of its samples, the probability that $\mu > 3$ is the fraction of the samples where this is true, and so on.
+
+![Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior $p(\mu, \sigma | X)$ (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities $\mathcal{N}(\mu_t, \sigma_t)$ of all the samples of the chain (a few of them in green).](../img/mcmc-posterior.png){#fig-mcmcposterior}
+
+The same holds for the **posterior predictive** distribution, which was out of reach in @sec-map. It is an expectation over the posterior:
+
+$$
+    p(x | X) = \int p(x | \mu, \sigma) \, p(\mu, \sigma | X) \, d\mu \, d\sigma = \mathbb{E}_{(\mu, \sigma) \sim p(\mu, \sigma | X)} [\mathcal{N}(x ; \mu, \sigma)]
+$$
+
+and is therefore estimated by averaging the normal densities corresponding to all the samples $(\mu_t, \sigma_t)$ of the chain:
+
+$$
+    p(x | X) \approx \dfrac{1}{T} \, \sum_{t=1}^T \mathcal{N}(x ; \mu_t, \sigma_t)
+$$
+
+The right part of @fig-mcmcposterior shows the result. Each sample of the chain is a plausible normal distribution for the data; their average is broader than each of them, as it also takes into account our uncertainty about the parameters. With more data, the posterior would become narrower, and the predictive distribution would get closer to a single normal distribution.
+
+This example is small, but it contains the whole workflow of Bayesian inference with MCMC: write down the unnormalized posterior (likelihood times prior), sample it with a Markov chain, and compute any quantity of interest as an average over the chain.

@@ -199,10 +199,11 @@ File: `src/sampling/2-MCMC.qmd`, label `{#sec-mcmc}`, second chapter of *Samplin
     - Useful when the conditionals are simple: conjugate models, latent variable models; image restoration.
     - Example: bivariate normal, conditionals $\mathcal{N}(\rho x_2, \sqrt{1 - \rho^2})$ (admitted); independent vs. strongly correlated coordinates; blocked Gibbs in one sentence.
     - Figure `gibbs-sampling.png` (`src/img/gibbs-sampling.py`, seed 0): Gibbs on $\rho = 0$ vs. $\rho = 0.95$, 30 sweeps from $(-3, -3)$ (instead of Gibbs vs. random-walk Metropolis).
-6. [ ] **Example: sampling a posterior** (optional — to decide)
-    - Back to @sec-map: posterior of the mean **and** standard deviation of a normal distribution from data (no simple closed form for the joint posterior with a non-conjugate prior); MH on $(\mu, \log \sigma)$; posterior histograms and the posterior predictive as a Monte Carlo average over the chain.
-    - Closes the loop with the limitations of MAP (point estimate vs. full posterior).
-    - *Figure (proposed):* `mcmc-posterior.png` — samples of $(\mu, \sigma)$ in 2D with marginal histograms.
+6. [x] **Example: sampling a posterior** `{#sec-mcmcposterior}` — approved (no subsections).
+    - Back to @sec-map: $\mu$ and $\sigma$ unknown, 20 samples of $\mathcal{N}(3, 2)$, priors $\mathcal{N}(0, 5)$ and half-normal (not conjugate); unnormalized posterior = likelihood × prior.
+    - Random-walk Metropolis on $(\mu, \sigma)$ directly, negative $\sigma$ rejected; acceptance test in the log domain.
+    - Whole posterior instead of a point estimate; posterior predictive as an average of $\mathcal{N}(x; \mu_t, \sigma_t)$ over the chain.
+    - Figure `mcmc-posterior.png` (`src/img/mcmc-posterior.py`, seed 0): joint samples with marginals, posterior predictive with a few individual densities and the data.
 7. [ ] **Limits: towards gradient-based samplers**
     - Random-walk proposals ignore the shape of the target: in high dimensions the step size must shrink and exploration becomes very slow.
     - Using the gradient $\nabla_x \log \tilde{p}(x)$ to propose moves towards high probability (Langevin dynamics, Hamiltonian Monte Carlo) → next chapter, and the bridge to score-based diffusion models.
