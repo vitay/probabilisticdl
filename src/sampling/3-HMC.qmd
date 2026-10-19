@@ -27,3 +27,34 @@ For the bimodal target of the previous chapters (@fig-score, left), the score po
 Following the arrows of the score from any initial state leads to a mode: this is gradient ascent on the log-density, the method we would use to find the MAP estimate of @sec-map. To sample the distribution instead of finding its modes, we need to add noise to these moves, which is the topic of the next section.
 
 The score of a simple distribution can be derived by hand, as above. For more complex models, for example when the likelihood involves a neural network, it is computed by **automatic differentiation**, exactly like the gradient of a loss function during training. This requires the target to be differentiable with respect to $x$: gradient-based samplers only apply to continuous variables.
+
+## Langevin dynamics {#sec-langevin}
+
+**Langevin dynamics** adds noise to gradient ascent on the log-density. Starting from an initial state $x_0$, each step moves the state a little in the direction of the score, then adds some Gaussian noise:
+
+$$
+    x_{t+1} = x_t + \epsilon \, \nabla_x \log \tilde{p}(x_t) + \sqrt{2 \epsilon} \, \xi_t \qquad \text{with } \xi_t \sim \mathcal{N}(0, 1)
+$$
+
+where $\epsilon$ is a small step size. The two terms have opposite effects:
+
+* without the noise, this is gradient ascent on $\log p(x)$: the state converges to the nearest mode, i.e. to a MAP estimate (@sec-map);
+* without the score, this is a random walk with steps of standard deviation $\sqrt{2 \epsilon}$, which spreads the state everywhere.
+
+The score concentrates the states around the modes, the noise spreads them. The factor $\sqrt{2 \epsilon}$ is exactly the amount of noise for which the two effects balance, so that the stationary distribution of the chain is the target $p(x)$. We admit this result, which comes from physics: the equation describes the motion of a particle in a potential $- \log p(x)$, shaken by thermal noise, whose positions end up distributed according to $p(x)$.
+
+@fig-langevin shows 400 independent Langevin chains on the 2D mixture of @fig-score, starting on a regular grid. Within about ten steps, the score brings the chains to the regions of high probability. They do not collapse onto the modes, though: the noise keeps them spread around each mode, as samples of the target should be. As in @sec-markovchains, the snapshots show the distribution $p_t$ of the chain at different steps, which converges to the target.
+
+![400 independent Langevin chains on the 2D mixture of two Gaussians of @fig-score, with $\epsilon = 0.05$, starting on a regular grid. Inspired by the animation of <https://yang-song.net/blog/2021/score/>.](../img/langevin.png){#fig-langevin}
+
+Compared to random-walk Metropolis, every step goes in a sensible direction, and there is no rejection: Langevin dynamics does not waste computations on candidates that would be rejected. The price to pay is a small error. The stationary distribution is exactly $p(x)$ only in the limit of infinitely small steps; with a finite step size $\epsilon$, it is a slightly distorted version of the target. Reducing $\epsilon$ reduces the error, but the chain then needs more steps to explore the target.
+
+The **Metropolis-adjusted Langevin algorithm** (MALA) [@Roberts1996] removes this error by combining the two methods: the Langevin step is used as the **proposal** of Metropolis-Hastings, whose acceptance step corrects the distortion. The proposal is a normal distribution centered on the Langevin update:
+
+$$
+    q(x' | x) = \mathcal{N}(x + \epsilon \, \nabla_x \log \tilde{p}(x), \sqrt{2 \epsilon})
+$$
+
+Unlike the random-walk proposal of @sec-metropolishastings, this proposal is **not symmetric**: from a state $x$ on the side of a mode, it favors moves towards the mode, and the reverse move is less likely to be proposed. This is precisely the situation for which Hastings introduced the correction $q(x_t | x') / q(x' | x_t)$ in the acceptance probability. With a small step size, nearly all candidates are accepted, and MALA behaves like Langevin dynamics without its error.
+
+Langevin dynamics is also used to sample the posterior over the weights $\theta$ of a neural network (Bayesian deep learning). The score of the posterior $p(\theta | X) \propto p(X | \theta) \, p(\theta)$ with respect to the weights is the gradient of the log-likelihood plus the gradient of the log-prior, i.e. exactly the gradient used to train the network with MAP (@sec-map). A Langevin step is then a gradient step on the training loss plus some noise. **Stochastic gradient Langevin dynamics** (SGLD) [@Welling2011] estimates this gradient on minibatches, as stochastic gradient descent does: with a decreasing step size, training the network with the right amount of noise produces samples of the posterior instead of a single set of weights.

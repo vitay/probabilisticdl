@@ -239,15 +239,15 @@ File: `src/sampling/3-HMC.qmd`, label `{#sec-hmc}`, third and last chapter of *S
 - $v$: the momentum (instead of the usual $p$ of physics, which would clash with the densities); $K(v) = \frac{1}{2} ||v||^2$ the kinetic energy; $H(x, v) = U(x) + K(v)$ the Hamiltonian.
 - $L$: the number of leapfrog steps per HMC iteration.
 
-**References** (only `Song2020a` is in `Library.bib`; identifiers to be checked before adding them to Zotero):
+**References** (all in `Library.bib`):
 
-- Duane, Kennedy, Pendleton & Roweth (1987), *Hybrid Monte Carlo*, Phys. Lett. B — doi:10.1016/0370-2693(87)91197-X
-- Roberts & Tweedie (1996), *Exponential convergence of Langevin distributions and their discrete approximations*, Bernoulli (MALA) — doi:10.2307/3318418
-- Neal (2011), *MCMC using Hamiltonian dynamics*, Handbook of Markov Chain Monte Carlo — arXiv:1206.1901
-- Welling & Teh (2011), *Bayesian learning via stochastic gradient Langevin dynamics*, ICML (SGLD)
-- Hoffman & Gelman (2014), *The No-U-Turn Sampler*, JMLR — arXiv:1111.4246
-- Betancourt (2017), *A Conceptual Introduction to Hamiltonian Monte Carlo* — arXiv:1701.02434
-- Song & Ermon (2019), *Generative Modeling by Estimating Gradients of the Data Distribution* — `Song2020a` (already in the library)
+- `Duane1987` — Hybrid Monte Carlo (origin of HMC)
+- `Roberts1996` — MALA
+- `Neal2012` — MCMC using Hamiltonian dynamics
+- `Welling2011` — SGLD
+- `Hoffman2011` — the No-U-Turn Sampler
+- `Betancourt2017` — conceptual introduction to HMC
+- `Song2020a` — score-based generative modeling
 
 ### Sections
 
@@ -256,12 +256,12 @@ File: `src/sampling/3-HMC.qmd`, label `{#sec-hmc}`, third and last chapter of *S
     - Examples: the score of $\mathcal{N}(\mu, \sigma)$ is $-(x - \mu) / \sigma^2$ (a spring pulling back to the mean, stronger for narrow distributions); for the bimodal target, the score points towards the nearest mode and vanishes at the modes and at the bottom of the valley.
     - Computing it: by hand for simple models, by automatic differentiation otherwise (the same backpropagation as for training neural networks); the target must be differentiable (continuous $x$ only).
     - Figure `score.png` (`src/img/score.py`, redone in the style of the book after @Song2020a's blog post): left, the 1D bimodal target of the previous chapters and its score; right, a 2D mixture of two Gaussians with the score as a vector field.
-2. [ ] **Langevin dynamics** `{#sec-langevin}`
+2. [x] **Langevin dynamics** `{#sec-langevin}` — approved (no subsections; MALA [@Roberts1996], SGLD [@Welling2011]).
     - Update $x_{t+1} = x_t + \epsilon \, \nabla_x \log \tilde{p}(x_t) + \sqrt{2 \epsilon} \, \xi_t$, $\xi_t \sim \mathcal{N}(0, 1)$.
     - Limit cases: without noise, gradient ascent on $\log p$ → converges to a mode (the MAP of @sec-map); without gradient, a random walk. The $\sqrt{2 \epsilon}$ factor balances the two so that $p$ is stationary (stated, for $\epsilon \rightarrow 0$; no proof).
     - With a finite $\epsilon$, the samples are slightly biased. **MALA** (Metropolis-adjusted Langevin algorithm) uses the Langevin step as the proposal of Metropolis-Hastings; this proposal is not symmetric, which is a use case for the Hastings correction $q(x_t | x') / q(x' | x_t)$ of @sec-metropolishastings.
     - Pointer (one paragraph): stochastic gradient Langevin dynamics for Bayesian deep learning, where the gradient is estimated on minibatches.
-    - Figure `langevin.png` (`src/img/langevin.py`, redone after the blog post's `langevin.gif`): many Langevin chains on the 2D mixture of `score.png`, starting on a regular grid, snapshots at a few steps; plus the histogram of 1D chains against the bimodal target.
+    - Figure `langevin.png` (`src/img/langevin.py`, redone after the blog post's `langevin.gif`): 400 Langevin chains on the 2D mixture of `score.png`, starting on a regular grid, snapshots at $t$ = 0, 10, 100, 1000 (the 1D histogram panel was dropped). Note for section 4: the chains first split about 50/50 between the modes and only slowly reach the 60/40 weights of the target.
 3. [ ] **Hamiltonian Monte Carlo** `{#sec-hmcalgorithm}`
     - Physical analogy: $U(x) = - \log \tilde{p}(x)$ is a landscape whose valleys are the modes; a ball given a random push rolls without friction, travels far, and spends more time in the valleys.
     - Auxiliary momentum $v \sim \mathcal{N}(0, 1)$; joint $p(x, v) \propto \exp(- H(x, v))$ whose marginal on $x$ is the target: sampling $(x, v)$ and dropping $v$ samples $p(x)$ (ancestral-sampling argument of @sec-simplesampling in reverse).
