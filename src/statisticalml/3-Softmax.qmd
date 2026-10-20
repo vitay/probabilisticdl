@@ -1,84 +1,80 @@
 # Softmax classifier for discrete distributions {#sec-softmax}
 
-In machine learning, classification consists in learning a mapping between input vectors $\mathbf{x}$ and a finite number of classes $\mathbf{t}$ for some unknown conditional data distribution $p(\mathbf{t} | \mathbf{x})$. The training data is a set of tuples $\{\mathbf{x}_i, t_i\}_{i=1}^N$ sampled from $p$, where the values $t_i$ are called labels, targets or ground truth, and represent the class of each sample.
+@sec-klml showed that any model with a probabilistic interpretation, fitted to data by maximum likelihood, minimizes the KL divergence between the data and the model. This chapter applies this idea to the most common case in machine learning: **classification**, where the quantity to predict is discrete. The resulting model, the softmax classifier, is everywhere in deep learning: it is the output layer of image classifiers, and also of language models, which are classifiers predicting the next token among a vocabulary of tens of thousands of words.
 
-In object recognition, the input vectors are the pixels of particular images, and the targets are the name of the object represented in each image (or their index).
+## Classification as density estimation
 
-In multi-class classification, the target is usually represented by a **one-hot encoded vector** $\mathbf{t}$ consisting of mostly zeros, except a one at a location corresponding to the class.
+In classification, we want to learn a mapping between input vectors $\mathbf{x}$ and a finite number $K$ of classes. In object recognition, the inputs are the pixels of images, and the classes are the names of the objects they represent. The training data is a set of pairs $\{(\mathbf{x}_i, \mathbf{t}_i)\}_{i=1}^N$, where the **targets** $\mathbf{t}_i$ (also called labels or ground truth) indicate the class of each input.
 
-For example, if you have five classes (cat, dog, ship, house, car), an image $\mathbf{x}$ of a dog would be associated with the following ground truth vector:
+In multi-class classification, the target is usually represented by a **one-hot encoded vector**: a vector of $K$ zeros, except a one at the position of the correct class. For example, with five classes (cat, dog, ship, house, car), an image of a dog is associated with the target:
 
 $$
     \mathbf{t} = [\text{cat}, \text{dog}, \text{ship}, \text{house}, \text{car}] = [0, 1, 0, 0, 0]
 $$
 
-The target vectors of the training set can be seen as being samples of a **conditional probability distribution** $p(\mathbf{t} | \mathbf{x})$, in this case a discrete **multinomial** (or multinoulli) distribution (a die with one side per class). For a given image $\mathbf{x}$, the conditional probabilities are defined by the one-hot encoded vector $\mathbf{t}$:
+This vector can be read in a probabilistic way: it is a **categorical distribution** over the classes (a die with one face per class, @sec-simplesampling), which puts all its probability on the class "dog":
 
 $$
     p(\mathbf{t} | \mathbf{x}) = [p(\text{cat}| \mathbf{x}), p(\text{dog}| \mathbf{x}), p(\text{ship}| \mathbf{x}), p(\text{house}| \mathbf{x}), p(\text{car}| \mathbf{x})] = [0, 1, 0, 0, 0]
 $$
 
-Each image $\mathbf{x}$ has different probabilities of belonging to one class or another. Note that the use of one-hot encoded targets is a special case: the ground truth could have non-binary conditional probabilities.
+The targets of the training set are therefore samples of an unknown **conditional distribution** $p(\mathbf{t} | \mathbf{x})$: the probability of each class, given the input. One-hot vectors are only a special case of this distribution, where the class is certain. The targets could perfectly be "soft", for example $[0.1, 0.7, 0, 0, 0.2]$ for an ambiguous image, or when several annotators disagree.
 
-A **softmax classifier** is a parametric function approximator $p_\theta(\mathbf{y} | \mathbf{x})$ that outputs a conditional probability distribution through the vector $\mathbf{y}$, in the form of a multinomial distribution:
+Classification thus becomes a density estimation problem, as in @sec-klml: we want a parameterized model $p_\theta(\mathbf{t} | \mathbf{x})$ that outputs, for each input, a categorical distribution as close as possible to the one of the data.
 
-$$
-    p_\theta(\mathbf{y} | \mathbf{x}) = [p_\theta(\text{cat}| \mathbf{x}), p_\theta(\text{dog}| \mathbf{x}), p_\theta(\text{ship}| \mathbf{x}), p_\theta(\text{house}| \mathbf{x}), p_\theta(\text{car}| \mathbf{x})]
-$$
+## The softmax function
 
-To make sure that the vector $\mathbf{y}$ indeed characterizes a probability distribution over the classes, its elements must be positive and sum to one. A classical choice is the softmax function, creating the vector $\mathbf{y}$ from the **logit score** $\mathbf{z}$. Their elements are related by:
-
-$$
-    \mathbf{y} = [y_i]_i = \mathcal{S}(\textbf{z}) = [\dfrac{e^{z_i}}{\sum_j e^{z_j}}]_i
-$$
-
-The use of the exponential makes sure that the elements are positive, and the denominator makes sure that they sum to one. The logit score vector can be anything, for example the output of a neural network with parameters $\theta$ taking $\mathbf{x}$ as an input:
+A neural network $F_\theta$ can easily output a vector of $K$ real numbers for each input. These numbers are called the **logits** $\mathbf{z}$:
 
 $$
     \mathbf{z} = F_\theta(\mathbf{x})
 $$
 
-Using the softmax function makes sure that, for an input $\mathbf{x}$, the vectors $\mathbf{t}$ and $\mathbf{y}$ both represent a multinomial probability distribution, and that they can be compared with each other.
-
-![The softmax function transforms logit scores into a multinomial probability distribution.](../img/softmax-transformation.png){#fig-softmax width=70%}
-
-Now that we have two multinomial probability distributions, one $p(\mathbf{t} | \mathbf{x})$ representing the data, the other $p_\theta(\mathbf{y} | \mathbf{x})$ representing the parameterized model, we can try to find the value of $\theta$ that minimizes the statistical distance between the two distributions. As before, minimizing the KL divergence between the two is the same as minimizing their cross-entropy.
-
-The cross-entropy loss function to minimize is expressed as:
+The logits can take any real value, so they cannot be used directly as probabilities, which must be positive and sum to one. The **softmax function** $\mathcal{S}$ transforms them into a categorical distribution $\mathbf{y}$:
 
 $$
-    \mathcal{L}(\theta) = \mathbb{E}_{\mathbf{x}, \mathbf{t} \sim p(\mathbf{t} | \mathbf{x})} [- \log p_\theta(\mathbf{t} | \mathbf{x})]
+    y_k = \mathcal{S}(\mathbf{z})_k = \dfrac{\exp z_k}{\sum_{l=1}^K \exp z_l}
 $$
 
-What does $- \log p_\theta(\mathbf{t} | \mathbf{x})$ mean for a single sample? It denotes the negative log-likelihood that the model with parameters $\theta$ explains the target vector $\mathbf{t}$ for an input $\mathbf{x}$.
+The exponential makes all elements positive, and the denominator normalizes them so that they sum to one (@fig-softmax). The output $\mathbf{y}$ of the network is the model distribution $p_\theta(\mathbf{t} | \mathbf{x})$: its element $y_k$ is the predicted probability of the class $k$.
 
-Let's suppose that the input image $\mathbf{x}$ is a dog ($\mathbf{t} = [0, 1, 0, 0, 0]$). This negative log-likelihood is defined by the predicted probability $p_\theta(\text{dog}| \mathbf{x})$, i.e. the second element of the vector $\mathbf{y}$. As $\mathbf{t} = [0, 1, 0, 0, 0]$ is a one-hot encoded vector, the log-likelihood could also be written as the dot product between $\mathbf{t}$ and $\log \, \mathbf{y}$:
+![The softmax function transforms logits into a categorical probability distribution.](../img/softmax-transformation.png){#fig-softmax width=70%}
 
-$$
-    - \log \, p_\theta(\mathbf{t} | \mathbf{x}) = - \log \, p_\theta(\text{dog}| \mathbf{x})
-    = - \begin{bmatrix} 0 & 1 & 0 & 0 & 0 \\ \end{bmatrix} \times \begin{bmatrix} \log \, p_\theta(\text{cat}| \mathbf{x}) \\ \log \, p_\theta(\text{dog}| \mathbf{x}) \\ \log \, p_\theta(\text{ship}| \mathbf{x}) \\ \log \, p_\theta(\text{house}| \mathbf{x})\\ \log \, p_\theta(\text{car}| \mathbf{x}) \\ \end{bmatrix}
-    = - \mathbf{t} \cdot \log \, \mathbf{y}
-$$
+A few properties help to understand what the softmax does:
 
-The cross-entropy loss function can therefore be expressed as:
+* It preserves the **ranking** of the logits: the class with the highest logit gets the highest probability.
+* It only depends on the **differences** between the logits: adding the same constant to all logits does not change the probabilities, as the factor $\exp c$ cancels between the numerator and the denominator. Libraries use this property to compute the softmax in a numerically stable way, by subtracting the largest logit first.
+* It is a smooth version of the **argmax**: if one logit is much larger than the others, the softmax puts almost all the probability on this class. Dividing the logits by a **temperature** $T$ before the softmax controls this behavior: a low temperature ($T \rightarrow 0$) gives a one-hot vector on the most likely class, a high temperature ($T \rightarrow \infty$) a uniform distribution.
 
-$$
-    \mathcal{L}(\theta) = \mathbb{E}_{\mathbf{x}, \mathbf{t} \sim p(\mathbf{t} | \mathbf{x})} [- \mathbf{t} \cdot \log \, \mathbf{y}]
-$$
+## The cross-entropy loss
 
-To estimate this loss function, we only have to sample $N$ tuples $(\mathbf{x}_i, \mathbf{t}_i)$ from the data distribution and approximate it with a sampling average:
+We now have two categorical distributions for each input: the target $\mathbf{t}$, representing the data, and the prediction $\mathbf{y}$, representing the model. As in @sec-klml, we want to minimize the KL divergence between them, which is the same as minimizing their cross-entropy (@sec-crossentropy), as the entropy of the data does not depend on the parameters:
 
 $$
-    \mathcal{L}(\theta) \approx \dfrac{1}{N} \sum_{i=1}^N - \mathbf{t}_i \cdot \log \, \mathbf{y}_i
+    \mathcal{L}(\theta) = \mathbb{E}_{(\mathbf{x}, \mathbf{t}) \sim \mathcal{D}} [H(p(\mathbf{t} | \mathbf{x}), p_\theta(\mathbf{t} | \mathbf{x}))] = \mathbb{E}_{(\mathbf{x}, \mathbf{t}) \sim \mathcal{D}} [- \sum_{k=1}^K t_k \, \log y_k]
 $$
 
-When the model is a softmax over parameterized logit scores:
+The cross-entropy between two categorical distributions is a sum over the classes, which can be written as a dot product: $- \mathbf{t} \cdot \log \mathbf{y}$. With a one-hot target, all terms of the sum are zero except the one of the correct class. For the image of a dog:
 
 $$
-    \mathbf{y} = \mathcal{S}(\mathbf{z}) = \mathcal{S}( F_\theta(\mathbf{x}) )
+    - \mathbf{t} \cdot \log \mathbf{y} = - \begin{bmatrix} 0 & 1 & 0 & 0 & 0 \\ \end{bmatrix} \cdot \begin{bmatrix} \log \, p_\theta(\text{cat}| \mathbf{x}) \\ \log \, p_\theta(\text{dog}| \mathbf{x}) \\ \log \, p_\theta(\text{ship}| \mathbf{x}) \\ \log \, p_\theta(\text{house}| \mathbf{x})\\ \log \, p_\theta(\text{car}| \mathbf{x}) \\ \end{bmatrix} = - \log \, p_\theta(\text{dog}| \mathbf{x})
 $$
 
-the gradient of the individual loss function $l(\theta) = - \mathbf{t} \cdot \log \, \mathbf{y}$ with respect to the logit scores is extremely simple:
+The loss of a single example is simply the **negative log-likelihood** of the correct class under the model: we recover maximum likelihood estimation (@sec-mle). Its behavior is easy to interpret:
+
+* if the model is confident and right ($p_\theta(\text{dog}| \mathbf{x}) \approx 1$), the loss is close to zero;
+* if the model is uncertain ($p_\theta(\text{dog}| \mathbf{x}) = 1/K$, the uniform distribution), the loss is $\log K$;
+* if the model is confident and wrong ($p_\theta(\text{dog}| \mathbf{x}) \approx 0$), the loss is very large: confident mistakes are heavily penalized.
+
+In practice, the expectation is estimated on the training set, or on a minibatch of it, with a Monte Carlo average (@sec-mcestimator):
+
+$$
+    \mathcal{L}(\theta) \approx \dfrac{1}{N} \sum_{i=1}^N - \mathbf{t}_i \cdot \log \mathbf{y}_i
+$$
+
+## The gradient of the loss
+
+To minimize the loss with gradient descent, we need its gradient with respect to the parameters $\theta$. By the chain rule, it goes through the logits $\mathbf{z} = F_\theta(\mathbf{x})$, and the combination of the logarithm in the cross-entropy and of the exponential in the softmax makes the gradient with respect to the logits remarkably simple. For a single example with loss $l(\theta) = - \mathbf{t} \cdot \log \mathbf{y}$:
 
 $$
     \dfrac{\partial l(\theta)}{\partial \mathbf{z}} = - (\mathbf{t} - \mathbf{y})
@@ -87,28 +83,28 @@ $$
 :::{.callout-note icon="false" collapse="true"}
 ## Proof
 
-When differentiating a softmax probability $y_j = \dfrac{\exp(z_j)}{\sum_k \exp(z_k)}$ w.r.t a logit score $z_i$, i.e. $\dfrac{\partial y_j}{\partial z_i}$, we need to consider two cases:
+When differentiating a softmax probability $y_l = \dfrac{\exp z_l}{\sum_m \exp z_m}$ with respect to a logit $z_k$, two cases have to be considered:
 
-* If $i=j$, $\exp(z_i)$ appears both at the numerator and denominator of $\dfrac{\exp(z_i)}{\sum_k \exp(z_k)}$. The product rule $(f\times g)' = f'\, g + f \, g'$ gives us:
+* If $l = k$, $\exp z_k$ appears both in the numerator and in the denominator. The product rule $(f\times g)' = f'\, g + f \, g'$ gives us:
 
 $$
 \begin{aligned}
-\dfrac{\partial y_i}{\partial z_i} &= \dfrac{\exp(z_i)}{\sum_k \exp(z_k)} + \exp(z_i) \, \dfrac{- \exp(z_i)}{(\sum_k \exp(z_k))^2} \\
-&= \dfrac{\exp(z_i) \, \sum_k \exp(z_k) - \exp(z_i)^2}{(\sum_k \exp(z_k))^2} \\
-&= \dfrac{\exp(z_i)}{\sum_k \exp(z_k)} \, (1- \dfrac{\exp(z_i)}{\sum_k \exp(z_k)})\\
-&= y_i \, (1 - y_i)\\
+\dfrac{\partial y_k}{\partial z_k} &= \dfrac{\exp z_k}{\sum_m \exp z_m} + \exp z_k \, \dfrac{- \exp z_k}{(\sum_m \exp z_m)^2} \\
+&= \dfrac{\exp z_k \, \sum_m \exp z_m - (\exp z_k)^2}{(\sum_m \exp z_m)^2} \\
+&= \dfrac{\exp z_k}{\sum_m \exp z_m} \, (1- \dfrac{\exp z_k}{\sum_m \exp z_m})\\
+&= y_k \, (1 - y_k)\\
 \end{aligned}
 $$
 
 This is similar to the derivative of the logistic function.
 
-* If $i \neq j$, $z_i$ only appears at the denominator, so we only need the chain rule:
+* If $l \neq k$, $z_k$ only appears in the denominator, so we only need the chain rule:
 
 $$
 \begin{aligned}
-\dfrac{\partial y_j}{\partial z_i} &= - \exp(z_j) \, \dfrac{\exp(z_i)}{(\sum_k \exp(z_k))^2} \\
-&= - \dfrac{\exp(z_i)}{\sum_k \exp(z_k)} \, \dfrac{\exp(z_j)}{\sum_k \exp(z_k)} \\
-&= - y_i \, y_j \\
+\dfrac{\partial y_l}{\partial z_k} &= - \exp z_l \, \dfrac{\exp z_k}{(\sum_m \exp z_m)^2} \\
+&= - \dfrac{\exp z_k}{\sum_m \exp z_m} \, \dfrac{\exp z_l}{\sum_m \exp z_m} \\
+&= - y_k \, y_l \\
 \end{aligned}
 $$
 
@@ -116,23 +112,37 @@ This allows us to differentiate the cross-entropy:
 
 $$
 \begin{aligned}
-\frac{\partial {l}(\theta)}{\partial z_i} & = - \sum_j \frac{\partial}{\partial z_i} t_j \log(y_j)=
-- \sum_j t_j \frac{\partial \log(y_j)}{\partial z_i} = - \sum_j t_j \frac{1}{y_j} \frac{\partial y_j}{\partial z_i} \\
-& = - \frac{t_i}{y_i} \frac{\partial y_i}{\partial z_i} - \sum_{j \neq i} \frac{t_j}{y_j} \frac{\partial y_j}{\partial z_i}
-= - \frac{t_i}{y_i} y_i (1-y_i) - \sum_{j \neq i} \frac{t_j}{y_j} (-y_j \, y_i) \\
-& = - t_i + t_i \, y_i + \sum_{j \neq i} t_j \, y_i = - t_i + \sum_{j} t_j y_i
-= -t_i + y_i \sum_{j} t_j \\
-& = - (t_i - y_i)
+\frac{\partial l(\theta)}{\partial z_k} & = - \sum_l \frac{\partial}{\partial z_k} t_l \log y_l =
+- \sum_l t_l \frac{\partial \log y_l}{\partial z_k} = - \sum_l \frac{t_l}{y_l} \frac{\partial y_l}{\partial z_k} \\
+& = - \frac{t_k}{y_k} \frac{\partial y_k}{\partial z_k} - \sum_{l \neq k} \frac{t_l}{y_l} \frac{\partial y_l}{\partial z_k}
+= - \frac{t_k}{y_k} y_k (1-y_k) - \sum_{l \neq k} \frac{t_l}{y_l} (-y_l \, y_k) \\
+& = - t_k + t_k \, y_k + \sum_{l \neq k} t_l \, y_k = - t_k + y_k \sum_{l} t_l \\
+& = - (t_k - y_k)
 \end{aligned}
 $$
 
 as the targets sum to one.
 :::
 
-Put together, the gradient of the cross-entropy loss function is:
+The gradient with respect to the logits is the **prediction error**: the difference between the target and the predicted distribution. This is the same form as the gradient of the mean square error in linear regression, which makes the softmax classifier as easy to train as a regression model:
+
+* the logit of the correct class ($t_k = 1$) is increased by $1 - y_k$, i.e. a lot if the model gives it a low probability, and not at all if the model is already certain;
+* the logits of the wrong classes ($t_k = 0$) are decreased by $y_k$, i.e. in proportion of the probability the model wrongly gives them;
+* when the prediction matches the target, $\mathbf{y} = \mathbf{t}$, the gradient is zero.
+
+The gradient with respect to the parameters is then obtained by backpropagating this error through the network:
 
 $$
-    \nabla_\theta \, \mathcal{L}(\theta) = \mathbb{E}_{\mathbf{x}, \mathbf{t} \sim p(\mathbf{t} | \mathbf{x})} [ - (\mathbf{t} - \mathbf{y} ) \times \nabla_\theta \, F_\theta(\mathbf{x})]
+    \nabla_\theta \, \mathcal{L}(\theta) = \mathbb{E}_{(\mathbf{x}, \mathbf{t}) \sim \mathcal{D}} [ - (\mathbf{t} - \mathbf{y} ) \times \nabla_\theta \, F_\theta(\mathbf{x})]
 $$
 
-The function approximator $\mathbf{z} = F_\theta(\mathbf{x})$ can be anything (neural network, etc.): we know how to apply gradient descent / backpropagation to minimize the KL divergence / cross-entropy between the data and the model!
+The network $F_\theta$ can be anything differentiable: whatever its architecture, training it with the cross-entropy loss minimizes the KL divergence between the categorical distribution of the data and the one of the model.
+
+## Using the predicted distribution
+
+Once trained, the classifier outputs a full probability distribution over the classes, which can be used in two ways:
+
+* For **decisions**, we usually keep the most probable class, the argmax of $\mathbf{y}$, as the prediction of the classifier.
+* For **generation**, we can sample a class from the categorical distribution $\mathbf{y}$ (@sec-simplesampling). This is how language models generate text: at each step, the next token is sampled from the softmax output, and the temperature of the softmax controls the trade-off between the most likely continuations ($T \rightarrow 0$, close to the argmax) and more diverse ones (larger $T$).
+
+The predicted probabilities also quantify the confidence of the model, but only to a certain extent: a classifier trained with the cross-entropy loss can be confidently wrong on inputs that are very different from its training data. The softmax only represents the uncertainty that is present in the data themselves (ambiguous inputs), not the uncertainty of the model about its own parameters.
