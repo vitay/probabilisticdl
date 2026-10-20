@@ -34,10 +34,11 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 ### Part I — Basics (`src/basics/`)
 
-- [x] **1. Information theory** `{#sec-informationtheory}` — self-information, entropy (discrete / differential, Bernoulli example), joint and conditional entropy, mutual information, cross-entropy `{#sec-crossentropy}`, KL divergence `{#sec-kl}` (relation to cross-entropy, asymmetry).
+- [x] **1. Information theory** `{#sec-informationtheory}` — self-information, entropy (discrete / differential, Bernoulli example), joint and conditional entropy, mutual information, cross-entropy `{#sec-crossentropy}`, KL divergence `{#sec-kl}` (relation to cross-entropy, asymmetry). Rewritten intro (Bell Labs, information as surprise, compression, predicting = compressing) [@Nyquist1924; @Hartley1928; @Shannon1948]; collapsed note on differential entropy; $p$, $q$ notation for cross-entropy and KL.
 - [x] **2. Maximum likelihood estimation** `{#sec-mle}` — likelihood vs. joint probability, i.i.d. assumption, log-likelihood and NLL; worked derivation of MLE for the univariate normal (empirical mean and variance).
 - [x] **3. Bayesian estimation** `{#sec-bayesian}` — central limit theorem (frequentist view); MAP `{#sec-map}`: Bayes' rule on the parameters (prior, likelihood, evidence, posterior), MLE as MAP with a uniform prior, MAP for the mean of a normal with a normal prior (weighted average of $\bar{x}$ and $\mu_0$, limit cases, conjugate posterior variance, figure `map-posterior.png`), MAP as L2 / L1 regularization, limitations (point estimate, posterior predictive, intractable evidence → VI).
-- [ ] ★ **Forward vs. reverse KL** (section of `statisticalml/2-KL.qmd` or a short chapter here): mode-covering vs. mode-seeking; MLE minimizes the forward KL, VI the reverse one.
+- Notation unified: cross-entropy and KL use distributions $p$, $q$ ($H(p, q)$, $\text{KL}(p || q)$, normals $\mathcal{N}(x; \mu_p, \sigma_p)$) in `basics/1-InformationTheory.qmd` and `statisticalml/2-KL.qmd`; $X$, $Y$ kept for entropy / joint / conditional entropy / mutual information; `cross-entropy.svg` replaced by `cross-entropy.png` (`src/img/cross-entropy.py`).
+- [x] ★ **Forward vs. reverse KL** `{#sec-forwardreverse}` — new last section of `statisticalml/2-KL.qmd`, approved (figure `forward-reverse-kl.png`, modes at ±2 as the reverse KL also covers both modes at ±1.5).
 
 ### Part II — Statistical machine learning (`src/statisticalml/`)
 
@@ -283,3 +284,41 @@ File: `src/sampling/3-HMC.qmd`, label `{#sec-hmc}`, third and last chapter of *S
 - Former section 4 (scaling with the dimension) merged into the limits section as one sentence; its figure `sampler-dimension.png` is dropped.
 - Momentum $v$.
 - Figures: `score.png`, `langevin.png` and `hmc.png` from own scripts (house style, same targets as the previous chapters); `score-matching-langevin.jpg` and `score-pitfalls.jpg` from Yang Song's blog post, captions with "Source: <https://yang-song.net/blog/2021/score/>".
+
+---
+
+## Section plan: Forward vs. reverse KL
+
+File: `src/statisticalml/2-KL.qmd`, new last section `## Forward vs. reverse KL {#sec-forwardreverse}`, after "Equivalence between KL and cross-entropy" (which ends on MLE = minimizing $\text{KL}(p || p_\theta)$).
+
+**Goal:** the KL is not symmetric (@sec-kl only states it); show that the two directions lead to very different fits, and that the choice is usually imposed by what we can compute: samples of the target (forward KL, maximum likelihood) or its unnormalized density (reverse KL, variational inference). Main ideas only, few formulas.
+
+**Notation:** generic $p$ (the target) and $q$ (the approximation we fit), with the mapping given once: MLE fits $q = p_\theta$ to the data $p$; VI fits $q = q_\phi(z|x)$ to the posterior $p = p_\theta(z|x)$.
+
+### Content
+
+1. **Two directions.**
+    - Forward KL $\text{KL}(p || q) = \mathbb{E}_{x \sim p}[- \log \frac{q(x)}{p(x)}]$: expectation under the target, needs **samples of $p$** → maximum likelihood (previous section).
+    - Reverse KL $\text{KL}(q || p) = \mathbb{E}_{x \sim q}[- \log \frac{p(x)}{q(x)}]$: expectation under the approximation, needs samples of $q$ and the **density of $p$, up to its normalization constant** ($\log Z$ is a constant) → variational inference (@sec-variationalinference), where the posterior can be evaluated up to the evidence but not sampled.
+2. **Where the penalty is.**
+    - Forward: the log-ratio is weighted by $p$; large penalty where $p(x) > 0$ but $q(x) \approx 0$ → $q$ must put mass **everywhere $p$ has mass** (mass-covering, "mean-seeking"); no penalty for putting mass where $p$ has none.
+    - Reverse: weighted by $q$; large penalty where $q(x) > 0$ but $p(x) \approx 0$ → $q$ must **avoid the regions where $p$ is small** (zero-forcing, mode-seeking); no penalty for ignoring parts of $p$.
+3. **Example: fitting a normal distribution to the bimodal target** of @sec-montecarlo.
+    - Forward KL: a single broad normal covering both modes, with its mass in the valley between them; for a normal $q$, the optimum simply matches the mean and variance of $p$ (stated, collapsed one-line proof optional).
+    - Reverse KL: two local optima, each a narrow normal on one of the modes; which one is found depends on the initialization.
+    - Figure (proposed) `forward-reverse-kl.png` (`src/img/forward-reverse-kl.py`): left, forward-KL fit; right, the two reverse-KL fits (numerical minimization over $(\mu, \sigma)$), with the value of each KL in the legend.
+4. **Consequences** (short, bullet list).
+    - Maximum likelihood (forward): models try to cover all the data and may put probability between the modes → blurry or "averaged" samples (link to the blurriness of VAEs, @sec-vae).
+    - Variational inference (reverse): the approximate posterior is too confident: it underestimates the uncertainty and can miss whole modes of the posterior — the same failure as a too narrow importance sampling proposal (@sec-importance) or a stuck MCMC chain (@sec-mcmcpractice), and a limitation for the multimodal posteriors of inverse problems (@sec-inverseproblems).
+    - One sentence: other divergences interpolate between the two behaviors or are symmetric (Jensen-Shannon, already mentioned in @sec-kl; GANs in Part V).
+
+### Related edits
+
+- `sec-kl` (information theory): the sentence "In practice, it does not matter much" contradicts this section → replace by a pointer to @sec-forwardreverse.
+- VI summary ("this KL is taken in the opposite direction…"): add the reference @sec-forwardreverse.
+
+### Open questions
+
+- Placement as a section of `2-KL.qmd` (proposed) or a short chapter of its own?
+- Figure: 1D bimodal only (proposed), or also a 2D correlated Gaussian fitted by a factorized (diagonal) Gaussian, the classical illustration where reverse KL underestimates the variance?
+

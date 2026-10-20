@@ -2,20 +2,20 @@
 
 Let us now look at maximum likelihood estimation / KL minimization from the information theory point of view.
 
-The definition of the KL divergence (@sec-kl) relies on the mathematical expectation of the negative log-likelihood of the outcomes of $X$:
+The definition of the KL divergence (@sec-kl) relies on the mathematical expectation of the negative log-likelihood of the outcomes of $p$:
 
 $$
-    \text{KL}(X ||Y) = \mathbb{E}_{x \sim X}[- \log \dfrac{P(Y=x)}{P(X=x)}]
+    \text{KL}(p || q) = \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}]
 $$
 
 There are basically two ways to compute the KL, one relying on closed analytical forms, the other on sampling. We focus here on the first one; sampling methods are the topic of @sec-montecarlo.
 
 ## Closed form of the KL divergence for normal distributions {#sec-klnormal}
 
-The first method is possible when both distributions are normal distributions. Let us suppose that $X$ and $Y$ are both univariate normal distributions:
+The first method is possible when both distributions are normal distributions. Let us suppose that $p$ and $q$ are both univariate normal distributions:
 
 $$
-    X = \mathcal{N}(\mu_x, \sigma_x) \qquad\qquad\qquad Y = \mathcal{N}(\mu_y, \sigma_y)
+    p(x) = \mathcal{N}(x; \mu_p, \sigma_p) \qquad\qquad\qquad q(x) = \mathcal{N}(x; \mu_q, \sigma_q)
 $$
 
 :::{.callout-tip icon="false"}
@@ -28,23 +28,23 @@ We can use the known pdf of normal distributions to get the KL:
 
 $$
 \begin{aligned}
-\text{KL}(X ||Y) &= \mathbb{E}_{x \sim X}[- \log \dfrac{P(Y=x)}{P(X=x)}] \\
-&= \mathbb{E}_{x \sim X}[- \log \dfrac{p(x; \mu_y, \sigma_y)}{p(x; \mu_x, \sigma_x)}] \\
-&= \mathbb{E}_{x \sim X}[ \log p(x; \mu_x, \sigma_x) - \log p(x; \mu_y, \sigma_y)] \\
+\text{KL}(p || q) &= \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}] \\
+&= \mathbb{E}_{x \sim p(x)}[- \log \dfrac{\mathcal{N}(x; \mu_q, \sigma_q)}{\mathcal{N}(x; \mu_p, \sigma_p)}] \\
+&= \mathbb{E}_{x \sim p(x)}[ \log \mathcal{N}(x; \mu_p, \sigma_p) - \log \mathcal{N}(x; \mu_q, \sigma_q)] \\
 \end{aligned}
 $$
 
 As:
 
 $$
-    p(x ; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} \, \exp{- \dfrac{(x - \mu)^2}{2 \, \sigma^2}}
+    \mathcal{N}(x ; \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma^2}} \, \exp{- \dfrac{(x - \mu)^2}{2 \, \sigma^2}}
 $$
 
 the log-likelihood of a normal distribution is:
 
 $$
 \begin{aligned}
-\log p(x ; \mu, \sigma) &= \log [\frac{1}{\sqrt{2 \pi \sigma^2}} \, \exp{- \dfrac{(x - \mu)^2}{2 \, \sigma^2}}] \\
+\log \mathcal{N}(x ; \mu, \sigma) &= \log [\frac{1}{\sqrt{2 \pi \sigma^2}} \, \exp{- \dfrac{(x - \mu)^2}{2 \, \sigma^2}}] \\
 &= -\dfrac{1}{2} \log 2 \pi \sigma^2 - \dfrac{(x - \mu)^2}{2 \, \sigma^2}\\
 &= - \dfrac{1}{2} [ \log 2 \pi + 2 \, \log \sigma + \dfrac{(x - \mu)^2}{\sigma^2} ]\\
 \end{aligned}
@@ -54,26 +54,26 @@ This gives for the KL:
 
 $$
 \begin{aligned}
-\text{KL}(X ||Y) &= \mathbb{E}_{x \sim X}[ \log p(x; \mu_x, \sigma_x) - \log p(x; \mu_y, \sigma_y)] \\
-&= \mathbb{E}_{x \sim X}[\dfrac{1}{2} \, [2 \, \log \sigma_y + \dfrac{(x - \mu_y)^2}{\sigma_y^2} - 2 \, \log \sigma_x - \dfrac{(x - \mu_x)^2}{\sigma_x^2}]]\\
-&= \mathbb{E}_{x \sim X} [\log \dfrac{\sigma_y}{\sigma_x} + \dfrac{(x - \mu_y)^2}{2 \sigma_y^2} - \dfrac{(x - \mu_x)^2}{2 \sigma_x^2}]\\
-&= \log \dfrac{\sigma_y}{\sigma_x} + \dfrac{1}{2 \sigma_y^2} \, \mathbb{E}_{x \sim X} [(x - \mu_y)^2] - \dfrac{1}{2 \sigma_x^2} \, \mathbb{E}_{x \sim X} [(x - \mu_x)^2]\\
+\text{KL}(p || q) &= \mathbb{E}_{x \sim p(x)}[ \log \mathcal{N}(x; \mu_p, \sigma_p) - \log \mathcal{N}(x; \mu_q, \sigma_q)] \\
+&= \mathbb{E}_{x \sim p(x)}[\dfrac{1}{2} \, [2 \, \log \sigma_q + \dfrac{(x - \mu_q)^2}{\sigma_q^2} - 2 \, \log \sigma_p - \dfrac{(x - \mu_p)^2}{\sigma_p^2}]]\\
+&= \mathbb{E}_{x \sim p(x)} [\log \dfrac{\sigma_q}{\sigma_p} + \dfrac{(x - \mu_q)^2}{2 \sigma_q^2} - \dfrac{(x - \mu_p)^2}{2 \sigma_p^2}]\\
+&= \log \dfrac{\sigma_q}{\sigma_p} + \dfrac{1}{2 \sigma_q^2} \, \mathbb{E}_{x \sim p(x)} [(x - \mu_q)^2] - \dfrac{1}{2 \sigma_p^2} \, \mathbb{E}_{x \sim p(x)} [(x - \mu_p)^2]\\
 \end{aligned}
 $$
 
 By definition of the variance, we have:
 
 $$
-    \sigma_x^2 = \mathbb{E}_{x \sim X} [(x - \mu_x)^2]
+    \sigma_p^2 = \mathbb{E}_{x \sim p(x)} [(x - \mu_p)^2]
 $$
 
-Moreover, as $\mathbb{E}_{x \sim X} [x - \mu_x] = 0$:
+Moreover, as $\mathbb{E}_{x \sim p(x)} [x - \mu_p] = 0$:
 
 $$
 \begin{aligned}
-\mathbb{E}_{x \sim X} [(x - \mu_y)^2] &= \mathbb{E}_{x \sim X} [(x - \mu_x + \mu_x - \mu_y)^2]\\
-&= \mathbb{E}_{x \sim X} [(x - \mu_x)^2] + 2 \, \mathbb{E}_{x \sim X} [(x - \mu_x) \, (\mu_x - \mu_y)] + \mathbb{E}_{x \sim X} [(\mu_x - \mu_y)^2] \\
-&= \sigma_x^2 + (\mu_x - \mu_y)^2 \\
+\mathbb{E}_{x \sim p(x)} [(x - \mu_q)^2] &= \mathbb{E}_{x \sim p(x)} [(x - \mu_p + \mu_p - \mu_q)^2]\\
+&= \mathbb{E}_{x \sim p(x)} [(x - \mu_p)^2] + 2 \, \mathbb{E}_{x \sim p(x)} [(x - \mu_p) \, (\mu_p - \mu_q)] + \mathbb{E}_{x \sim p(x)} [(\mu_p - \mu_q)^2] \\
+&= \sigma_p^2 + (\mu_p - \mu_q)^2 \\
 \end{aligned}
 $$
 
@@ -81,27 +81,27 @@ which gives:
 
 $$
 \begin{aligned}
-\text{KL}(X ||Y) &= \log \dfrac{\sigma_y}{\sigma_x} + \dfrac{1}{2 \sigma_y^2} \, \mathbb{E}_{x \sim X} [(x - \mu_y)^2] - \dfrac{1}{2 \sigma_x^2} \, \mathbb{E}_{x \sim X} [(x - \mu_x)^2]\\
-&= \log \dfrac{\sigma_y}{\sigma_x} + \dfrac{\sigma_x^2 + (\mu_x - \mu_y)^2}{2 \sigma_y^2} - \dfrac{\sigma_x^2}{2 \sigma_x^2} \\
+\text{KL}(p || q) &= \log \dfrac{\sigma_q}{\sigma_p} + \dfrac{1}{2 \sigma_q^2} \, \mathbb{E}_{x \sim p(x)} [(x - \mu_q)^2] - \dfrac{1}{2 \sigma_p^2} \, \mathbb{E}_{x \sim p(x)} [(x - \mu_p)^2]\\
+&= \log \dfrac{\sigma_q}{\sigma_p} + \dfrac{\sigma_p^2 + (\mu_p - \mu_q)^2}{2 \sigma_q^2} - \dfrac{\sigma_p^2}{2 \sigma_p^2} \\
 \end{aligned}
 $$
 
 :::{.callout-note icon="false"}
 ## Closed form of the KL divergence between two Gaussians
 
-The closed form of the KL divergence between $X = \mathcal{N}(\mu_x, \sigma_x)$ and $Y=\mathcal{N}(\mu_y, \sigma_y)$ is simply a function of their parameters:
+The closed form of the KL divergence between $p = \mathcal{N}(\mu_p, \sigma_p)$ and $q = \mathcal{N}(\mu_q, \sigma_q)$ is simply a function of their parameters:
 
 $$
-    \text{KL}(X ||Y) = \log \dfrac{\sigma_y}{\sigma_x} + \dfrac{\sigma_x^2 + (\mu_x - \mu_y)^2}{2 \sigma_y^2} - \dfrac{1}{2}
+    \text{KL}(p || q) = \log \dfrac{\sigma_q}{\sigma_p} + \dfrac{\sigma_p^2 + (\mu_p - \mu_q)^2}{2 \sigma_q^2} - \dfrac{1}{2}
 $$
 :::
 
-We can check that when $\mu_x = \mu_y$ and $\sigma_x = \sigma_y$, the KL is zero.
+We can check that when $\mu_p = \mu_q$ and $\sigma_p = \sigma_q$, the KL is zero.
 
-When $Y$ is the standard normal distribution $\mathcal{N}(0, 1)$, we have:
+When $q$ is the standard normal distribution $\mathcal{N}(0, 1)$, we have:
 
 $$
-    \text{KL}(X || \mathcal{N}(0, 1)) = \dfrac{1}{2} [\sigma_x^2 + \mu_x^2 - 1 - \log \sigma_x^2]
+    \text{KL}(p || \mathcal{N}(0, 1)) = \dfrac{1}{2} [\sigma_p^2 + \mu_p^2 - 1 - \log \sigma_p^2]
 $$
 
 ## Equivalence between KL and cross-entropy
@@ -178,3 +178,49 @@ Depending on the assumption about the underlying distribution, we can use the fo
 
 * Discrete / categorical / multinoulli distribution: softmax classifier.
 * Continuous distribution: mixture density network [MDN, @Bishop1994] or Gaussian Process regression (GPR, but it is a nonparametric kernel-based probabilistic model, not a neural network).
+
+## Forward vs. reverse KL {#sec-forwardreverse}
+
+The KL divergence is not symmetric (@sec-kl): $\text{KL}(p || q)$ and $\text{KL}(q || p)$ are different quantities, and minimizing one or the other leads to very different results. Let's call $p$ the **target** distribution and $q$ the **approximation** we fit to it. Maximum likelihood fits a model $q = p_\theta$ to the distribution of the data $p$; variational inference (@sec-variationalinference) will fit an approximate posterior $q = q_\phi(z | x)$ to a true posterior $p = p_\theta(z | x)$.
+
+### Two directions
+
+The **forward KL** is an expectation under the target:
+
+$$
+    \text{KL}(p || q) = \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}]
+$$
+
+Estimating it requires **samples of the target**. This is the situation of the previous section: we have data, i.e. samples of $p$, and minimizing the forward KL is maximum likelihood estimation.
+
+The **reverse KL** is an expectation under the approximation:
+
+$$
+    \text{KL}(q || p) = \mathbb{E}_{x \sim q(x)}[- \log \dfrac{p(x)}{q(x)}]
+$$
+
+Estimating it requires samples of the approximation, which we choose easy to sample, and the ability to **evaluate the target**, at least up to its normalization constant: if $p(x) = \tilde{p}(x) / Z$, then $\log p(x) = \log \tilde{p}(x) - \log Z$, and the constant $\log Z$ does not change the minimum. This is the situation of Bayesian inference, where the posterior can be evaluated up to the evidence but not sampled: variational inference minimizes the reverse KL.
+
+In practice, the choice of the direction is therefore usually imposed by what we have: samples of the target, or its unnormalized density.
+
+### Where is the penalty?
+
+The two directions do not penalize the same errors:
+
+* In the forward KL, the log-ratio is weighted by the target $p(x)$. The penalty is very large where $p(x) > 0$ but $q(x) \approx 0$, as $- \log q(x)$ explodes, while regions where $p(x) \approx 0$ do not count at all. The approximation must put mass **everywhere the target has mass**, even if this means putting mass where the target has none: the forward KL is **mass-covering**.
+* In the reverse KL, the log-ratio is weighted by the approximation $q(x)$. The penalty is very large where $q(x) > 0$ but $p(x) \approx 0$, while regions where $q(x) \approx 0$ do not count at all. The approximation must **avoid the regions where the target is small**, even if this means ignoring whole parts of the target: the reverse KL is **mode-seeking**.
+
+@fig-forwardreversekl illustrates the difference by fitting a single normal distribution $q(x) = \mathcal{N}(\mu, \sigma)$ to a bimodal target. With the forward KL, the best normal distribution covers both modes: it is broad, and puts most of its mass in the valley between the modes, where the target has almost none. For a normal approximation, the optimum of the forward KL simply matches the mean and the variance of the target. With the reverse KL, the normal distribution settles on **one** of the modes and ignores the other: there are two local optima, and which one is found depends on the initialization of the parameters.
+
+![Fitting a normal distribution $q(x)$ to a bimodal target $p(x)$. Left: the forward KL gives a broad distribution covering both modes. Right: the reverse KL has two local optima, each covering one mode only. The target has the weights and widths of the target of @sec-montecarlo, with modes further apart.](../img/forward-reverse-kl.png){#fig-forwardreversekl}
+
+The behavior of the reverse KL depends on how separated the modes are. If they are close to each other, as in the bimodal target of @sec-montecarlo, covering both modes with a single broad distribution costs less than ignoring one of them, and the reverse KL also prefers a broad fit; the two directions differ more and more when the modes move apart.
+
+### Consequences
+
+These two behaviors have practical consequences throughout this book:
+
+* **Maximum likelihood** (forward KL) produces models that try to cover all the data. When the model is not flexible enough, it spreads probability between the modes of the data, and generates "averaged" samples that do not look like any real one, which is one reason for the blurry samples of variational autoencoders (@sec-vae).
+* **Variational inference** (reverse KL) produces approximate posteriors that are too confident: they underestimate the uncertainty, and can miss whole modes of the posterior. This is the same failure as a too narrow proposal in importance sampling (@sec-importance) or an MCMC chain stuck in one mode (@sec-mcmcpractice), and an important limitation for the multimodal posteriors of inverse problems (@sec-inverseproblems).
+
+Other divergences interpolate between these two behaviors or are symmetric, for example the Jensen-Shannon divergence, which is at the heart of generative adversarial networks.
