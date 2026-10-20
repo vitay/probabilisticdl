@@ -1,0 +1,28 @@
+# Gradient estimators {#sec-gradientestimators}
+
+Training a variational autoencoder required a trick: the reconstruction loss is an expectation over samples of the encoder, and its gradient with respect to the parameters of the encoder could only be computed after reparameterizing the samples (@sec-reparameterization). This problem is much more general than VAEs, and the reparameterization trick is only one of the two main ways to solve it. This chapter presents both, and applies the second one to a problem that looks very different at first sight: reinforcement learning.
+
+## The gradient of an expectation
+
+Let's consider a distribution $q_\phi(z)$ with parameters $\phi$, and a function $f(z)$ whose expected value under this distribution we want to minimize (or maximize):
+
+$$
+    \mathcal{L}(\phi) = \mathbb{E}_{z \sim q_\phi(z)} [f(z)] = \int q_\phi(z) \, f(z) \, dz
+$$
+
+Gradient descent needs the gradient $\nabla_\phi \mathcal{L}(\phi)$. In supervised learning, the parameters appear in the function $f$, while the distribution of the data does not depend on them: the gradient can be moved inside the expectation, and estimated by averaging the gradients of individual samples. Here, it is the opposite: the parameters $\phi$ appear in the **distribution** over which the expectation is taken, not in the function. Changing $\phi$ does not change the value of $f$ for a given $z$; it changes which samples $z$ are likely to be drawn. The gradient cannot simply be moved inside the expectation:
+
+$$
+    \nabla_\phi \, \mathbb{E}_{z \sim q_\phi(z)} [f(z)] \neq \mathbb{E}_{z \sim q_\phi(z)} [\nabla_\phi f(z)] = 0
+$$
+
+and, as seen in @sec-reparameterization, we cannot backpropagate through the sampling operation either.
+
+This situation appears in many places:
+
+* in **variational autoencoders**, the reconstruction loss is an expectation over the encoder $q_\phi(z | x)$ (@sec-vae);
+* in **variational inference** in general, when the ELBO of an arbitrary model has no closed form and must be estimated with samples of the approximate posterior;
+* when the latent variables are **discrete**, for example categories or tokens, which cannot be reparameterized as a differentiable function of a noise;
+* in **reinforcement learning**, where an agent controls the distribution of its own experiences through its behavior, and wants to change this behavior to obtain better outcomes.
+
+As the expectation itself is usually estimated with samples, so is its gradient: we look for an **estimator** of the gradient, i.e. a quantity that can be computed from samples of $q_\phi(z)$ and whose expected value is the true gradient. There are two main families of such estimators, which make very different assumptions about $f$ and $q_\phi$.

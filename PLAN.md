@@ -44,7 +44,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 - [x] **1. Learning paradigms** `{#sec-paradigms}` — discriminative (classification, regression, MDN), generative (density estimation vs. generation), autoregressive / self-supervised (LLMs, PixelCNN, masked learning); all of them fit $p_\theta$ to $p$ by minimizing the KL.
 - [x] **2. KL divergence in machine learning** `{#sec-klml}` — closed form between two Gaussians `{#sec-klnormal}` (full derivation, special case $\mathcal{N}(0,1)$); equivalence of KL minimization, cross-entropy minimization and MLE.
-- [x] **3. Softmax classifier** `{#sec-softmax}` — one-hot targets as a multinomial distribution, softmax, cross-entropy loss $-\mathbf{t} \cdot \log \mathbf{y}$, gradient $-(\mathbf{t} - \mathbf{y})$ w.r.t. the logits (collapsed proof).
+- [x] **3. Softmax classifier** `{#sec-softmax}` — one-hot targets as a multinomial distribution, softmax, cross-entropy loss $-\mathbf{t} \cdot \log \mathbf{y}$, gradient $-(\mathbf{t} - \mathbf{y})$ w.r.t. the logits (collapsed proof). Rewritten: classification as density estimation, the softmax function (ranking, differences, temperature), the cross-entropy loss (NLL of the correct class, limit cases), the gradient (prediction error), using the predicted distribution (argmax, sampling, LLMs).
 - [x] **4. Mixture density networks** `{#sec-mdn}` — mean-variance estimation (NLL of a Gaussian, regression as a special case), multimodal targets (inverse problems, half-moons), mixture of Gaussians output, NLL loss, two-step sampling.
 
 ### Part III — Sampling methods (`src/sampling/`) — new
@@ -58,8 +58,8 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 - [x] **1. Latent variable models** `{#sec-latentvariables}` — inverse problems section `{#sec-inverseproblems}` (encoder as the inverse of the decoder, link to the MDN inverse problem; restoring degraded observations $y = A(x) + $ noise with a generative prior, figure `inverse-problem.png` from `src/img/inverse-problem.py`, [@Song2022a; @Rozet2023]). Rewritten: generative modeling as MLE (back-reference to @sec-klml), images live on a manifold (figure `image-manifold.png`, `src/img/image-manifold.py`: rotated / scaled "7"s as a 2D surface in pixel space, PCA projection, and the 2D latent grid; manifold hypothesis), latent variables (prior, decoder, ancestral sampling, hidden), the marginal likelihood is intractable (Monte Carlo over the prior fails like a bad importance sampling proposal → posterior / encoder → VI).
 - [x] **2. Variational inference** `{#sec-variationalinference}` — merged with the former chapter "Why maximizing the ELBO works": the intractable posterior, the evidence lower bound (single derivation $\log p_\theta(x) = \text{ELBO} + \text{KL}$; Jensen / importance sampling view in a collapsed callout), why maximizing the ELBO works `{#sec-elbo}` (gradient w.r.t. $\phi$, decoder, EM, figure `elbo-gap.png` from `src/img/elbo-gap.py`) [@Luo2022a], a tractable loss (reconstruction + regularization), summary.
 - [x] **3. Variational autoencoders** `{#sec-vae}` — intro continues the VI chapter with three open questions (distributions, gradient, latent space); choosing the distributions (prior, encoder outputs $\mu_x, \sigma_x$, decoder), the loss (BCE / MSE reconstruction, closed-form KL, log-variance), the reparameterization trick `{#sec-reparameterization}` (gradient of an expectation over $q_\phi$, $z = \mu + \sigma \odot \xi$, REINFORCE mentioned), a smooth latent space (why autoencoders cannot generate, noise → local smoothness, KL → no holes / overlaps / interpolation, MNIST 2D manifold, link to `image-manifold.png`, blurriness and $\beta$-VAE). Figures from the Neurocomputing slides (towardsdatascience, Keras blog).
-- [ ] **Gradient estimators** — reparameterization trick in detail vs. score-function (REINFORCE) estimator; link to policy gradients in the DeepRL book.
-- [ ] **Tighter bounds** — IWAE (importance-weighted ELBO, reuses Part III), β-VAE.
+- [~] **4. Gradient estimators** `{#sec-gradientestimators}` — outline agreed, writing section by section.
+- [~] **5. Tighter and weighted bounds** `{#sec-tighterbounds}` — outline agreed, after chapter 4.
 
 ### Part V — Deep generative models — planned
 
@@ -328,4 +328,70 @@ File: `src/statisticalml/2-KL.qmd`, new last section `## Forward vs. reverse KL 
 
 - Placement as a section of `2-KL.qmd` (proposed) or a short chapter of its own?
 - Figure: 1D bimodal only (proposed), or also a 2D correlated Gaussian fitted by a factorized (diagonal) Gaussian, the classical illustration where reverse KL underestimates the variance?
+
+---
+
+## Chapter plan: Gradient estimators
+
+File: `src/variationalinference/4-GradientEstimators.qmd`, label `{#sec-gradientestimators}`, after the VAE chapter.
+
+**Goal:** the VAE needed the gradient of an expectation whose distribution depends on the parameters, $\nabla_\phi \, \mathbb{E}_{z \sim q_\phi(z)}[f(z)]$, and solved it with the reparameterization trick (@sec-reparameterization). This chapter presents the problem in general and the two families of estimators, and applies the second one to reinforcement learning, introduced from a high-level point of view (the book stays standalone: no reference to the Deep RL book, only figures borrowed from it). Main ideas, few formulas.
+
+**Notation:** $q_\phi(z)$ the distribution whose parameters we optimize, $f(z)$ the function whose expectation we want to maximize or minimize; $\xi$ the parameter-free noise of the reparameterization; for RL: state $s_t$, action $a_t$, reward $r_t$, policy $\pi_\theta(a | s)$, trajectory $\tau$, return $R(\tau)$, trajectory distribution $\rho_\theta(\tau)$.
+
+**References:** in `Library.bib`: `Williams1992` (REINFORCE), `Sutton1998` (RL), `Kingma2013`, `Schulman2017a` (PPO), `Ouyang2022` (RLHF). To add if wanted: Mohamed et al. (2020), *Monte Carlo Gradient Estimation in Machine Learning*, JMLR (review of both estimators).
+
+### Sections
+
+1. [x] **The gradient of an expectation** — approved.
+    - The problem $\nabla_\phi \, \mathbb{E}_{z \sim q_\phi(z)}[f(z)]$: the parameters are in the distribution, the gradient cannot be moved inside (recap of @sec-reparameterization).
+    - Where it appears: the reconstruction loss of VAEs, discrete latent variables, black-box variational inference (any model, no closed form), and reinforcement learning, where the agent controls the distribution of its own experiences.
+2. [ ] **The reparameterization estimator** (pathwise gradient)
+    - General form: $z = g_\phi(\xi)$ with $\xi \sim p(\xi)$ fixed, $\nabla_\phi \, \mathbb{E}_{q_\phi}[f(z)] = \mathbb{E}_{\xi}[\nabla_\phi f(g_\phi(\xi))]$.
+    - Requirements: $f$ differentiable with respect to $z$, and $q_\phi$ reparameterizable (location-scale families like the normal, inverse transform sampling of @sec-simplesampling); continuous $z$ only.
+    - Low variance: uses the gradient of $f$, i.e. knows in which direction to move each sample.
+3. [ ] **The score-function estimator** (log-derivative trick, REINFORCE)
+    - Log-derivative trick $\nabla_\phi q_\phi(z) = q_\phi(z) \, \nabla_\phi \log q_\phi(z)$ → $\nabla_\phi \, \mathbb{E}_{q_\phi}[f(z)] = \mathbb{E}_{q_\phi}[f(z) \, \nabla_\phi \log q_\phi(z)]$ (short derivation in the main text).
+    - Intuition: increase the probability of the samples with a high $f(z)$, decrease it for a low $f(z)$; only $f(z)$ is needed, never its gradient: $f$ can be non-differentiable, a black box, and $z$ discrete.
+    - Terminology warning: $\nabla_\phi \log q_\phi(z)$ is called the score in statistics (gradient w.r.t. the **parameters**), not to be confused with the score $\nabla_x \log p(x)$ of @sec-score (gradient w.r.t. the **variable**).
+    - Unbiased but high variance: $f(z)$ multiplies the score, so an offset of $f$ changes every single estimate.
+    - Variance reduction with a **baseline**: $\mathbb{E}_{q_\phi}[\nabla_\phi \log q_\phi(z)] = 0$ (one-line proof), so subtracting a constant $b$ from $f$ does not change the expectation but can reduce the variance a lot.
+    - *Figure (proposed):* `gradient-estimators.png` (own script) — distribution of single-sample estimates of $\frac{d}{d\mu} \mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[f(z)]$ for a simple quadratic $f$: reparameterization, score function, score function with baseline; true gradient as a vertical line.
+4. [ ] **Application: reinforcement learning**
+    - The RL problem at a high level: an agent observes a state, takes an action, receives a reward and a new state; the goal is to maximize the sum of rewards (return) of its trajectories [@Sutton1998]. Figure `rl-agent.png` (from the Deep RL book, agent-environment loop).
+    - A stochastic policy $\pi_\theta(a | s)$ (a neural network outputting a distribution over actions, e.g. a softmax, @sec-softmax) defines a distribution over trajectories $\rho_\theta(\tau)$; objective $\mathcal{J}(\theta) = \mathbb{E}_{\tau \sim \rho_\theta}[R(\tau)]$: exactly the problem of section 1. Figure `policysearch.svg` (from the Deep RL book: trajectories with high return).
+    - The environment is unknown and not differentiable, and actions are often discrete → no reparameterization; the score-function estimator works, and the unknown dynamics disappear from $\nabla_\theta \log \rho_\theta(\tau) = \sum_t \nabla_\theta \log \pi_\theta(a_t | s_t)$ (short derivation): the **REINFORCE** algorithm [@Williams1992], policy gradient methods.
+    - Baselines again (the average return); pointers in one sentence: PPO reuses old trajectories with importance sampling (@sec-importance) [@Schulman2017a], and RLHF of language models, where the "actions" are discrete tokens [@Ouyang2022].
+5. [ ] **Summary** — table: estimator / requires / variance / typical uses.
+
+---
+
+## Chapter plan: Tighter and weighted bounds
+
+File: `src/variationalinference/5-TighterBounds.qmd`, label `{#sec-tighterbounds}`, last chapter of Part IV.
+
+**Goal:** two modifications of the ELBO: making the bound tighter with several importance samples (IWAE), and weighting its two terms differently ($\beta$-VAE). Short chapter.
+
+**References:** in `Library.bib`: `Higgins2016` ($\beta$-VAE). To add: Burda, Grosse & Salakhutdinov (2016), *Importance Weighted Autoencoders*, ICLR (arXiv:1509.00519).
+
+### Sections
+
+1. [ ] **Importance-weighted autoencoders** `{#sec-iwae}`
+    - Recap of the callout of @sec-variationalinference: the ELBO is the logarithm of a single importance weight $p_\theta(x, z) / q_\phi(z | x)$, averaged; Jensen's inequality creates the gap.
+    - IWAE bound: average $K$ importance weights **inside** the logarithm: $\mathcal{L}_K = \mathbb{E}[\log \frac{1}{K} \sum_k \frac{p_\theta(x, z_k)}{q_\phi(z_k | x)}]$; $\mathcal{L}_1$ is the ELBO, $\mathcal{L}_K$ increases with $K$ and tends to $\log p_\theta(x)$ (stated) — the average of the weights is the importance sampling estimate of the evidence (@sec-importance), more accurate with more samples.
+    - Consequence: the encoder no longer needs to match the posterior exactly; the gradient weights the $K$ samples by their normalized importance weights (self-normalized importance sampling).
+    - Cost: $K$ forward passes through the decoder per input; known side effect: the encoder can become worse while the bound gets tighter (one sentence).
+    - *Figure (proposed):* `iwae-bound.png` (own script) — on a toy latent variable model where $\log p_\theta(x)$ is computable (linear-Gaussian), $\mathcal{L}_K$ as a function of $K$ (log scale) approaching $\log p_\theta(x)$, for a fixed, imperfect encoder.
+2. [ ] **$\beta$-VAE** `{#sec-betavae}`
+    - Loss: reconstruction $+ \, \beta \, \text{KL}(q_\phi(z|x) || p_\theta(z))$; $\beta = 1$ is the ELBO.
+    - $\beta > 1$: stronger pressure towards the factorized prior → more regular latent space, **disentangled** factors of variation [@Higgins2016], blurrier reconstructions; $\beta < 1$: sharper reconstructions, less regular latent space (link to the trade-off of @sec-vae).
+    - For $\beta \neq 1$ the loss is no longer a bound on the evidence: it trades likelihood for structure.
+    - Figure `betavae-results.png` (from the Neurocomputing slides, source @Higgins2016): traversals of single latent dimensions controlling skin colour, age/gender, saturation.
+3. [ ] **Summary of Part IV** — short: latent variable models, VI, VAE, gradient estimators, bounds; transition to the deep generative models of Part V (diffusion models as hierarchical VAEs).
+
+### Decisions
+
+- Two chapters.
+- IWAE figure from an own toy computation.
+- Posterior collapse included in the $\beta$-VAE section: with a powerful decoder, the KL term can drive $q_\phi(z|x)$ to the prior for every input, the latent variables are ignored; KL annealing (increasing $\beta$ from 0 to 1 during training) as a remedy.
 
