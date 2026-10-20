@@ -1,5 +1,7 @@
 # Variational inference {#sec-variationalinference}
 
+## The intractable posterior
+
 The previous chapter ended on a circular problem. To train a latent variable model (@sec-latentvariables), we need to know which latent variables $z$ explain an observation $x$, i.e. the **posterior** $p_\theta(z | x)$, also called the **encoder**. Bayes' rule tells us:
 
 $$
@@ -8,65 +10,92 @@ $$
 
 The posterior depends on the **model** (decoder) $p_\theta(x|z)$, the **prior** $p_\theta(z)$ and the **evidence** $p_\theta(x)$. It is **intractable**, as the evidence $p_\theta(x) = \int_z p_\theta(x | z) \, p_\theta(z) \, dz$ would require to integrate over all possible latent representations $z$.
 
-**Variational inference** proposes to approximate the true posterior (encoder) $p_\theta(z | x)$ by another parameterized distribution $q_\phi(z|x)$.
+**Variational inference** proposes to approximate the true posterior $p_\theta(z | x)$ by another parameterized distribution $q_\phi(z|x)$, the **approximate posterior**, chosen in a family of distributions that is easy to sample and evaluate, for example normal distributions whose parameters are predicted by a neural network.
 
 ![Graphical model of a VAE. Source: <https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html>](../img/vae-graphical-model.png){#fig-vaegraphicalmodel width=70%}
 
-The decoder $p_\theta(x |z)$ generates observations $x$ from a latent representation $z$ with parameters $\theta$. The encoder $q_\phi(z|x)$ estimates the latent representation $z$ of a generated observation $x$. It should approximate $p_\theta(z | x)$ with parameters $\phi$.
+The decoder $p_\theta(x |z)$ generates observations $x$ from a latent representation $z$, with parameters $\theta$. The encoder $q_\phi(z|x)$ estimates the latent representation $z$ of an observation $x$, with parameters $\phi$: it should be as close as possible to the true posterior $p_\theta(z | x)$. The decoder and the encoder have to be trained together, but neither the evidence $p_\theta(x)$ we want to maximize for the decoder, nor the true posterior we want to approximate with the encoder, can be computed. Variational inference solves both problems with a single quantity, the evidence lower bound.
 
-To make $q_\phi(z| x)$ close to $p_\theta(z | x)$, we minimize their KL divergence:
+## The evidence lower bound
 
-$$
-    \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) = \mathbb{E}_{z \sim q_\phi(z|x)} [- \log \dfrac{p_\theta(z | x)}{q_\phi(z|x)}]
-$$
-
-Note that we sample the latent representations from the learned encoder $q_\phi(z|x)$ (imagination). As $p_\theta(z | x) = p_\theta(x |z) \, \dfrac{p_\theta(z)}{p_\theta(x)}$, we get:
+Let's decompose the log-evidence of an observation $x$, using the encoder:
 
 $$
 \begin{aligned}
-\text{KL}(q_\phi(z|x) || p_\theta(z | x) ) &= \mathbb{E}_{z \sim q_\phi(z|x)} [- \log \dfrac{p_\theta(x | z) \, p_\theta(z)}{q_\phi(z|x) \, p_\theta(x)}]\\
-&=\mathbb{E}_{z \sim q_\phi(z|x)} [- \log \dfrac{p_\theta(z)}{q_\phi(z|x)}] - \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x)] + \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)]\\
+    \log p_\theta(x) & = \log p_\theta(x) \, \int q_\phi(z | x) \, dz& \text{(The integral is one by definition)} \\
+     & =  \int q_\phi(z | x) \log p_\theta(x) \, dz& \text{(We can move the evidence inside)} \\
+     & =  \mathbb{E}_{z \sim q_\phi(z | x)} [\log p_\theta(x) ] & \text{(It becomes an expectation)} \\
+     & =  \mathbb{E}_{z \sim q_\phi(z | x)} [\log \dfrac{p_\theta(x, z)}{p_\theta(z|x)} ] & \text{(Definition of the conditional)} \\
+     & =  \mathbb{E}_{z \sim q_\phi(z | x)} [\log \dfrac{p_\theta(x, z) \, q_\phi(z|x)}{p_\theta(z|x) \, q_\phi(z|x)} ] & \text{(Introduce the encoder)} \\
+     & =  \mathbb{E}_{z \sim q_\phi(z | x)} [\log \dfrac{p_\theta(x, z)}{q_\phi(z|x)} ] + \mathbb{E}_{z \sim q_\phi(z | x)} [ - \log \dfrac{p_\theta(z|x)}{q_\phi(z|x)} ] & \text{(Split the expectation)} \\
 \end{aligned}
 $$
 
-$p_\theta(x)$ does not depend on $z$, so its expectation w.r.t $z$ is constant:
+The second term is the KL divergence between the approximate and the true posteriors (@sec-kl). The first term is called the **evidence lower bound** (ELBO):
 
 $$
-    \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) = \text{KL}(q_\phi(z| x) || p_\theta(z)) + \log p_\theta(x) + \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)]
+    \text{ELBO}(\theta, \phi) = \mathbb{E}_{z \sim q_\phi(z | x)} [\log \dfrac{p_\theta(x, z)}{q_\phi(z|x)} ]
 $$
 
-We rearrange the terms:
+so that the log-evidence is exactly:
 
 $$
-    \log p_\theta(x) - \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) = - \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)] - \text{KL}(q_\phi(z|x) || p_\theta(z))
+    \log p_\theta(x) = \text{ELBO}(\theta, \phi) + \text{KL}(q_\phi(z|x) || p_\theta(z | x))
 $$
 
-* Training the **encoder** means that we **minimize** $\text{KL}(q_\phi(z|x) || p_\theta(z | x) )$, i.e. we want the encoder $q_\phi(z | x)$ to be close to the true "inverse" of the decoder.
-* Training the **decoder** means that we **maximize** $\log p_\theta(x)$ (log-likelihood of the model), i.e. we generate realistic data / explain the data samples.
-* Training the encoder and decoder together means that we **maximize**:
+This decomposition tells us two things:
+
+* As the KL divergence is always positive or zero, the ELBO is a **lower bound** of the log-evidence, hence its name: $\text{ELBO}(\theta, \phi) \leq \log p_\theta(x)$.
+* The **gap** between the log-evidence and its lower bound is exactly the KL divergence between the encoder and the true posterior: the better the encoder approximates the posterior, the tighter the bound. It is zero only when $q_\phi(z|x) = p_\theta(z|x)$.
+
+:::{.callout-note icon="false" collapse="true"}
+## Another view: importance sampling of the evidence
+
+The evidence is an expectation over the prior, $p_\theta(x) = \mathbb{E}_{z \sim p_\theta(z)}[p_\theta(x | z)]$, which is very inefficient to estimate with samples of the prior (@sec-latentvariables). Using the encoder as a proposal, importance sampling (@sec-importance) gives:
 
 $$
-    \text{ELBO}(\theta, \phi) = \log p_\theta(x) - \text{KL}(q_\phi(z|x) || p_\theta(z | x) )
+    p_\theta(x) = \int q_\phi(z|x) \, \dfrac{p_\theta(x, z)}{q_\phi(z|x)} \, dz = \mathbb{E}_{z \sim q_\phi(z|x)} [\dfrac{p_\theta(x, z)}{q_\phi(z|x)}]
 $$
 
-The KL divergence is always positive or equal to 0, so we have:
+where $p_\theta(x, z) / q_\phi(z|x)$ plays the role of the importance weight. Taking the logarithm and using Jensen's inequality ($\log \mathbb{E}[X] \geq \mathbb{E}[\log X]$, as the logarithm is concave) gives the ELBO again:
 
 $$
-    \text{ELBO}(\theta, \phi) \leq \log p_\theta(x)
+    \log p_\theta(x) = \log \mathbb{E}_{z \sim q_\phi(z|x)} [\dfrac{p_\theta(x, z)}{q_\phi(z|x)}] \geq \mathbb{E}_{z \sim q_\phi(z|x)} [\log \dfrac{p_\theta(x, z)}{q_\phi(z|x)}] = \text{ELBO}(\theta, \phi)
 $$
 
-This term is called the **evidence lower bound** (ELBO): by maximizing it, we also maximize the intractable evidence $\log p_\theta(x)$, which is what we want to do (see @sec-elbo for the reason).
+The best proposal for importance sampling is the posterior $p_\theta(z | x)$, for which all the weights are equal to $p_\theta(x)$ and the inequality becomes an equality. Averaging several importance weights inside the logarithm gives tighter bounds, which is the idea of importance-weighted autoencoders.
+:::
 
-The trick is that the right-hand term of the equation gives us a tractable definition of the ELBO term:
+## Why maximizing the ELBO works {#sec-elbo}
+
+Variational inference trains the encoder and the decoder together by maximizing the ELBO with respect to both $\phi$ and $\theta$. Many presentations stop at "the ELBO is a lower bound, so maximizing it maximizes the evidence", but a lower bound can increase while the quantity above it stays where it is. The decomposition $\log p_\theta(x) = \text{ELBO}(\theta, \phi) + \text{KL}(q_\phi(z|x) || p_\theta(z | x))$ shows what actually happens [@Luo2022a]. Let's look at the two sets of parameters separately (@fig-elbogap):
+
+**The encoder** ($\phi$). The log-evidence $\log p_\theta(x)$ does not depend on $\phi$, so its gradient with respect to $\phi$ is zero:
+
+$$
+    \underbrace{\nabla_\phi \, \log \, p_\theta(x)}_{ = 0} = \underbrace{\nabla_\phi \, \text{ELBO}(\theta, \phi)}_{\text{maximized}} + \underbrace{\nabla_\phi \,  \text{KL}( q_\phi(z|x) || p_\theta(z|x))}_{\text{minimized}}
+$$
+
+Whatever increases the ELBO decreases the KL by the same amount: maximizing the ELBO with respect to $\phi$ brings the encoder closer to the true posterior, and closes the gap. This is how the encoder learns to approximate a posterior that it can never compute.
+
+**The decoder** ($\theta$). Maximizing the ELBO with respect to $\theta$ pushes up a lower bound of the log-evidence. As long as the gap is small, the ELBO and the log-evidence move together: improving the ELBO means explaining the data better, which is the goal of maximum likelihood.
+
+![Schematic of ELBO maximization. The log-evidence (black lines) is the sum of the ELBO (blue) and of the gap, the KL divergence between the encoder and the true posterior (orange). Updating the encoder leaves the log-evidence unchanged and closes the gap; updating the decoder raises the ELBO and the log-evidence. In practice, both are updated at the same time by gradient ascent; the steps are separated here for clarity.](../img/elbo-gap.png){#fig-elbogap}
+
+If the encoder could represent the true posterior exactly, each update of $\phi$ would close the gap completely, and the alternation of the two steps would be the classical **expectation-maximization** (EM) algorithm. With an approximate encoder, the gap never fully closes, and the decoder can also increase the ELBO in a less desirable way: by making its true posterior easier to approximate by the encoder, rather than by explaining the data better. This is the price of the approximation.
+
+## A tractable loss
+
+The ELBO is useful because, unlike the log-evidence, it can be computed. Splitting the joint distribution into the decoder and the prior, $p_\theta(x, z) = p_\theta(x | z) \, p_\theta(z)$:
 
 $$
 \begin{aligned}
-\text{ELBO}(\theta, \phi) &= \log p_\theta(x) - \text{KL}(q_\phi(z|x) || p_\theta(z | x) ) \\
+\text{ELBO}(\theta, \phi) &= \mathbb{E}_{z \sim q_\phi(z|x)} [\log p_\theta(x | z)] + \mathbb{E}_{z \sim q_\phi(z|x)} [\log \dfrac{p_\theta(z)}{q_\phi(z|x)}] \\
 &= \mathbb{E}_{z \sim q_\phi(z|x)} [\log p_\theta(x | z)] - \text{KL}(q_\phi(z|x) || p_\theta(z))
 \end{aligned}
 $$
 
-What happens when we **minimize** the negative ELBO?
+Neither term involves the evidence nor the true posterior. Training a latent variable model therefore consists in **minimizing** the negative ELBO:
 
 $$
     \mathcal{L}(\theta, \phi) = - \text{ELBO}(\theta, \phi) = \mathbb{E}_{z \sim q_\phi(z|x)} [- \log p_\theta(x | z)] + \text{KL}(q_\phi(z| x) || p_\theta(z))
@@ -89,4 +118,4 @@ The two terms pull in opposite directions: a perfect reconstruction would give e
 
 Variational inference also illustrates the second of the two ways of dealing with intractable distributions in this book. The sampling methods of @sec-montecarlo and @sec-mcmc estimate expectations under the posterior by drawing samples from it, which is exact in the limit but must be repeated for every new observation. Variational inference turns inference into **optimization**: a single network learns to output an approximate posterior for any observation, in one forward pass. The price to pay is that $q_\phi(z | x)$ is only an approximation within a chosen family of distributions (for example normal distributions), and that the ELBO is only a lower bound of the log-likelihood: the gap between the two is exactly the KL divergence between the approximate and the true posteriors. Note also that this KL is taken in the opposite direction to the one of maximum likelihood (@sec-klml): the approximate distribution $q_\phi$ is the first argument, which changes how it fits the true posterior.
 
-Two questions remain open. Why does maximizing the ELBO also train the decoder, although the evidence itself is never computed? This is the topic of @sec-elbo. And how do we compute the gradient of the reconstruction loss with respect to the parameters $\phi$ of the encoder, when this loss is an expectation over samples of the encoder itself? The variational autoencoder (@sec-vae) answers this question with the reparameterization trick.
+One question remains open: how do we compute the gradient of the reconstruction loss with respect to the parameters $\phi$ of the encoder, when this loss is an expectation over samples of the encoder itself? The variational autoencoder (@sec-vae) answers it with the reparameterization trick.

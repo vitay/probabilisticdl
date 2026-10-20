@@ -1,28 +1,28 @@
 # Variational autoencoders {#sec-vae}
 
-@sec-variationalinference derived the loss of a latent variable model trained with variational inference: the negative ELBO, made of a reconstruction loss and a regularization loss. **Variational autoencoders** (VAE) [@Kingma2013] are the most direct implementation of this idea with neural networks. This chapter explains how they work in practice, and in particular two points that make them work: the reparameterization trick, which allows to train them with backpropagation, and the regularization of the latent space, which makes it smooth enough to generate new data.
+@sec-variationalinference gave the general recipe of variational inference for a latent variable model: an encoder $q_\phi(\mathbf{z} | \mathbf{x})$ approximating the true posterior, a decoder $p_\theta(\mathbf{x} | \mathbf{z})$, and a loss, the negative ELBO, made of a reconstruction loss and a regularization loss towards the prior $p_\theta(\mathbf{z})$. To turn this recipe into an algorithm that can be trained on images, three questions remain:
 
-## From autoencoders to variational autoencoders
+1. Which distributions should we choose for the prior, the encoder and the decoder?
+2. How do we compute the gradient of the reconstruction loss with respect to the encoder, when this loss is an expectation over samples of the encoder itself?
+3. What does the regularization loss do to the latent space, and why does it make generation possible?
 
-A classical **autoencoder** is a neural network trained to reproduce its input. An **encoder** compresses the input $\mathbf{x}$ into a low-dimensional code $\mathbf{z}$, the bottleneck, and a **decoder** reconstructs the input from this code. Both are trained together by minimizing a reconstruction loss, for example the mean square error between the input and its reconstruction. The bottleneck forces the network to keep only the most important information about the data, and autoencoders are very good at compressing data.
+**Variational autoencoders** (VAE) [@Kingma2013] give the simplest answers to these questions: normal distributions wherever possible, and the reparameterization trick for the gradient. This chapter presents these choices, and then explains why the resulting latent space is smooth enough to generate new data.
 
-They are, however, bad at generating new data. The encoder and the decoder are **deterministic**: each training example is mapped to a single point of the latent space, and the decoder only learns to reconstruct these points. Nothing constrains what the decoder does between them. If we pick a new point of the latent space, for example between the codes of two training examples, the decoder generally produces a meaningless output (@fig-autoencoderlimits).
+## Choosing the distributions
 
-![An autoencoder can reconstruct its training data, but a new point of its latent space is generally decoded into something meaningless. Source: <https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73>](../img/autoencoder-limits.png){#fig-autoencoderlimits}
+The **prior** over the latent space is the standard normal distribution, $p_\theta(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{1})$, which has no parameters to learn.
 
-A variational autoencoder is an autoencoder whose encoder outputs a **probability distribution** over the latent space instead of a single point: the approximate posterior $q_\phi(\mathbf{z} | \mathbf{x})$ of @sec-variationalinference. The VAE uses a normal distribution with a diagonal covariance matrix, whose parameters are the outputs of the encoder:
+The **encoder** is a normal distribution with a diagonal covariance matrix, whose parameters are the outputs of a neural network:
 
 $$
     q_\phi(\mathbf{z} | \mathbf{x}) = \mathcal{N}(\mathbf{\mu_x}, \mathbf{\sigma_x})
 $$
 
-The encoder therefore has two output vectors, the mean $\mathbf{\mu_x}$ and the standard deviation $\mathbf{\sigma_x}$, each with one element per dimension of the latent space. During training, a latent vector $\mathbf{z}$ is **sampled** from this distribution and passed to the decoder, which reconstructs the input (@fig-vaestructure). The prior over the latent space is the standard normal distribution, $p_\theta(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{1})$.
+The encoder network therefore has two output vectors, the mean $\mathbf{\mu_x}$ and the standard deviation $\mathbf{\sigma_x}$, each with one element per dimension of the latent space. During training, a latent vector $\mathbf{z}$ is **sampled** from this distribution and passed to the **decoder** network, which reconstructs the input (@fig-vaestructure).
 
 ![Structure of a VAE: the encoder outputs the mean and standard deviation of a normal distribution, which is sampled to obtain the input of the decoder. Source: <https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73>](../img/vae-structure.png){#fig-vaestructure width=80%}
 
-## The loss function
-
-The loss of the VAE is the negative ELBO of @sec-variationalinference, averaged over the training data $\mathcal{D}$:
+With these choices, the loss of the VAE is the negative ELBO averaged over the training data $\mathcal{D}$:
 
 $$
 \begin{aligned}
@@ -52,9 +52,13 @@ $$
 
 ### Backpropagation through sampling
 
-The regularization loss is easy to minimize, but the reconstruction loss raises a problem. It is an expectation over samples of the encoder, $\mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})$. We can estimate it with Monte Carlo (@sec-mcestimator), in practice with a single sample per input, and backpropagate its gradient through the decoder down to $\mathbf{z}$. But how do we go further, to the outputs $\mathbf{\mu_x}$ and $\mathbf{\sigma_x}$ of the encoder?
+The regularization loss is easy to minimize, but the reconstruction loss raises the second question of the introduction. It is an expectation over samples of the encoder, $\mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})$. We can estimate it with Monte Carlo (@sec-mcestimator), in practice with a single sample per input, and backpropagate its gradient through the decoder down to $\mathbf{z}$. But how do we go further, to the outputs $\mathbf{\mu_x}$ and $\mathbf{\sigma_x}$ of the encoder?
 
-Sampling is not a differentiable operation. Changing $\mathbf{\mu_x}$ or $\mathbf{\sigma_x}$ slightly changes the distribution of $\mathbf{z}$, but says nothing about how a particular sample $\mathbf{z}$ would change: the derivative $\frac{\partial \mathbf{z}}{\partial \mathbf{\mu_x}}$ is not defined. Mathematically, the problem is that the parameters $\phi$ appear in the distribution over which the expectation is taken:
+Sampling is not a differentiable operation. Let's suppose that backpropagation tells us that the loss would decrease if the sample $\mathbf{z}$ was a bit smaller ($\frac{\partial \mathcal{L}}{\partial \mathbf{z}} > 0$, @fig-samplinggradient). Should we move the mean $\mathbf{\mu_x}$ to the left? Changing $\mathbf{\mu_x}$ changes the distribution of $\mathbf{z}$, but the next sample is drawn independently of the current one: it can land anywhere, smaller or larger than $\mathbf{z}$. Nothing tells us how a particular sample would change when the parameters change: the derivative $\frac{\partial \mathbf{z}}{\partial \mathbf{\mu_x}}$ is not defined, and the gradient cannot be passed on to the encoder.
+
+![A sample $z$ of $\mathcal{N}(\mu, \sigma)$ should decrease to reduce the loss. Shifting the mean gives a new, independent sample $z'$, which can be smaller or larger than $z$: the derivative of $z$ with respect to $\mu$ is not defined, and we do not know in which direction to move the mean.](../img/sampling-gradient.png){#fig-samplinggradient}
+
+Mathematically, the problem is that the parameters $\phi$ appear in the distribution over which the expectation is taken:
 
 $$
     \nabla_\phi \, \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})} [- \log p_\theta(\mathbf{x} | \mathbf{z})]
@@ -76,6 +80,8 @@ $$
     \dfrac{\partial \mathbf{z}}{\partial \mathbf{\mu_x}} = 1 \qquad \dfrac{\partial \mathbf{z}}{\partial \mathbf{\sigma_x}} = \xi
 $$
 
+For a fixed noise $\xi$, moving the mean moves the sample by the same amount: if the sample should decrease, so should the mean.
+
 ![Without the reparameterization trick (left), the sampling operation blocks backpropagation. With the trick (right), the randomness comes from an additional input $\zeta$ (noted $\xi$ in the text), and the gradient flows to $\mathbf{\mu_x}$ and $\mathbf{\sigma_x}$. Source: <https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73>](../img/vae-reparameterization-trick.png){#fig-reparameterizationtrick}
 
 The expectation is now taken over $\xi$, whose distribution does not depend on $\phi$, so the gradient can be moved inside it:
@@ -96,9 +102,19 @@ The trick works because a normal sample can be written as a differentiable trans
 
 ## A smooth latent space
 
+### Why autoencoders cannot generate
+
+As noted at the end of @sec-variationalinference, the loss of a latent variable model reads like the loss of an autoencoder. A classical **autoencoder** is a neural network trained to reproduce its input: an encoder compresses the input $\mathbf{x}$ into a low-dimensional code $\mathbf{z}$, the bottleneck, and a decoder reconstructs the input from this code. Both are trained together by minimizing a reconstruction loss only. The bottleneck forces the network to keep only the most important information about the data, which makes autoencoders very good at compressing data.
+
+They are, however, bad at generating new data. The encoder and the decoder are **deterministic**: each training example is mapped to a single point of the latent space, and the decoder only learns to reconstruct these points. Nothing constrains what the decoder does between them. If we pick a new point of the latent space, for example between the codes of two training examples, the decoder generally produces a meaningless output (@fig-autoencoderlimits).
+
+![An autoencoder can reconstruct its training data, but a new point of its latent space is generally decoded into something meaningless. Source: <https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73>](../img/autoencoder-limits.png){#fig-autoencoderlimits}
+
+The VAE differs from a classical autoencoder by two ingredients: its encoder outputs a distribution, which is sampled, and its loss contains the regularization towards the prior. Together, they solve this problem.
+
 ### Regularity of the latent space
 
-To generate new data with the decoder, its latent space must be **regular**: close points of the latent space should be decoded into similar data, and every point sampled from the prior should be decoded into something meaningful (@fig-vaelatentregularity). The latent space of a classical autoencoder has none of these properties. The variational autoencoder obtains them thanks to the two ingredients of its loss, which act together.
+To generate new data with the decoder, its latent space must be **regular**: close points of the latent space should be decoded into similar data, and every point sampled from the prior should be decoded into something meaningful (@fig-vaelatentregularity). The latent space of a classical autoencoder has none of these properties. The variational autoencoder obtains them thanks to its two ingredients, which act together.
 
 ![Irregular (left) and regular (right) latent spaces: in a regular latent space, close points are decoded into similar data, and no point is meaningless. Source: <https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73>](../img/vae-latent-regularity.png){#fig-vaelatentregularity}
 

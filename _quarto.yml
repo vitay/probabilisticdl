@@ -43,8 +43,7 @@ book:
       chapters:
         - src/variationalinference/1-LatentVariables.qmd
         - src/variationalinference/2-VariationalInference.qmd
-        - src/variationalinference/3-ELBO.qmd
-        - src/variationalinference/4-VAE.qmd
+        - src/variationalinference/3-VAE.qmd
     - src/references.qmd
 
 bibliography: 
