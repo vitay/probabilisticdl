@@ -66,6 +66,13 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 - [ ] Normalizing flows — change of variables, exact likelihood.
 - [ ] Energy-based models and score matching.
 - [ ] ★ Diffusion models — port `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/` (~850 lines; its images `langevin.gif`, `kerneldensityestimation.png`, `manifold.png` are in the Obsidian `Inference/img/` folder); hierarchical-VAE derivation of @Luo2022a.
+    - Planned paragraph: **diffusion and flow matching in the forward / reverse KL dichotomy** (link to @sec-forwardreverse).
+        - Rule of thumb: an expectation over the **data** is mass-covering (MLE, VAE, diffusion, flow matching); over the **model's own samples** it is mode-seeking (VI, mode collapse of GAN generators).
+        - Diffusion is trained by maximizing an ELBO on $\log p_\theta(x)$ (hierarchical VAE, @Luo2022a); the encoder is the fixed noising process, and each term $\text{KL}(q(x_{t-1}|x_t, x_0) || p_\theta(x_{t-1}|x_t))$ has the data-driven distribution first → forward KL / maximum likelihood. With the right weighting, score matching also bounds $\text{KL}(p_\text{data} || p_\theta)$ (Song et al., 2021, *Maximum likelihood training of score-based diffusion models* — to add to Zotero).
+        - Not blurry because the model family is flexible: each reverse step is nearly Gaussian for small steps, so a Gaussian per step is almost exact, and the chain of many steps gives an arbitrarily multimodal marginal. The forward KL only averages between modes when the family cannot represent the target (single normal of `forward-reverse-kl.png`).
+        - The averaging happens at the right place: the MSE denoiser predicts $\mathbb{E}[x_0 | x_t]$, blurry at high noise but exactly the score of the noisy distribution (Tweedie's formula); the modes are separated progressively as the noise decreases (the noise-levels argument of @sec-hmclimits, seen from the training side).
+        - Flow matching: same picture — MSE regression of conditional velocities over data samples (covering), learned field $\mathbb{E}[u_t(x | x_0) | x_t]$; not literally a KL (closer to transport distances).
+        - Mode-seeking comes back at sampling time: classifier-free guidance samples roughly from $p(x | c) \, p(c | x)^w$, sharpening towards the modes (diversity traded for quality).
 - [ ] GANs as divergence minimization (f-divergences).
 
 ### Part VI — Uncertainty and Bayesian deep learning — optional
