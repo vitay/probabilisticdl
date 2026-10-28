@@ -58,8 +58,8 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 - [x] **1. Latent variable models** `{#sec-latentvariables}` — inverse problems section `{#sec-inverseproblems}` (encoder as the inverse of the decoder, link to the MDN inverse problem; restoring degraded observations $y = A(x) + $ noise with a generative prior, figure `inverse-problem.png` from `src/img/inverse-problem.py`, [@Song2022a; @Rozet2023]). Rewritten: generative modeling as MLE (back-reference to @sec-klml), images live on a manifold (figure `image-manifold.png`, `src/img/image-manifold.py`: rotated / scaled "7"s as a 2D surface in pixel space, PCA projection, and the 2D latent grid; manifold hypothesis), latent variables (prior, decoder, ancestral sampling, hidden), the marginal likelihood is intractable (Monte Carlo over the prior fails like a bad importance sampling proposal → posterior / encoder → VI).
 - [x] **2. Variational inference** `{#sec-variationalinference}` — merged with the former chapter "Why maximizing the ELBO works": the intractable posterior, the evidence lower bound (single derivation $\log p_\theta(x) = \text{ELBO} + \text{KL}$; Jensen / importance sampling view in a collapsed callout), why maximizing the ELBO works `{#sec-elbo}` (gradient w.r.t. $\phi$, decoder, EM, figure `elbo-gap.png` from `src/img/elbo-gap.py`) [@Luo2022a], a tractable loss (reconstruction + regularization), summary.
 - [x] **3. Variational autoencoders** `{#sec-vae}` — intro continues the VI chapter with three open questions (distributions, gradient, latent space); choosing the distributions (prior, encoder outputs $\mu_x, \sigma_x$, decoder), the loss (BCE / MSE reconstruction, closed-form KL, log-variance), the reparameterization trick `{#sec-reparameterization}` (gradient of an expectation over $q_\phi$, $z = \mu + \sigma \odot \xi$, REINFORCE mentioned), a smooth latent space (why autoencoders cannot generate, noise → local smoothness, KL → no holes / overlaps / interpolation, MNIST 2D manifold, link to `image-manifold.png`, blurriness and $\beta$-VAE). Figures from the Neurocomputing slides (towardsdatascience, Keras blog).
-- [~] **4. Gradient estimators** `{#sec-gradientestimators}` — outline agreed, writing section by section.
-- [~] **5. Tighter and weighted bounds** `{#sec-tighterbounds}` — outline agreed, after chapter 4.
+- [x] **4. Gradient estimators** `{#sec-gradientestimators}` — the gradient of an expectation, reparameterization (pathwise) estimator, score-function estimator (log-derivative trick, two scores, baselines; figure `gradient-estimators.png`), application to reinforcement learning `{#sec-reinforcementlearning}` (figures `rl-agent.png`, `policy-search.svg` from the Deep RL book; REINFORCE, PPO, RLHF), summary table.
+- [~] **5. Tighter and weighted bounds** `{#sec-tighterbounds}` — outline agreed, writing section by section.
 
 ### Part V — Deep generative models — planned
 
@@ -346,23 +346,23 @@ File: `src/variationalinference/4-GradientEstimators.qmd`, label `{#sec-gradient
 1. [x] **The gradient of an expectation** — approved.
     - The problem $\nabla_\phi \, \mathbb{E}_{z \sim q_\phi(z)}[f(z)]$: the parameters are in the distribution, the gradient cannot be moved inside (recap of @sec-reparameterization).
     - Where it appears: the reconstruction loss of VAEs, discrete latent variables, black-box variational inference (any model, no closed form), and reinforcement learning, where the agent controls the distribution of its own experiences.
-2. [ ] **The reparameterization estimator** (pathwise gradient)
+2. [x] **The reparameterization estimator** (pathwise gradient) — approved.
     - General form: $z = g_\phi(\xi)$ with $\xi \sim p(\xi)$ fixed, $\nabla_\phi \, \mathbb{E}_{q_\phi}[f(z)] = \mathbb{E}_{\xi}[\nabla_\phi f(g_\phi(\xi))]$.
     - Requirements: $f$ differentiable with respect to $z$, and $q_\phi$ reparameterizable (location-scale families like the normal, inverse transform sampling of @sec-simplesampling); continuous $z$ only.
     - Low variance: uses the gradient of $f$, i.e. knows in which direction to move each sample.
-3. [ ] **The score-function estimator** (log-derivative trick, REINFORCE)
+3. [x] **The score-function estimator** (log-derivative trick, REINFORCE) — approved (offset of 10 added to $f$ in the figure to show the effect of the baseline).
     - Log-derivative trick $\nabla_\phi q_\phi(z) = q_\phi(z) \, \nabla_\phi \log q_\phi(z)$ → $\nabla_\phi \, \mathbb{E}_{q_\phi}[f(z)] = \mathbb{E}_{q_\phi}[f(z) \, \nabla_\phi \log q_\phi(z)]$ (short derivation in the main text).
     - Intuition: increase the probability of the samples with a high $f(z)$, decrease it for a low $f(z)$; only $f(z)$ is needed, never its gradient: $f$ can be non-differentiable, a black box, and $z$ discrete.
     - Terminology warning: $\nabla_\phi \log q_\phi(z)$ is called the score in statistics (gradient w.r.t. the **parameters**), not to be confused with the score $\nabla_x \log p(x)$ of @sec-score (gradient w.r.t. the **variable**).
     - Unbiased but high variance: $f(z)$ multiplies the score, so an offset of $f$ changes every single estimate.
     - Variance reduction with a **baseline**: $\mathbb{E}_{q_\phi}[\nabla_\phi \log q_\phi(z)] = 0$ (one-line proof), so subtracting a constant $b$ from $f$ does not change the expectation but can reduce the variance a lot.
     - *Figure (proposed):* `gradient-estimators.png` (own script) — distribution of single-sample estimates of $\frac{d}{d\mu} \mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[f(z)]$ for a simple quadratic $f$: reparameterization, score function, score function with baseline; true gradient as a vertical line.
-4. [ ] **Application: reinforcement learning**
+4. [x] **Application: reinforcement learning** `{#sec-reinforcementlearning}` — approved.
     - The RL problem at a high level: an agent observes a state, takes an action, receives a reward and a new state; the goal is to maximize the sum of rewards (return) of its trajectories [@Sutton1998]. Figure `rl-agent.png` (from the Deep RL book, agent-environment loop).
     - A stochastic policy $\pi_\theta(a | s)$ (a neural network outputting a distribution over actions, e.g. a softmax, @sec-softmax) defines a distribution over trajectories $\rho_\theta(\tau)$; objective $\mathcal{J}(\theta) = \mathbb{E}_{\tau \sim \rho_\theta}[R(\tau)]$: exactly the problem of section 1. Figure `policysearch.svg` (from the Deep RL book: trajectories with high return).
     - The environment is unknown and not differentiable, and actions are often discrete → no reparameterization; the score-function estimator works, and the unknown dynamics disappear from $\nabla_\theta \log \rho_\theta(\tau) = \sum_t \nabla_\theta \log \pi_\theta(a_t | s_t)$ (short derivation): the **REINFORCE** algorithm [@Williams1992], policy gradient methods.
     - Baselines again (the average return); pointers in one sentence: PPO reuses old trajectories with importance sampling (@sec-importance) [@Schulman2017a], and RLHF of language models, where the "actions" are discrete tokens [@Ouyang2022].
-5. [ ] **Summary** — table: estimator / requires / variance / typical uses.
+5. [x] **Summary** — table: estimator / requires / variance / typical uses — approved.
 
 ---
 
