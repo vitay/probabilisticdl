@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Langevin dynamics and Hamiltonian Monte Carlo – Probabilistic inference for machine learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../src/variationalinference/1-LatentVariables.html" rel="next">
+<link href="../../src/sampling/2-MCMC.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5c1318cf63eba56dbef7ba16bc7d56f5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bf96f07ec775635e6421f1b05533089a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span id="sec-hmc" class="quarto-section-identifier"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></span></h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Probabilistic inference for machine learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Basics</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/1-InformationTheory.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Information theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/2-MLE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Maximum likelihood estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/3-Bayesian.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Bayesian estimation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Statistical machine learning</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/1-Paradigms.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Learning paradigms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/2-KL.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Kullback-Leibler divergence in machine learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/3-Softmax.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Softmax classifier for discrete distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/4-MDN.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Mixture density networks for continuous distributions</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Sampling methods</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/1-MonteCarlo.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Monte Carlo and importance sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/2-MCMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/3-HMC.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Variational inference</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/1-LatentVariables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Latent variable models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/2-VariationalInference.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/3-VAE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational autoencoders</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/4-GradientEstimators.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Gradient estimators</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/5-TighterBounds.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Tighter and weighted bounds</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-score" id="toc-sec-score" class="nav-link active" data-scroll-target="#sec-score">The score</a></li>
+  <li><a href="#sec-langevin" id="toc-sec-langevin" class="nav-link" data-scroll-target="#sec-langevin">Langevin dynamics</a></li>
+  <li><a href="#sec-hmcalgorithm" id="toc-sec-hmcalgorithm" class="nav-link" data-scroll-target="#sec-hmcalgorithm">Hamiltonian Monte Carlo</a>
+  <ul class="collapse">
+  <li><a href="#a-ball-rolling-on-the-landscape" id="toc-a-ball-rolling-on-the-landscape" class="nav-link" data-scroll-target="#a-ball-rolling-on-the-landscape">A ball rolling on the landscape</a></li>
+  <li><a href="#the-algorithm" id="toc-the-algorithm" class="nav-link" data-scroll-target="#the-algorithm">The algorithm</a></li>
+  <li><a href="#tuning-hmc" id="toc-tuning-hmc" class="nav-link" data-scroll-target="#tuning-hmc">Tuning HMC</a></li>
+  </ul></li>
+  <li><a href="#sec-hmclimits" id="toc-sec-hmclimits" class="nav-link" data-scroll-target="#sec-hmclimits">Limits and the bridge to diffusion models</a>
+  <ul class="collapse">
+  <li><a href="#limits-of-gradient-based-samplers" id="toc-limits-of-gradient-based-samplers" class="nav-link" data-scroll-target="#limits-of-gradient-based-samplers">Limits of gradient-based samplers</a></li>
+  <li><a href="#learning-the-score" id="toc-learning-the-score" class="nav-link" data-scroll-target="#learning-the-score">Learning the score</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span id="sec-hmc" class="quarto-section-identifier"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The previous chapter ended on the main weakness of Metropolis-Hastings: its random-walk proposals are blind, and explore the target more and more slowly when the dimension increases (<a href="2-MCMC.html#sec-mcmclimits" class="quarto-xref"><span>Limits: towards gradient-based samplers</span></a>). This chapter presents two samplers that use the <strong>gradient</strong> of the log-density to propose moves that follow the shape of the target: Langevin dynamics and Hamiltonian Monte Carlo. The gradient of the log-density will also be the central quantity of score-based diffusion models.</p>
+<section id="sec-score" class="level2">
+<h2 class="anchored" data-anchor-id="sec-score">The score</h2>
+<p>The gradient of the log-density with respect to <span class="math inline">x</span> is called the <strong>score</strong> of the distribution:</p>
+<p><span class="math display">
+    \nabla_x \log p(x)
+</span></p>
+<p>It is a vector with the same dimension as <span class="math inline">x</span>, which points, at each state, in the direction where the log-density increases the fastest. As seen in <a href="2-MCMC.html#sec-mcmclimits" class="quarto-xref"><span>Limits: towards gradient-based samplers</span></a>, it does not depend on the normalization constant: <span class="math inline">\nabla_x \log p(x) = \nabla_x \log \tilde{p}(x)</span>, as <span class="math inline">\log Z</span> is a constant whose gradient is zero. Like the acceptance ratio of Metropolis-Hastings, the score can therefore be computed from the unnormalized target only.</p>
+<p>For a normal distribution <span class="math inline">\mathcal{N}(\mu, \sigma)</span>, the log-density is <span class="math inline">\log p(x) = - \frac{(x - \mu)^2}{2 \sigma^2} + \text{cst}</span>, so its score is:</p>
+<p><span class="math display">
+    \nabla_x \log p(x) = - \dfrac{x - \mu}{\sigma^2}
+</span></p>
+<p>The score acts like a spring pulling <span class="math inline">x</span> back towards the mean <span class="math inline">\mu</span>: it is zero at the mean, and its strength increases linearly with the distance to the mean. The narrower the distribution (small <span class="math inline">\sigma</span>), the stiffer the spring.</p>
+<p>For the bimodal target of the previous chapters (<a href="#fig-score" class="quarto-xref">Figure&nbsp;<span>11.1</span></a>, left), the score points towards the nearest mode: it is positive on the left of each mode (go right) and negative on its right (go left). It is zero at the two modes, but also at the bottom of the valley between them: a zero score only means that the density is flat locally, not that it is high. The right part of the figure shows the same behavior in two dimensions, for a mixture of two Gaussians: the score is a <strong>vector field</strong>, whose arrows point towards the modes, and become longer far away from them.</p>
+<div id="fig-score" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/score.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;11.1: The score of two mixtures of Gaussians. Left: the bimodal target of sec-montecarlo (top) and its score (bottom), which is zero at the two modes and at the bottom of the valley (dotted lines). Right: a 2D mixture of two Gaussians, with the log-density as contours and the score as arrows. Inspired by the figures of https://yang-song.net/blog/2021/score/."><img src="../img/score.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.1: The score of two mixtures of Gaussians. Left: the bimodal target of <a href="1-MonteCarlo.html" class="quarto-xref"><span>Monte Carlo and importance sampling</span></a> (top) and its score (bottom), which is zero at the two modes and at the bottom of the valley (dotted lines). Right: a 2D mixture of two Gaussians, with the log-density as contours and the score as arrows. Inspired by the figures of <a href="https://yang-song.net/blog/2021/score/" class="uri">https://yang-song.net/blog/2021/score/</a>.
+</figcaption>
+</figure>
+</div>
+<p>Following the arrows of the score from any initial state leads to a mode: this is gradient ascent on the log-density, the method we would use to find the MAP estimate of <a href="../basics/3-Bayesian.html#sec-map" class="quarto-xref"><span>Maximum a posteriori (MAP)</span></a>. To sample the distribution instead of finding its modes, we need to add noise to these moves, which is the topic of the next section.</p>
+<p>The score of a simple distribution can be derived by hand, as above. For more complex models, for example when the likelihood involves a neural network, it is computed by <strong>automatic differentiation</strong>, exactly like the gradient of a loss function during training. This requires the target to be differentiable with respect to <span class="math inline">x</span>: gradient-based samplers only apply to continuous variables.</p>
+</section>
+<section id="sec-langevin" class="level2">
+<h2 class="anchored" data-anchor-id="sec-langevin">Langevin dynamics</h2>
+<p><strong>Langevin dynamics</strong> adds noise to gradient ascent on the log-density. Starting from an initial state <span class="math inline">x_0</span>, each step moves the state a little in the direction of the score, then adds some Gaussian noise:</p>
+<p><span class="math display">
+    x_{t+1} = x_t + \epsilon \, \nabla_x \log \tilde{p}(x_t) + \sqrt{2 \epsilon} \, \xi_t \qquad \text{with } \xi_t \sim \mathcal{N}(0, 1)
+</span></p>
+<p>where <span class="math inline">\epsilon</span> is a small step size. The two terms have opposite effects:</p>
+<ul>
+<li>without the noise, this is gradient ascent on <span class="math inline">\log p(x)</span>: the state converges to the nearest mode, i.e.&nbsp;to a MAP estimate (<a href="../basics/3-Bayesian.html#sec-map" class="quarto-xref"><span>Maximum a posteriori (MAP)</span></a>);</li>
+<li>without the score, this is a random walk with steps of standard deviation <span class="math inline">\sqrt{2 \epsilon}</span>, which spreads the state everywhere.</li>
+</ul>
+<p>The score concentrates the states around the modes, the noise spreads them. The factor <span class="math inline">\sqrt{2 \epsilon}</span> is exactly the amount of noise for which the two effects balance, so that the stationary distribution of the chain is the target <span class="math inline">p(x)</span>. We admit this result, which comes from physics: the equation describes the motion of a particle in a potential <span class="math inline">- \log p(x)</span>, shaken by thermal noise, whose positions end up distributed according to <span class="math inline">p(x)</span>.</p>
+<p><a href="#fig-langevin" class="quarto-xref">Figure&nbsp;<span>11.2</span></a> shows 400 independent Langevin chains on the 2D mixture of <a href="#fig-score" class="quarto-xref">Figure&nbsp;<span>11.1</span></a>, starting on a regular grid. Within about ten steps, the score brings the chains to the regions of high probability. They do not collapse onto the modes, though: the noise keeps them spread around each mode, as samples of the target should be. As in <a href="2-MCMC.html#sec-markovchains" class="quarto-xref"><span>Markov chains</span></a>, the snapshots show the distribution <span class="math inline">p_t</span> of the chain at different steps, which converges to the target.</p>
+<div id="fig-langevin" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-langevin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/langevin.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;11.2: 400 independent Langevin chains on the 2D mixture of two Gaussians of Figure&nbsp;fig-score, with \epsilon = 0.05, starting on a regular grid. Inspired by the animation of https://yang-song.net/blog/2021/score/."><img src="../img/langevin.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-langevin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.2: 400 independent Langevin chains on the 2D mixture of two Gaussians of <a href="#fig-score" class="quarto-xref">Figure&nbsp;<span>11.1</span></a>, with <span class="math inline">\epsilon = 0.05</span>, starting on a regular grid. Inspired by the animation of <a href="https://yang-song.net/blog/2021/score/" class="uri">https://yang-song.net/blog/2021/score/</a>.
+</figcaption>
+</figure>
+</div>
+<p>Compared to random-walk Metropolis, every step goes in a sensible direction, and there is no rejection: Langevin dynamics does not waste computations on candidates that would be rejected. The price to pay is a small error. The stationary distribution is exactly <span class="math inline">p(x)</span> only in the limit of infinitely small steps; with a finite step size <span class="math inline">\epsilon</span>, it is a slightly distorted version of the target. Reducing <span class="math inline">\epsilon</span> reduces the error, but the chain then needs more steps to explore the target.</p>
+<p>The <strong>Metropolis-adjusted Langevin algorithm</strong> (MALA) <span class="citation" data-cites="Roberts1996">(<a href="../references.html#ref-Roberts1996" role="doc-biblioref">Roberts and Tweedie, 1996</a>)</span> removes this error by combining the two methods: the Langevin step is used as the <strong>proposal</strong> of Metropolis-Hastings, whose acceptance step corrects the distortion. The proposal is a normal distribution centered on the Langevin update:</p>
+<p><span class="math display">
+    q(x' | x) = \mathcal{N}(x + \epsilon \, \nabla_x \log \tilde{p}(x), \sqrt{2 \epsilon})
+</span></p>
+<p>Unlike the random-walk proposal of <a href="2-MCMC.html#sec-metropolishastings" class="quarto-xref"><span>The Metropolis-Hastings algorithm</span></a>, this proposal is <strong>not symmetric</strong>: from a state <span class="math inline">x</span> on the side of a mode, it favors moves towards the mode, and the reverse move is less likely to be proposed. This is precisely the situation for which Hastings introduced the correction <span class="math inline">q(x_t | x') / q(x' | x_t)</span> in the acceptance probability. With a small step size, nearly all candidates are accepted, and MALA behaves like Langevin dynamics without its error.</p>
+<p>Langevin dynamics is also used to sample the posterior over the weights <span class="math inline">\theta</span> of a neural network (Bayesian deep learning). The score of the posterior <span class="math inline">p(\theta | X) \propto p(X | \theta) \, p(\theta)</span> with respect to the weights is the gradient of the log-likelihood plus the gradient of the log-prior, i.e.&nbsp;exactly the gradient used to train the network with MAP (<a href="../basics/3-Bayesian.html#sec-map" class="quarto-xref"><span>Maximum a posteriori (MAP)</span></a>). A Langevin step is then a gradient step on the training loss plus some noise. <strong>Stochastic gradient Langevin dynamics</strong> (SGLD) <span class="citation" data-cites="Welling2011">(<a href="../references.html#ref-Welling2011" role="doc-biblioref">Welling and Teh, 2011</a>)</span> estimates this gradient on minibatches, as stochastic gradient descent does: with a decreasing step size, training the network with the right amount of noise produces samples of the posterior instead of a single set of weights.</p>
+</section>
+<section id="sec-hmcalgorithm" class="level2">
+<h2 class="anchored" data-anchor-id="sec-hmcalgorithm">Hamiltonian Monte Carlo</h2>
+<section id="a-ball-rolling-on-the-landscape" class="level3">
+<h3 class="anchored" data-anchor-id="a-ball-rolling-on-the-landscape">A ball rolling on the landscape</h3>
+<p><strong>Hamiltonian Monte Carlo</strong> (HMC) <span class="citation" data-cites="Duane1987 Neal2012">(<a href="../references.html#ref-Duane1987" role="doc-biblioref">Duane et al., 1987</a>; <a href="../references.html#ref-Neal2012" role="doc-biblioref">Neal, 2012</a>)</span> borrows its idea from physics. Let’s define the <strong>potential energy</strong> of a state as minus its log-density:</p>
+<p><span class="math display">
+    U(x) = - \log \tilde{p}(x)
+</span></p>
+<p>The regions of high probability become the valleys of an energy landscape, the modes being at the bottom of the valleys. Langevin dynamics moves a particle on this landscape as if it was in honey: it slides slowly downhill, shaken by the noise. HMC instead launches a <strong>ball without friction</strong>: given a random push, the ball rolls down into a valley, gaining speed, climbs up the other side, and keeps going. In a single trajectory, it can travel a long way across the region of high probability.</p>
+<p>To describe this motion, HMC adds to each state <span class="math inline">x</span> a <strong>momentum</strong> <span class="math inline">v</span> (the velocity of the ball), of the same dimension as <span class="math inline">x</span>. The ball has a <strong>kinetic energy</strong> <span class="math inline">K(v) = \frac{1}{2} ||v||^2</span>, and its total energy is the <strong>Hamiltonian</strong>:</p>
+<p><span class="math display">
+    H(x, v) = U(x) + K(v)
+</span></p>
+<p>The laws of physics (Hamilton’s equations) state that the position changes with the momentum, and the momentum with the force, which is minus the gradient of the potential energy, i.e.&nbsp;the score:</p>
+<p><span class="math display">
+    \dfrac{dx}{dt} = v \qquad \dfrac{dv}{dt} = - \nabla_x U(x) = \nabla_x \log \tilde{p}(x)
+</span></p>
+<p>Without friction, the total energy <span class="math inline">H(x, v)</span> is <strong>conserved</strong> along the trajectory: the ball converts potential energy into kinetic energy when it goes down, and back when it goes up.</p>
+<p>How does this help to sample <span class="math inline">p(x)</span>? HMC samples the pair <span class="math inline">(x, v)</span> from the joint distribution:</p>
+<p><span class="math display">
+    p(x, v) \propto \exp(- H(x, v)) = \tilde{p}(x) \, \exp(- \frac{1}{2} ||v||^2)
+</span></p>
+<p>In this distribution, <span class="math inline">x</span> and <span class="math inline">v</span> are independent: <span class="math inline">x</span> follows the target, and <span class="math inline">v</span> a standard normal distribution. If we can sample pairs <span class="math inline">(x, v)</span>, we simply drop the momentum and keep <span class="math inline">x</span>, which is a sample of the target (the same trick as ancestral sampling in <a href="1-MonteCarlo.html#sec-simplesampling" class="quarto-xref"><span>Sampling from simple distributions</span></a>, where we dropped the latent variable). And as <span class="math inline">H(x, v)</span> is conserved along the trajectory, so is the density <span class="math inline">p(x, v)</span>: moving the ball along its trajectory does not change the probability of the pair, even though the position can change a lot.</p>
+</section>
+<section id="the-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="the-algorithm">The algorithm</h3>
+<p>Each iteration of HMC consists of the following steps, starting from the current state <span class="math inline">x_t</span>:</p>
+<ol type="1">
+<li>sample a new momentum <span class="math inline">v \sim \mathcal{N}(0, 1)</span>: this is the random push, which sets the energy level of the trajectory;</li>
+<li>simulate the motion of the ball during <span class="math inline">L</span> small time steps of size <span class="math inline">\epsilon</span>, using the <strong>leapfrog</strong> integrator, which gives a candidate <span class="math inline">(x', v')</span>;</li>
+<li>accept the candidate with the probability <span class="math inline">\min(1, \exp(H(x_t, v) - H(x', v')))</span>, otherwise stay at <span class="math inline">x_{t+1} = x_t</span>;</li>
+<li>drop the momentum.</li>
+</ol>
+<p>If the motion was simulated exactly, the energy would be conserved and the candidate always accepted. The leapfrog integrator only simulates it approximately, so the energy changes a little: the acceptance step of Metropolis-Hastings corrects this error, as for MALA. With a small step size, the error is small and nearly all candidates are accepted.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>The leapfrog integrator
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Each leapfrog step updates the momentum and the position in turn, using the score at the current position:</p>
+<p><span class="math display">
+\begin{aligned}
+    v &amp;\leftarrow v + \frac{\epsilon}{2} \, \nabla_x \log \tilde{p}(x) &amp; \text{(half step on the momentum)} \\
+    x &amp;\leftarrow x + \epsilon \, v &amp; \text{(full step on the position)} \\
+    v &amp;\leftarrow v + \frac{\epsilon}{2} \, \nabla_x \log \tilde{p}(x) &amp; \text{(half step on the momentum, at the new position)} \\
+\end{aligned}
+</span></p>
+<p>Each step requires one evaluation of the score, so an iteration of HMC costs <span class="math inline">L</span> gradient evaluations. The leapfrog integrator is preferred to simpler methods because it has two properties that make the acceptance probability above correct without any additional Hastings ratio: it is reversible (running it backwards from <span class="math inline">(x', -v')</span> brings back <span class="math inline">(x, -v)</span>), and it preserves volumes in the <span class="math inline">(x, v)</span> space. We admit these results; see <span class="citation" data-cites="Neal2012">Neal (<a href="../references.html#ref-Neal2012" role="doc-biblioref">2012</a>)</span> for details.</p>
+</div>
+</div>
+</div>
+<p><a href="#fig-hmc" class="quarto-xref">Figure&nbsp;<span>11.3</span></a> compares HMC with random-walk Metropolis and Gibbs sampling on the correlated normal distribution of <a href="2-MCMC.html#fig-gibbssampling" class="quarto-xref">Figure&nbsp;<span>10.4</span></a>. The first trajectory of HMC brings the chain from its initial state to the center of the distribution in a single iteration, and the following samples are spread over the whole distribution, almost independently of each other. Random-walk Metropolis and Gibbs sampling are still crawling along the diagonal. The comparison is not entirely fair, as each iteration of HMC costs 15 gradient evaluations. Counted per evaluation, HMC still produces several times more effective samples than the two other methods, and the gap widens quickly in higher dimensions.</p>
+<div id="fig-hmc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hmc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/hmc.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;11.3: 30 iterations of random-walk Metropolis, Gibbs sampling and HMC on the correlated normal distribution of Figure&nbsp;fig-gibbssampling, from the same initial state. For HMC, the first three leapfrog trajectories are drawn; each iteration uses L = 15 leapfrog steps."><img src="../img/hmc.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hmc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.3: 30 iterations of random-walk Metropolis, Gibbs sampling and HMC on the correlated normal distribution of <a href="2-MCMC.html#fig-gibbssampling" class="quarto-xref">Figure&nbsp;<span>10.4</span></a>, from the same initial state. For HMC, the first three leapfrog trajectories are drawn; each iteration uses <span class="math inline">L = 15</span> leapfrog steps.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="tuning-hmc" class="level3">
+<h3 class="anchored" data-anchor-id="tuning-hmc">Tuning HMC</h3>
+<p>HMC has two parameters:</p>
+<ul>
+<li>The <strong>step size</strong> <span class="math inline">\epsilon</span> controls the accuracy of the simulation. Too large, and the energy is badly conserved, so that many candidates are rejected; too small, and many steps are needed to travel the same distance.</li>
+<li>The <strong>number of steps</strong> <span class="math inline">L</span> controls the length of the trajectories. Too short, and HMC loses its advantage: with a single leapfrog step, HMC is actually equivalent to MALA. Too long, and the trajectory makes a U-turn and comes back towards its starting point, wasting computations.</li>
+</ul>
+<p>The <strong>No-U-Turn Sampler</strong> (NUTS) <span class="citation" data-cites="Hoffman2011">(<a href="../references.html#ref-Hoffman2011" role="doc-biblioref">Hoffman and Gelman, 2011</a>)</span> removes the need to choose <span class="math inline">L</span>: it extends each trajectory until it starts to turn back, and adapts the step size during the burn-in period. NUTS is the default sampler of probabilistic programming libraries such as Stan, PyMC or NumPyro, where the user only writes the model, and the gradients are computed by automatic differentiation. <span class="citation" data-cites="Betancourt2017">Betancourt (<a href="../references.html#ref-Betancourt2017" role="doc-biblioref">2017</a>)</span> gives a very intuitive introduction to the geometry behind HMC.</p>
+</section>
+</section>
+<section id="sec-hmclimits" class="level2">
+<h2 class="anchored" data-anchor-id="sec-hmclimits">Limits and the bridge to diffusion models</h2>
+<section id="limits-of-gradient-based-samplers" class="level3">
+<h3 class="anchored" data-anchor-id="limits-of-gradient-based-samplers">Limits of gradient-based samplers</h3>
+<p>Using the score makes a huge difference in high dimensions. To obtain a new independent sample, the number of steps needed grows roughly like the dimension <span class="math inline">d</span> for random-walk Metropolis, but only like <span class="math inline">d^{1/3}</span> for MALA and <span class="math inline">d^{1/4}</span> for HMC <span class="citation" data-cites="Roberts1997 Neal2012">(<a href="../references.html#ref-Neal2012" role="doc-biblioref">Neal, 2012</a>; <a href="../references.html#ref-Roberts1997" role="doc-biblioref">Roberts et al., 1997</a>)</span>. This is why HMC (with NUTS) is today the method of choice to sample posterior distributions with thousands of parameters.</p>
+<p>Gradient-based samplers keep two limitations, however:</p>
+<ul>
+<li>They are still <strong>local</strong> methods. The score points towards the nearest mode, so the valleys between distant modes remain difficult to cross. In <a href="#fig-langevin" class="quarto-xref">Figure&nbsp;<span>11.2</span></a>, the chains starting on the grid first split equally between the two modes, while the target puts 60% of its mass in the lower-left one: the correct proportions are only restored very slowly, by the few chains that manage to cross the valley. Methods such as <strong>tempering</strong>, which run additional chains on flattened versions of the target, help with this problem, but multimodal distributions remain the hardest case for MCMC.</li>
+<li>They require a <strong>differentiable</strong> target: they do not apply to discrete variables, such as the categories of a classifier or the tokens of a language model.</li>
+</ul>
+</section>
+<section id="learning-the-score" class="level3">
+<h3 class="anchored" data-anchor-id="learning-the-score">Learning the score</h3>
+<p>There is one more observation to make about Langevin dynamics: it only needs the <strong>score</strong> <span class="math inline">\nabla_x \log p(x)</span>, never the density <span class="math inline">p(x)</span> itself. Until now, we always assumed that the unnormalized target <span class="math inline">\tilde{p}(x)</span> was known, for example a likelihood times a prior. In generative modeling (<a href="../statisticalml/1-Paradigms.html" class="quarto-xref"><span>Learning paradigms</span></a>), the situation is different: we have <strong>data</strong>, samples <span class="math inline">x_i</span> of an unknown distribution <span class="math inline">p(x)</span>, for example images, and want to generate new samples of the same distribution.</p>
+<p>If we could <strong>learn</strong> the score of the data distribution with a neural network <span class="math inline">s_\theta(x) \approx \nabla_x \log p(x)</span>, Langevin dynamics would use this learned score to generate new samples, without ever knowing <span class="math inline">p(x)</span>. This is the idea of <strong>score-based generative models</strong> <span class="citation" data-cites="Song2020a">(<a href="../references.html#ref-Song2020a" role="doc-biblioref">Song and Ermon, 2020</a>)</span> (<a href="#fig-scorematchinglangevin" class="quarto-xref">Figure&nbsp;<span>11.4</span></a>). Learning the score from data is possible with methods called <strong>score matching</strong>, which, conveniently, never require the normalization constant either.</p>
+<div id="fig-scorematchinglangevin" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scorematchinglangevin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/score-matching-langevin.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;11.4: Score-based generative modeling: the score of the data distribution is learned from data samples (score matching), and Langevin dynamics uses the learned score to generate new samples. Source: https://yang-song.net/blog/2021/score/."><img src="../img/score-matching-langevin.jpg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scorematchinglangevin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.4: Score-based generative modeling: the score of the data distribution is learned from data samples (score matching), and Langevin dynamics uses the learned score to generate new samples. Source: <a href="https://yang-song.net/blog/2021/score/" class="uri">https://yang-song.net/blog/2021/score/</a>.
+</figcaption>
+</figure>
+</div>
+<p>A naive application of this idea does not work well, for two reasons:</p>
+<ul>
+<li>The learned score is only accurate where there is data, i.e.&nbsp;close to the modes (<a href="#fig-scorepitfalls" class="quarto-xref">Figure&nbsp;<span>11.5</span></a>). In the low-probability regions between and around the modes, where Langevin chains usually start, the network has seen almost no data, and its score is unreliable.</li>
+<li>The data distribution is extremely multimodal (think of all possible images), and we saw above that Langevin dynamics struggles to distribute the samples correctly between distant modes.</li>
+</ul>
+<div id="fig-scorepitfalls" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scorepitfalls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/score-pitfalls.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;11.5: The learned score (right) is only accurate in the regions of high probability, where there is enough data to learn it; it is inaccurate elsewhere. Source: https://yang-song.net/blog/2021/score/."><img src="../img/score-pitfalls.jpg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scorepitfalls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.5: The learned score (right) is only accurate in the regions of high probability, where there is enough data to learn it; it is inaccurate elsewhere. Source: <a href="https://yang-song.net/blog/2021/score/" class="uri">https://yang-song.net/blog/2021/score/</a>.
+</figcaption>
+</figure>
+</div>
+<p>The solution is to <strong>add noise</strong> to the data. Perturbing the data with a lot of Gaussian noise spreads it over the whole space: the score of the noisy distribution can be learned everywhere, and its modes are merged into a single smooth bump. Learning the score at several noise levels, and running Langevin dynamics while progressively decreasing the noise, guides the chains from anywhere in the space towards the data, while distributing them correctly between the modes. This is the principle of <strong>diffusion models</strong>, which will be presented in a later part of this book.</p>
+</section>
+<section id="summary" class="level3">
+<h3 class="anchored" data-anchor-id="summary">Summary</h3>
+<p>The methods of this chapter can be summarized as follows, in the same format as at the end of <a href="1-MonteCarlo.html" class="quarto-xref"><span>Monte Carlo and importance sampling</span></a> and <a href="2-MCMC.html" class="quarto-xref"><span>Markov chain Monte Carlo</span></a>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: left;">Requires</th>
+<th style="text-align: left;">Produces</th>
+<th style="text-align: left;">Fails when</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Langevin dynamics</td>
+<td style="text-align: left;">score <span class="math inline">\nabla_x \log \tilde{p}(x)</span></td>
+<td style="text-align: left;">approximate, correlated samples of <span class="math inline">p(x)</span></td>
+<td style="text-align: left;">the step size is too large, the modes are far apart</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MALA</td>
+<td style="text-align: left;"><span class="math inline">\tilde{p}(x)</span> and its score</td>
+<td style="text-align: left;">correlated samples of <span class="math inline">p(x)</span></td>
+<td style="text-align: left;">the modes are far apart</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hamiltonian Monte Carlo</td>
+<td style="text-align: left;"><span class="math inline">\tilde{p}(x)</span> and its score</td>
+<td style="text-align: left;">nearly independent samples of <span class="math inline">p(x)</span></td>
+<td style="text-align: left;">the modes are far apart, the variables are discrete</td>
+</tr>
+</tbody>
+</table>
+<p>This chapter closes the part on sampling methods. Sampling estimates intractable expectations by averaging over samples; the next part presents the other approach to intractable distributions, <strong>variational inference</strong>, which replaces sampling by optimization.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Betancourt2017" class="csl-entry" role="listitem">
+Betancourt, M. (2017). A <span>Conceptual Introduction</span> to <span>Hamiltonian Monte Carlo</span>. <em>arXiv.org</em>.
+</div>
+<div id="ref-Duane1987" class="csl-entry" role="listitem">
+Duane, S., Kennedy, A. D., Pendleton, B. J., and Roweth, D. (1987). Hybrid <span>Monte Carlo</span>. <em>Physics Letters B</em> 195, 216–222. doi:<a href="https://doi.org/10.1016/0370-2693(87)91197-X">10.1016/0370-2693(87)91197-X</a>.
+</div>
+<div id="ref-Hoffman2011" class="csl-entry" role="listitem">
+Hoffman, M. D., and Gelman, A. (2011). The <span>No-U-Turn Sampler</span>: <span>Adaptively Setting Path Lengths</span> in <span>Hamiltonian Monte Carlo</span>. <em>arXiv.org</em>.
+</div>
+<div id="ref-Neal2012" class="csl-entry" role="listitem">
+Neal, R. M. (2012). <span>MCMC</span> using <span>Hamiltonian</span> dynamics. <em>arXiv.org</em>. doi:<a href="https://doi.org/10.1201/b10905">10.1201/b10905</a>.
+</div>
+<div id="ref-Roberts1997" class="csl-entry" role="listitem">
+Roberts, G. O., Gelman, A., and Gilks, W. R. (1997). Weak convergence and optimal scaling of random walk <span>Metropolis</span> algorithms. <em>The Annals of Applied Probability</em> 7. doi:<a href="https://doi.org/10.1214/aoap/1034625254">10.1214/aoap/1034625254</a>.
+</div>
+<div id="ref-Roberts1996" class="csl-entry" role="listitem">
+Roberts, G. O., and Tweedie, R. L. (1996). Exponential <span>Convergence</span> of <span>Langevin Distributions</span> and <span>Their Discrete Approximations</span>. <em>Bernoulli</em> 2, 341. doi:<a href="https://doi.org/10.2307/3318418">10.2307/3318418</a>.
+</div>
+<div id="ref-Song2020a" class="csl-entry" role="listitem">
+Song, Y., and Ermon, S. (2020). Generative <span>Modeling</span> by <span>Estimating Gradients</span> of the <span>Data Distribution</span>. doi:<a href="https://doi.org/10.48550/arXiv.1907.05600">10.48550/arXiv.1907.05600</a>.
+</div>
+<div id="ref-Welling2011" class="csl-entry" role="listitem">
+Welling, M., and Teh, Y. W. (2011). Bayesian learning via stochastic gradient langevin dynamics. in <em>Proceedings of the 28th <span>International Conference</span> on <span>International Conference</span> on <span>Machine Learning</span></em> <span>ICML</span>’11. (Madison, WI, USA: Omnipress), 681–688.
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../../src/sampling/2-MCMC.html" class="pagination-link" aria-label="Markov chain Monte Carlo">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Markov chain Monte Carlo</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../src/variationalinference/1-LatentVariables.html" class="pagination-link" aria-label="Latent variable models">
+        <span class="nav-page-text"><span class="chapter-title">Latent variable models</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p><a href="http://creativecommons.org/licenses/by-nc-sa/4.0">Creative Commons BY-NC-SA 4.0</a>. Author <a href="mailto:julien.vitay@gmail.com">Julien Vitay</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

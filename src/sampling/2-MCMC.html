@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Markov chain Monte Carlo – Probabilistic inference for machine learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../src/sampling/3-HMC.html" rel="next">
+<link href="../../src/sampling/1-MonteCarlo.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5c1318cf63eba56dbef7ba16bc7d56f5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-bf96f07ec775635e6421f1b05533089a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span id="sec-mcmc" class="quarto-section-identifier"><span class="chapter-title">Markov chain Monte Carlo</span></span></h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Probabilistic inference for machine learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Basics</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/1-InformationTheory.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Information theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/2-MLE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Maximum likelihood estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/3-Bayesian.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Bayesian estimation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Statistical machine learning</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/1-Paradigms.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Learning paradigms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/2-KL.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Kullback-Leibler divergence in machine learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/3-Softmax.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Softmax classifier for discrete distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/4-MDN.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Mixture density networks for continuous distributions</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Sampling methods</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/1-MonteCarlo.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Monte Carlo and importance sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/2-MCMC.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/3-HMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Variational inference</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/1-LatentVariables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Latent variable models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/2-VariationalInference.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/3-VAE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational autoencoders</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/4-GradientEstimators.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Gradient estimators</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/5-TighterBounds.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Tighter and weighted bounds</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-markovchains" id="toc-sec-markovchains" class="nav-link active" data-scroll-target="#sec-markovchains">Markov chains</a>
+  <ul class="collapse">
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition">Definition</a></li>
+  <li><a href="#evolution-of-the-distribution" id="toc-evolution-of-the-distribution" class="nav-link" data-scroll-target="#evolution-of-the-distribution">Evolution of the distribution</a></li>
+  <li><a href="#stationary-distribution" id="toc-stationary-distribution" class="nav-link" data-scroll-target="#stationary-distribution">Stationary distribution</a></li>
+  <li><a href="#time-averages" id="toc-time-averages" class="nav-link" data-scroll-target="#time-averages">Time averages</a></li>
+  <li><a href="#turning-the-problem-around" id="toc-turning-the-problem-around" class="nav-link" data-scroll-target="#turning-the-problem-around">Turning the problem around</a></li>
+  </ul></li>
+  <li><a href="#sec-detailedbalance" id="toc-sec-detailedbalance" class="nav-link" data-scroll-target="#sec-detailedbalance">Detailed balance</a>
+  <ul class="collapse">
+  <li><a href="#probability-flows" id="toc-probability-flows" class="nav-link" data-scroll-target="#probability-flows">Probability flows</a></li>
+  <li><a href="#a-local-condition" id="toc-a-local-condition" class="nav-link" data-scroll-target="#a-local-condition">A local condition</a></li>
+  <li><a href="#sufficient-but-not-necessary" id="toc-sufficient-but-not-necessary" class="nav-link" data-scroll-target="#sufficient-but-not-necessary">Sufficient, but not necessary</a></li>
+  <li><a href="#why-detailed-balance-suits-mcmc" id="toc-why-detailed-balance-suits-mcmc" class="nav-link" data-scroll-target="#why-detailed-balance-suits-mcmc">Why detailed balance suits MCMC</a></li>
+  </ul></li>
+  <li><a href="#sec-metropolishastings" id="toc-sec-metropolishastings" class="nav-link" data-scroll-target="#sec-metropolishastings">The Metropolis-Hastings algorithm</a>
+  <ul class="collapse">
+  <li><a href="#the-algorithm" id="toc-the-algorithm" class="nav-link" data-scroll-target="#the-algorithm">The algorithm</a></li>
+  <li><a href="#the-metropolis-rule" id="toc-the-metropolis-rule" class="nav-link" data-scroll-target="#the-metropolis-rule">The Metropolis rule</a></li>
+  <li><a href="#rejected-candidates-are-repeated" id="toc-rejected-candidates-are-repeated" class="nav-link" data-scroll-target="#rejected-candidates-are-repeated">Rejected candidates are repeated</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  </ul></li>
+  <li><a href="#sec-mcmcpractice" id="toc-sec-mcmcpractice" class="nav-link" data-scroll-target="#sec-mcmcpractice">Using MCMC in practice</a>
+  <ul class="collapse">
+  <li><a href="#choosing-the-step-size" id="toc-choosing-the-step-size" class="nav-link" data-scroll-target="#choosing-the-step-size">Choosing the step size</a></li>
+  <li><a href="#burn-in" id="toc-burn-in" class="nav-link" data-scroll-target="#burn-in">Burn-in</a></li>
+  <li><a href="#correlated-samples" id="toc-correlated-samples" class="nav-link" data-scroll-target="#correlated-samples">Correlated samples</a></li>
+  <li><a href="#multimodality-and-multiple-chains" id="toc-multimodality-and-multiple-chains" class="nav-link" data-scroll-target="#multimodality-and-multiple-chains">Multimodality and multiple chains</a></li>
+  </ul></li>
+  <li><a href="#sec-gibbs" id="toc-sec-gibbs" class="nav-link" data-scroll-target="#sec-gibbs">Gibbs sampling</a>
+  <ul class="collapse">
+  <li><a href="#one-coordinate-at-a-time" id="toc-one-coordinate-at-a-time" class="nav-link" data-scroll-target="#one-coordinate-at-a-time">One coordinate at a time</a></li>
+  <li><a href="#when-is-it-useful" id="toc-when-is-it-useful" class="nav-link" data-scroll-target="#when-is-it-useful">When is it useful?</a></li>
+  <li><a href="#example-correlated-coordinates" id="toc-example-correlated-coordinates" class="nav-link" data-scroll-target="#example-correlated-coordinates">Example: correlated coordinates</a></li>
+  </ul></li>
+  <li><a href="#sec-mcmcposterior" id="toc-sec-mcmcposterior" class="nav-link" data-scroll-target="#sec-mcmcposterior">Example: sampling a posterior</a></li>
+  <li><a href="#sec-mcmclimits" id="toc-sec-mcmclimits" class="nav-link" data-scroll-target="#sec-mcmclimits">Limits: towards gradient-based samplers</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span id="sec-mcmc" class="quarto-section-identifier"><span class="chapter-title">Markov chain Monte Carlo</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The previous chapter ended on the limits of rejection and importance sampling: a proposal fixed once and for all cannot match a complex target in high dimensions. <strong>Markov chain Monte Carlo</strong> (MCMC) methods build samples <strong>one after the other</strong>, each new sample being proposed in the neighborhood of the current one. To understand why such a sequence of samples ends up following the target distribution, we first need a few notions about Markov chains.</p>
+<section id="sec-markovchains" class="level2">
+<h2 class="anchored" data-anchor-id="sec-markovchains">Markov chains</h2>
+<section id="definition" class="level3">
+<h3 class="anchored" data-anchor-id="definition">Definition</h3>
+<p>A <strong>Markov chain</strong> is a sequence of random variables <span class="math inline">x_0, x_1, x_2, \ldots</span> in which each state only depends on the previous one, not on the rest of the history:</p>
+<p><span class="math display">
+    p(x_{t+1} | x_t, x_{t-1}, \ldots, x_0) = p(x_{t+1} | x_t)
+</span></p>
+<p>This is the <strong>Markov property</strong>: the chain is “memoryless”, the current state contains everything needed to predict the next one. The probability of moving from a state <span class="math inline">x</span> to a state <span class="math inline">x'</span> in one step is given by the <strong>transition kernel</strong> <span class="math inline">T(x' | x)</span>. We only consider chains where the transition kernel does not change over time.</p>
+<p>Simulating a Markov chain is easy: start from an initial state <span class="math inline">x_0</span>, then repeatedly sample the next state from the transition kernel, <span class="math inline">x_{t+1} \sim T(x' | x_t)</span>. When the states are discrete, this is just sampling from a categorical distribution (<a href="1-MonteCarlo.html#sec-simplesampling" class="quarto-xref"><span>Sampling from simple distributions</span></a>).</p>
+<p>A classical toy example is the weather, with three possible states: sunny, cloudy and rainy. Each day, the weather of the next day is drawn according to the following transition probabilities (each row sums to one):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Today <span class="math inline">\backslash</span> tomorrow</th>
+<th style="text-align: center;">sunny</th>
+<th style="text-align: center;">cloudy</th>
+<th style="text-align: center;">rainy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>sunny</strong></td>
+<td style="text-align: center;">0.7</td>
+<td style="text-align: center;">0.2</td>
+<td style="text-align: center;">0.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>cloudy</strong></td>
+<td style="text-align: center;">0.3</td>
+<td style="text-align: center;">0.4</td>
+<td style="text-align: center;">0.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>rainy</strong></td>
+<td style="text-align: center;">0.2</td>
+<td style="text-align: center;">0.4</td>
+<td style="text-align: center;">0.4</td>
+</tr>
+</tbody>
+</table>
+<p>A sunny day is followed by another sunny day with probability 0.7, by a cloudy day with probability 0.2, and by a rainy day with probability 0.1. The left part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>10.1</span></a> represents the same chain as a graph.</p>
+<div id="fig-markovchain" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-markovchain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/markov-chain.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;10.1: A Markov chain with three states. Left: transition probabilities. Middle: the distribution p_t(x) of the state at step t converges to the same stationary distribution, whether the chain starts on a sunny (solid lines) or a rainy day (dashed lines). Right: fraction of the time spent in each state by a single long chain, which converges to the stationary distribution (dotted lines)."><img src="../img/markov-chain.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-markovchain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.1: A Markov chain with three states. Left: transition probabilities. Middle: the distribution <span class="math inline">p_t(x)</span> of the state at step <span class="math inline">t</span> converges to the same stationary distribution, whether the chain starts on a sunny (solid lines) or a rainy day (dashed lines). Right: fraction of the time spent in each state by a single long chain, which converges to the stationary distribution (dotted lines).
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="evolution-of-the-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="evolution-of-the-distribution">Evolution of the distribution</h3>
+<p>If we know the state today, the state tomorrow is random. More generally, let’s call <span class="math inline">p_t(x)</span> the probability that the chain is in state <span class="math inline">x</span> at step <span class="math inline">t</span>, i.e.&nbsp;the distribution we would observe over many independent runs of the chain. To be in state <span class="math inline">x'</span> at step <span class="math inline">t+1</span>, the chain must have been in some state <span class="math inline">x</span> at step <span class="math inline">t</span> and then moved from <span class="math inline">x</span> to <span class="math inline">x'</span>. Summing over all possible states <span class="math inline">x</span> (law of total probability):</p>
+<p><span class="math display">
+    p_{t+1}(x') = \sum_x T(x' | x) \, p_t(x)
+</span></p>
+<p>In the continuous case, the sum becomes an integral:</p>
+<p><span class="math display">
+    p_{t+1}(x') = \int_x T(x' | x) \, p_t(x) \, dx
+</span></p>
+<p>Let’s start on a sunny day: <span class="math inline">p_0 = (1, 0, 0)</span> for (sunny, cloudy, rainy). The next day, the distribution is given by the first row of the table: <span class="math inline">p_1 = (0.7, 0.2, 0.1)</span>. Applying the formula once more:</p>
+<p><span class="math display">
+    p_2(\text{sunny}) = 0.7 \times 0.7 + 0.3 \times 0.2 + 0.2 \times 0.1 = 0.57
+</span></p>
+<p>and similarly for the two other states, giving <span class="math inline">p_2 = (0.57, 0.26, 0.17)</span>. Repeating this, we get <span class="math inline">p_3 = (0.51, 0.29, 0.20)</span>, <span class="math inline">p_4 = (0.48, 0.30, 0.22)</span>, <span class="math inline">p_5 = (0.47, 0.30, 0.22)</span>… The distribution changes less and less: the chain progressively forgets that it started on a sunny day.</p>
+</section>
+<section id="stationary-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="stationary-distribution">Stationary distribution</h3>
+<p>The middle part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>10.1</span></a> shows that the distribution converges towards fixed values, around <span class="math inline">(0.46, 0.31, 0.23)</span>, and that these values are the same if we start on a rainy day instead. Once the chain has reached this distribution, applying the transition kernel does not change it anymore. Such a distribution <span class="math inline">p(x)</span> is called a <strong>stationary distribution</strong> of the chain:</p>
+<p><span class="math display">
+    p(x') = \sum_x T(x' | x) \, p(x)
+</span></p>
+<p>For the weather chain, we can check that <span class="math inline">p = (\frac{6}{13}, \frac{4}{13}, \frac{3}{13}) \approx (0.46, 0.31, 0.23)</span> is stationary. For example, for the sunny state:</p>
+<p><span class="math display">
+    0.7 \times \dfrac{6}{13} + 0.3 \times \dfrac{4}{13} + 0.2 \times \dfrac{3}{13} = \dfrac{4.2 + 1.2 + 0.6}{13} = \dfrac{6}{13}
+</span></p>
+<p>In the long run, it is sunny 46% of the days, cloudy 31% and rainy 23%, whatever the weather on the first day.</p>
+<p>This convergence is not specific to this example. If two mild conditions are satisfied:</p>
+<ul>
+<li>every state can be reached from every other state in a finite number of steps (the chain is <strong>irreducible</strong>),</li>
+<li>the chain does not cycle deterministically between groups of states (the chain is <strong>aperiodic</strong>),</li>
+</ul>
+<p>then the chain has a unique stationary distribution, and <span class="math inline">p_t</span> converges to it from <strong>any</strong> initial state. We will not prove this result here; see for example <span class="citation" data-cites="Bishop2006">Bishop (<a href="../references.html#ref-Bishop2006" role="doc-biblioref">2006</a>)</span> or <span class="citation" data-cites="MacKay2003">MacKay (<a href="../references.html#ref-MacKay2003" role="doc-biblioref">2003</a>)</span>.</p>
+</section>
+<section id="time-averages" class="level3">
+<h3 class="anchored" data-anchor-id="time-averages">Time averages</h3>
+<p>The middle part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>10.1</span></a> describes many independent runs of the chain. What happens with a <strong>single</strong> run? The right part of the figure shows the fraction of the days spent in each state by one long chain: it also converges to the stationary distribution. A single chain that runs long enough visits each state a fraction of the time equal to its stationary probability.</p>
+<p>More generally, the average of any function <span class="math inline">f</span> over the states visited by the chain converges to its expectation under the stationary distribution:</p>
+<p><span class="math display">
+    \dfrac{1}{N} \, \sum_{t=1}^N f(x_t) \rightarrow \mathbb{E}_{x \sim p(x)} [f(x)] \qquad \text{when } N \rightarrow \infty
+</span></p>
+<p>This is exactly the Monte Carlo estimator of <a href="1-MonteCarlo.html#sec-mcestimator" class="quarto-xref"><span>The Monte Carlo estimator</span></a>, except that the samples <span class="math inline">x_t</span> are now the successive states of a chain instead of independent samples. The estimate still converges, but more slowly, as successive states are correlated: today’s weather tells us a lot about tomorrow’s.</p>
+</section>
+<section id="turning-the-problem-around" class="level3">
+<h3 class="anchored" data-anchor-id="turning-the-problem-around">Turning the problem around</h3>
+<p>In the usual study of Markov chains, the transition kernel <span class="math inline">T</span> is given (the physics of the weather) and we want to find the stationary distribution. MCMC turns the problem around:</p>
+<ul>
+<li>the target distribution <span class="math inline">p(x) = \tilde{p}(x) / Z</span> is given, at least up to its normalization constant;</li>
+<li>we <strong>design</strong> a transition kernel <span class="math inline">T</span> whose stationary distribution is <span class="math inline">p(x)</span>, and which is easy to simulate.</li>
+</ul>
+<p>We then simulate the chain for a long time, and use its successive states as (correlated) samples of <span class="math inline">p(x)</span>. The next section explains how to build such a transition kernel.</p>
+</section>
+</section>
+<section id="sec-detailedbalance" class="level2">
+<h2 class="anchored" data-anchor-id="sec-detailedbalance">Detailed balance</h2>
+<section id="probability-flows" class="level3">
+<h3 class="anchored" data-anchor-id="probability-flows">Probability flows</h3>
+<p>To design a transition kernel <span class="math inline">T</span> with a given stationary distribution <span class="math inline">p(x)</span>, we could try to satisfy the stationarity condition directly:</p>
+<p><span class="math display">
+    p(x') = \sum_x T(x' | x) \, p(x) \qquad \text{for all } x'
+</span></p>
+<p>This condition is easier to interpret in terms of <strong>flows</strong> of probability. The term <span class="math inline">p(x) \, T(x' | x)</span> is the probability that, at stationarity, the chain is in state <span class="math inline">x</span> <strong>and</strong> moves to <span class="math inline">x'</span> at the next step: it is the flow of probability going from <span class="math inline">x</span> to <span class="math inline">x'</span>. As the chain must go somewhere after <span class="math inline">x'</span>, we have <span class="math inline">\sum_x T(x | x') = 1</span>, so the left-hand side can be written <span class="math inline">p(x') = \sum_x p(x') \, T(x | x')</span>, and stationarity becomes:</p>
+<p><span class="math display">
+    \underbrace{\sum_x p(x) \, T(x' | x)}_{\text{flow into } x'} = \underbrace{\sum_x p(x') \, T(x | x')}_{\text{flow out of } x'} \qquad \text{for all } x'
+</span></p>
+<p>For every state, the total flow coming in must equal the total flow going out. This is sometimes called <strong>global balance</strong>. Think of a crowd of people moving between the rooms of a building: the number of people in each room stays constant as long as, for every room, as many people enter as leave. Where they come from and where they go does not matter. People could, for example, all walk around the building in a loop A → B → C → A, without anybody ever walking back: the occupancy of the rooms would still be stationary.</p>
+<p>Designing <span class="math inline">T</span> with this condition is difficult: for every state <span class="math inline">x'</span>, it involves a sum (or an integral) over <strong>all</strong> the states of the space, which is exactly the kind of computation we want to avoid.</p>
+</section>
+<section id="a-local-condition" class="level3">
+<h3 class="anchored" data-anchor-id="a-local-condition">A local condition</h3>
+<p>Fortunately, there is a stronger condition that is much simpler to satisfy. A transition kernel satisfies <strong>detailed balance</strong> with respect to <span class="math inline">p(x)</span> if, for every pair of states <span class="math inline">x</span> and <span class="math inline">x'</span>:</p>
+<p><span class="math display">
+    p(x) \, T(x' | x) = p(x') \, T(x | x')
+</span></p>
+<p>Instead of balancing the total flows of each state, detailed balance requires that the flows are balanced <strong>for every pair of states</strong>: the flow from <span class="math inline">x</span> to <span class="math inline">x'</span> equals the flow from <span class="math inline">x'</span> to <span class="math inline">x</span>. In the analogy of the crowd, between every pair of rooms, as many people go one way as the other. This condition only involves <strong>two states at a time</strong>: there is no sum over the whole space anymore.</p>
+<p>Detailed balance implies global balance, hence stationarity: summing both sides over <span class="math inline">x</span> gives exactly the flow into <span class="math inline">x'</span> on the left and the flow out of <span class="math inline">x'</span> on the right:</p>
+<p><span class="math display">
+    \sum_x p(x) \, T(x' | x) = \sum_x p(x') \, T(x | x') = p(x') \, \sum_x T(x | x') = p(x')
+</span></p>
+<p>The converse is not true. In the loop A → B → C → A, the flow from A to B is positive, but there is no flow from B to A: detailed balance is violated, although the distribution is stationary. More generally, detailed balance requires every move to be possible in both directions: if <span class="math inline">T(x' | x) &gt; 0</span>, then <span class="math inline">T(x | x') &gt; 0</span>. Such chains are called <strong>reversible</strong>: at stationarity, a film of the chain looks statistically the same when played backwards, whereas a chain circulating in a loop has a preferred direction.</p>
+<p>The weather chain of <a href="#sec-markovchains" class="quarto-xref"><span>Markov chains</span></a> satisfies detailed balance with respect to its stationary distribution <span class="math inline">p = (\frac{6}{13}, \frac{4}{13}, \frac{3}{13})</span>. For each pair of states, the two flows are equal:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 35%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Pair of states</th>
+<th style="text-align: center;">flow one way</th>
+<th style="text-align: center;">flow the other way</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">sunny, cloudy</td>
+<td style="text-align: center;"><span class="math inline">\frac{6}{13} \times 0.2 = \frac{1.2}{13}</span></td>
+<td style="text-align: center;"><span class="math inline">\frac{4}{13} \times 0.3 = \frac{1.2}{13}</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sunny, rainy</td>
+<td style="text-align: center;"><span class="math inline">\frac{6}{13} \times 0.1 = \frac{0.6}{13}</span></td>
+<td style="text-align: center;"><span class="math inline">\frac{3}{13} \times 0.2 = \frac{0.6}{13}</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">cloudy, rainy</td>
+<td style="text-align: center;"><span class="math inline">\frac{4}{13} \times 0.3 = \frac{1.2}{13}</span></td>
+<td style="text-align: center;"><span class="math inline">\frac{3}{13} \times 0.4 = \frac{1.2}{13}</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sufficient-but-not-necessary" class="level3">
+<h3 class="anchored" data-anchor-id="sufficient-but-not-necessary">Sufficient, but not necessary</h3>
+<p>Detailed balance is therefore a <strong>sufficient</strong> condition for stationarity, not a necessary one. The loop A → B → C → A is an extreme case (the chain is moreover periodic, so it does not converge), but the same happens with less extreme chains. Consider three states placed on a circle, and a chain that moves clockwise with probability 0.6 and counter-clockwise with probability 0.4. By symmetry, the uniform distribution <span class="math inline">p = (\frac{1}{3}, \frac{1}{3}, \frac{1}{3})</span> is stationary: each state receives as much probability as it gives away. But between two neighboring states, the clockwise flow <span class="math inline">\frac{1}{3} \times 0.6</span> is larger than the counter-clockwise flow <span class="math inline">\frac{1}{3} \times 0.4</span>: probability keeps circulating around the circle, while the distribution stays the same.</p>
+<p>For MCMC, we do not need to characterize all the chains that have <span class="math inline">p(x)</span> as stationary distribution: it is enough to build <strong>one</strong> of them. Detailed balance is the design principle of most MCMC methods.</p>
+</section>
+<section id="why-detailed-balance-suits-mcmc" class="level3">
+<h3 class="anchored" data-anchor-id="why-detailed-balance-suits-mcmc">Why detailed balance suits MCMC</h3>
+<p>Detailed balance can be rewritten as a condition on the ratio of the transitions in both directions:</p>
+<p><span class="math display">
+    \dfrac{T(x' | x)}{T(x | x')} = \dfrac{p(x')}{p(x)} = \dfrac{\tilde{p}(x')}{\tilde{p}(x)}
+</span></p>
+<p>The last equality is the key: the ratio of the probabilities of two states does not depend on the normalization constant <span class="math inline">Z</span>, which cancels out. To build a transition kernel satisfying detailed balance, we only need to evaluate the unnormalized target <span class="math inline">\tilde{p}(x)</span>, at two points at a time. The Metropolis-Hastings algorithm, presented in the next section, does exactly that.</p>
+</section>
+</section>
+<section id="sec-metropolishastings" class="level2">
+<h2 class="anchored" data-anchor-id="sec-metropolishastings">The Metropolis-Hastings algorithm</h2>
+<section id="the-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="the-algorithm">The algorithm</h3>
+<p>The <strong>Metropolis-Hastings</strong> algorithm <span class="citation" data-cites="Metropolis1953 Hastings1970">(<a href="../references.html#ref-Hastings1970" role="doc-biblioref">Hastings, 1970</a>; <a href="../references.html#ref-Metropolis1953" role="doc-biblioref">Metropolis et al., 1953</a>)</span> builds a Markov chain satisfying detailed balance in two steps: a proposal step, which suggests a new state, and an acceptance step, which corrects the proposal so that the chain has the right stationary distribution.</p>
+<p>The <strong>proposal distribution</strong> <span class="math inline">q(x' | x)</span> plays the same role as in rejection and importance sampling (<a href="1-MonteCarlo.html#sec-rejection" class="quarto-xref"><span>Rejection sampling</span></a>), except that it now depends on the current state <span class="math inline">x</span>: it proposes a new state <strong>in the neighborhood</strong> of the current one. A typical choice is a normal distribution centered on the current state, <span class="math inline">q(x' | x) = \mathcal{N}(x, s)</span>, where the standard deviation <span class="math inline">s</span> is the <strong>step size</strong>. Starting from an initial state <span class="math inline">x_0</span>, the algorithm repeats the following steps:</p>
+<ol type="1">
+<li>sample a candidate <span class="math inline">x' \sim q(x' | x_t)</span>,</li>
+<li>compute the <strong>acceptance probability</strong>:</li>
+</ol>
+<p><span class="math display">
+    \alpha(x_t, x') = \min \left(1, \dfrac{\tilde{p}(x') \, q(x_t | x')}{\tilde{p}(x_t) \, q(x' | x_t)} \right)
+</span></p>
+<ol start="3" type="1">
+<li>sample <span class="math inline">u \sim \mathcal{U}(0, 1)</span>: if <span class="math inline">u \leq \alpha(x_t, x')</span>, <strong>accept</strong> the candidate, <span class="math inline">x_{t+1} = x'</span>; otherwise <strong>reject</strong> it and stay where we are, <span class="math inline">x_{t+1} = x_t</span>.</li>
+</ol>
+<p>The successive states <span class="math inline">x_0, x_1, x_2, \ldots</span> are (correlated) samples of <span class="math inline">p(x)</span>, once the chain has converged to its stationary distribution.</p>
+<p>As announced in <a href="#sec-detailedbalance" class="quarto-xref"><span>Detailed balance</span></a>, the target only appears through the ratio <span class="math inline">\tilde{p}(x') / \tilde{p}(x_t)</span>: the normalization constant <span class="math inline">Z</span> cancels out, and we only need to evaluate the unnormalized target <span class="math inline">\tilde{p}(x)</span>. This is exactly the situation of the posterior distributions of <a href="1-MonteCarlo.html#sec-simplesampling" class="quarto-xref"><span>Sampling from simple distributions</span></a>, whose numerator (likelihood times prior) is easy to evaluate but whose evidence is not.</p>
+</section>
+<section id="the-metropolis-rule" class="level3">
+<h3 class="anchored" data-anchor-id="the-metropolis-rule">The Metropolis rule</h3>
+<p>The ratio <span class="math inline">q(x_t | x') / q(x' | x_t)</span> corrects for proposals that are asymmetric, i.e.&nbsp;that propose some moves more easily than the reverse moves. For the most common proposals, it simply disappears. A normal distribution centered on the current state is <strong>symmetric</strong>: the probability of proposing <span class="math inline">x'</span> from <span class="math inline">x</span> is the same as the probability of proposing <span class="math inline">x</span> from <span class="math inline">x'</span>, as both only depend on the distance <span class="math inline">|x' - x|</span>:</p>
+<p><span class="math display">
+    q(x' | x) = \mathcal{N}(x' ; x, s) = \mathcal{N}(x ; x', s) = q(x | x')
+</span></p>
+<p>With such a symmetric proposal, the acceptance probability reduces to the original rule of <span class="citation" data-cites="Metropolis1953">Metropolis et al. (<a href="../references.html#ref-Metropolis1953" role="doc-biblioref">1953</a>)</span>:</p>
+<p><span class="math display">
+    \alpha(x_t, x') = \min \left(1, \dfrac{\tilde{p}(x')}{\tilde{p}(x_t)} \right)
+</span></p>
+<p>The algorithm is then called <strong>random-walk Metropolis</strong>, and its behavior is very intuitive:</p>
+<ul>
+<li>if the candidate is <strong>more probable</strong> than the current state (<span class="math inline">\tilde{p}(x') \geq \tilde{p}(x_t)</span>), it is always accepted: the chain always goes uphill;</li>
+<li>if it is <strong>less probable</strong>, it is accepted with a probability equal to the ratio of the probabilities: a candidate half as probable as the current state is accepted half of the time, a candidate a thousand times less probable almost never.</li>
+</ul>
+<p>Without the second rule, the chain would climb to the nearest mode and stay there, as an optimization algorithm would. Accepting some downhill moves is what allows the chain to explore the whole distribution, spending in each region a time proportional to its probability.</p>
+</section>
+<section id="rejected-candidates-are-repeated" class="level3">
+<h3 class="anchored" data-anchor-id="rejected-candidates-are-repeated">Rejected candidates are repeated</h3>
+<p>The acceptance step looks similar to rejection sampling (<a href="1-MonteCarlo.html#sec-rejection" class="quarto-xref"><span>Rejection sampling</span></a>), but there is an essential difference: when a candidate is rejected, the current state is <strong>repeated</strong> in the chain, <span class="math inline">x_{t+1} = x_t</span>. It is not discarded, and the algorithm does not simply try again.</p>
+<p>These repetitions are what gives each state its correct weight. A state of high probability is hard to leave: most candidates around it are less probable and get rejected, so the chain stays there for several steps, and the state appears several times in the chain. A state of low probability is left quickly. If we only kept the accepted candidates, the chain would spend as much “time” in the low-probability regions as in the high-probability ones, and its samples would not follow <span class="math inline">p(x)</span>.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Proof that Metropolis-Hastings satisfies detailed balance
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We need to show that <span class="math inline">p(x) \, T(x' | x) = p(x') \, T(x | x')</span> for every pair of states. When <span class="math inline">x' = x</span>, both sides are equal, so let’s suppose <span class="math inline">x' \neq x</span>. The only way to move from <span class="math inline">x</span> to <span class="math inline">x'</span> is to propose <span class="math inline">x'</span> and to accept it, so the transition kernel is:</p>
+<p><span class="math display">
+    T(x' | x) = q(x' | x) \, \alpha(x, x')
+</span></p>
+<p>The flow from <span class="math inline">x</span> to <span class="math inline">x'</span> is then:</p>
+<p><span class="math display">
+\begin{aligned}
+    p(x) \, T(x' | x) &amp;= p(x) \, q(x' | x) \, \min \left(1, \dfrac{p(x') \, q(x | x')}{p(x) \, q(x' | x)} \right) &amp; \text{(} Z \text{ cancels, so we can use } p \text{ instead of } \tilde{p} \text{)} \\
+    &amp;= \min \left( p(x) \, q(x' | x), \; p(x') \, q(x | x') \right) &amp; \text{(multiplying both terms of the min)} \\
+\end{aligned}
+</span></p>
+<p>This expression is symmetric in <span class="math inline">x</span> and <span class="math inline">x'</span>: swapping the two states gives the same result. The flow from <span class="math inline">x'</span> to <span class="math inline">x</span>, <span class="math inline">p(x') \, T(x | x')</span>, is therefore equal to the flow from <span class="math inline">x</span> to <span class="math inline">x'</span>: detailed balance holds, and <span class="math inline">p(x)</span> is a stationary distribution of the chain (<a href="#sec-detailedbalance" class="quarto-xref"><span>Detailed balance</span></a>).</p>
+</div>
+</div>
+</div>
+<p>The acceptance probability is in fact built for this: the minimum makes the flow from <span class="math inline">x</span> to <span class="math inline">x'</span> equal to the smaller of the two “proposal flows” <span class="math inline">p(x) \, q(x' | x)</span> and <span class="math inline">p(x') \, q(x | x')</span>. The direction with the larger proposal flow is slowed down by rejecting some of its moves, until both directions are balanced.</p>
+</section>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<p><a href="#fig-metropolishastings" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> applies random-walk Metropolis to the bimodal target of <a href="1-MonteCarlo.html#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, with the step size <span class="math inline">s = 1</span> and the initial state <span class="math inline">x_0 = 0</span>. Only the unnormalized target <span class="math inline">\tilde{p}(x)</span> (with <span class="math inline">Z = 3</span>) is used.</p>
+<div id="fig-metropolishastings" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-metropolishastings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/metropolis-hastings.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;10.2: Random-walk Metropolis on the bimodal target of Figure&nbsp;fig-rejectionsampling, with the proposal q(x'|x) = \mathcal{N}(x, 1). Left: the first 200 steps of the chain. Each rejected candidate (crosses) leaves the chain at the same position, creating a flat segment. Right: the histogram of a chain of 10000 steps matches the target."><img src="../img/metropolis-hastings.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-metropolishastings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.2: Random-walk Metropolis on the bimodal target of <a href="1-MonteCarlo.html#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, with the proposal <span class="math inline">q(x'|x) = \mathcal{N}(x, 1)</span>. Left: the first 200 steps of the chain. Each rejected candidate (crosses) leaves the chain at the same position, creating a flat segment. Right: the histogram of a chain of 10000 steps matches the target.
+</figcaption>
+</figure>
+</div>
+<p>The trace on the left shows the typical behavior of the chain:</p>
+<ul>
+<li>it wanders around the first mode (<span class="math inline">x \approx -1.5</span>) for about 140 steps, then moves to the second one (<span class="math inline">x \approx 1.5</span>);</li>
+<li>most rejected candidates fall in regions of low probability: in the tails, or in the valley between the modes;</li>
+<li>rejections create flat segments, where the same state is repeated.</li>
+</ul>
+<p>Over 10000 steps, 65% of the candidates are accepted, and the histogram of the chain matches the target (right). The average of the chain, <span class="math inline">-0.34</span>, is close to the true mean <span class="math inline">\mathbb{E}_p[x] = -0.3</span>.</p>
+<p>Two things are visible in the trace, however. First, successive samples are strongly correlated: the chain moves by small steps, and stays in the same mode for many steps in a row (about 25 on average over the whole chain, 140 at the beginning of the trace). Second, the result depends on the step size <span class="math inline">s</span> and on the initial state <span class="math inline">x_0</span>. The next section discusses these practical aspects.</p>
+</section>
+</section>
+<section id="sec-mcmcpractice" class="level2">
+<h2 class="anchored" data-anchor-id="sec-mcmcpractice">Using MCMC in practice</h2>
+<p>Metropolis-Hastings is guaranteed to produce samples of <span class="math inline">p(x)</span> <strong>in the limit</strong> of infinitely long chains. With a finite chain, the quality of the estimates depends on choices that the algorithm leaves open: the step size of the proposal, the initial state, and the number of steps. This section discusses them on the bimodal target, with three different step sizes (<a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>).</p>
+<div id="fig-metropolisstepsize" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-metropolisstepsize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/metropolis-stepsize.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;10.3: Random-walk Metropolis on the bimodal target with three step sizes, all chains starting in the tail at x_0 = 8. Left: first 1000 steps of the chain, the first 500 being discarded as burn-in (shaded). Middle: histogram of the chain after burn-in (9500 steps) against the target. Right: autocorrelation \rho_k of the chain after burn-in, as a function of the lag k."><img src="../img/metropolis-stepsize.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-metropolisstepsize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.3: Random-walk Metropolis on the bimodal target with three step sizes, all chains starting in the tail at <span class="math inline">x_0 = 8</span>. Left: first 1000 steps of the chain, the first 500 being discarded as burn-in (shaded). Middle: histogram of the chain after burn-in (9500 steps) against the target. Right: autocorrelation <span class="math inline">\rho_k</span> of the chain after burn-in, as a function of the lag <span class="math inline">k</span>.
+</figcaption>
+</figure>
+</div>
+<section id="choosing-the-step-size" class="level3">
+<h3 class="anchored" data-anchor-id="choosing-the-step-size">Choosing the step size</h3>
+<p>The step size <span class="math inline">s</span> of the random-walk proposal <span class="math inline">q(x' | x) = \mathcal{N}(x, s)</span> controls a trade-off between the size of the moves and their acceptance:</p>
+<ul>
+<li><strong>Too small</strong> (<span class="math inline">s = 0.1</span>, top row): the candidates are so close to the current state that their probability is almost the same, and nearly all of them are accepted (96%). But each move is tiny: the chain behaves like a random walk with small steps and explores the distribution very slowly. After 10000 steps, it has spent most of its time in the minor mode on the right, and the histogram does not match the target.</li>
+<li><strong>Too large</strong> (<span class="math inline">s = 50</span>, bottom row): the candidates land anywhere, mostly far in the tails where the target is negligible, and nearly all of them are rejected (3%). The chain stays still for tens of steps, and the few accepted moves are large jumps.</li>
+<li><strong>Good</strong> (<span class="math inline">s = 3</span>, middle row): the candidates are far enough to explore the distribution quickly, and close enough to be accepted reasonably often (42%). The chain jumps between the two modes all the time, and its histogram matches the target.</li>
+</ul>
+<p>A high acceptance rate is therefore <strong>not</strong> a sign of a good sampler: it is often the sign of a too small step size. The usual rule of thumb is to tune the step size so that the acceptance rate is between 25% and 50%. In high dimensions, the optimal acceptance rate of random-walk Metropolis approaches 23% <span class="citation" data-cites="Roberts1997">(<a href="../references.html#ref-Roberts1997" role="doc-biblioref">Roberts et al., 1997</a>)</span>. In practice, the step size is adapted during the burn-in period (see below) until the acceptance rate falls into this range.</p>
+<p>Note that the step size <span class="math inline">s = 1</span> used in <a href="#fig-metropolishastings" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> was a bit too small: its acceptance rate is higher (65%), but it produces about four times fewer effective samples than <span class="math inline">s = 3</span> (in the sense defined below).</p>
+</section>
+<section id="burn-in" class="level3">
+<h3 class="anchored" data-anchor-id="burn-in">Burn-in</h3>
+<p>The chain starts from an arbitrary initial state <span class="math inline">x_0</span>, often far from the regions of high probability: in <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>, all chains start at <span class="math inline">x_0 = 8</span>, deep in the tail of the target. The first states of the chain depend on this initial state, not on the target: the distribution <span class="math inline">p_t</span> of the chain has not converged to its stationary distribution yet (<a href="#sec-markovchains" class="quarto-xref"><span>Markov chains</span></a>).</p>
+<p>These first samples are therefore discarded: this is the <strong>burn-in</strong> (or warm-up) period. Its required length depends on how fast the chain converges. With the good step size, the chain reaches the target in a couple of steps; with the too small one, it needs hundreds of steps just to walk down from <span class="math inline">x_0 = 8</span> to the region of high probability. In practice, the burn-in length is chosen by looking at the trace: the chain should have “forgotten” its initial state, i.e.&nbsp;fluctuate around a stable level. Discarding a few hundred or thousand steps is common.</p>
+</section>
+<section id="correlated-samples" class="level3">
+<h3 class="anchored" data-anchor-id="correlated-samples">Correlated samples</h3>
+<p>After burn-in, the samples of the chain follow the target, but they are not independent: each state is close to the previous one, or even equal to it when a candidate is rejected. Two successive samples therefore carry partly the same information, and a chain of <span class="math inline">N</span> steps is worth less than <span class="math inline">N</span> independent samples.</p>
+<p>The right column of <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a> measures this dependence with the <strong>autocorrelation</strong> of the chain: how similar two states <span class="math inline">k</span> steps apart are, on a scale from 1 (identical) to 0 (unrelated). With the good step size, the similarity fades within a few steps. With the too large step size, it takes almost a hundred steps, as the chain repeats the same state for tens of steps. With the too small one, two states 200 steps apart are still strongly related.</p>
+<p>The <strong>effective sample size</strong> (ESS) of the chain summarizes this: it is the number of independent samples that would give an estimate of the same precision. It has the same meaning as the effective sample size of importance sampling (<a href="1-MonteCarlo.html#sec-importance" class="quarto-xref"><span>Importance sampling</span></a>). In <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>, the 9500 samples kept after burn-in are worth about 1600 independent samples with the good step size, 190 with the too large one, and only 8 with the too small one. The ESS is the number to look at when comparing samplers: a sampler that is twice as slow per step but produces three times more effective samples is the better one.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Autocorrelation and effective sample size
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The autocorrelation of the chain at lag <span class="math inline">k</span> is the correlation between the states <span class="math inline">x_t</span> and <span class="math inline">x_{t+k}</span>:</p>
+<p><span class="math display">
+    \rho_k = \dfrac{\text{Cov}(x_t, x_{t+k})}{\text{Var}(x_t)}
+</span></p>
+<p>with <span class="math inline">\rho_0 = 1</span>, and <span class="math inline">\rho_k = 0</span> for all <span class="math inline">k &gt; 0</span> if the samples are independent. For <span class="math inline">N</span> correlated samples, the variance <span class="math inline">\sigma_f^2 / N</span> of the Monte Carlo estimator (<a href="1-MonteCarlo.html#sec-mcestimator" class="quarto-xref"><span>The Monte Carlo estimator</span></a>) becomes approximately (we admit this result):</p>
+<p><span class="math display">
+    \text{Var}(\hat{f}_N) \approx \dfrac{\sigma_f^2}{N} \, \left(1 + 2 \, \sum_{k=1}^\infty \rho_k \right)
+</span></p>
+<p>This is the variance that <span class="math inline">N / (1 + 2 \sum_k \rho_k)</span> independent samples would give, hence the effective sample size:</p>
+<p><span class="math display">
+    \text{ESS} = \dfrac{N}{1 + 2 \, \sum_{k=1}^\infty \rho_k}
+</span></p>
+<p>In practice, the autocorrelations are estimated from the chain itself, and the sum is truncated when they become negligible (in <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>, at the first negative value).</p>
+</div>
+</div>
+</div>
+<p>Some implementations keep only one state every <span class="math inline">k</span> steps, which is called <strong>thinning</strong>. It saves memory, but does not add any information: the thinned chain is not worth more independent samples than the full one.</p>
+</section>
+<section id="multimodality-and-multiple-chains" class="level3">
+<h3 class="anchored" data-anchor-id="multimodality-and-multiple-chains">Multimodality and multiple chains</h3>
+<p>The too small step size illustrates the most dangerous failure of MCMC. A chain that moves by small steps can stay in one mode for a very long time, as crossing the low-probability valley between two modes requires many unlikely moves in a row. Nothing in its trace reveals this: the chain fluctuates around a stable level and looks converged. This is the same “missed mode” problem as with a too narrow importance sampling proposal (<a href="1-MonteCarlo.html#sec-importance" class="quarto-xref"><span>Importance sampling</span></a>).</p>
+<p>The standard diagnostic is to run <strong>several chains</strong> from different initial states and to compare their estimates. If they disagree, at least some of them have not explored the whole target. With the too small step size, chains started on different sides of the target indeed give very different estimates of the mean, while with the good step size they all agree. Probabilistic programming libraries automate this comparison.</p>
+<p>Agreement between chains is, however, not a proof of convergence: if all chains start in the same mode, they can all miss the other ones.</p>
+</section>
+</section>
+<section id="sec-gibbs" class="level2">
+<h2 class="anchored" data-anchor-id="sec-gibbs">Gibbs sampling</h2>
+<section id="one-coordinate-at-a-time" class="level3">
+<h3 class="anchored" data-anchor-id="one-coordinate-at-a-time">One coordinate at a time</h3>
+<p>Metropolis-Hastings needs a proposal distribution, whose step size must be tuned. <strong>Gibbs sampling</strong> <span class="citation" data-cites="Geman1984">(<a href="../references.html#ref-Geman1984" role="doc-biblioref">Geman and Geman, 1984</a>)</span> avoids this choice in multidimensional problems, by updating the coordinates of <span class="math inline">x = (x_1, x_2, \ldots, x_d)</span> <strong>one at a time</strong>. Each coordinate <span class="math inline">x_k</span> is sampled from its distribution given the current values of all the other coordinates, noted <span class="math inline">x_{-k}</span>:</p>
+<p><span class="math display">
+    x_k \sim p(x_k | x_{-k})
+</span></p>
+<p>This distribution is called the <strong>full conditional</strong> of <span class="math inline">x_k</span>. A complete pass over the coordinates is called a <strong>sweep</strong>:</p>
+<ol type="1">
+<li>sample <span class="math inline">x_1 \sim p(x_1 | x_2, x_3, \ldots, x_d)</span>,</li>
+<li>sample <span class="math inline">x_2 \sim p(x_2 | x_1, x_3, \ldots, x_d)</span>, using the new value of <span class="math inline">x_1</span>,</li>
+<li>… and so on until <span class="math inline">x_d</span>.</li>
+</ol>
+<p>The state at the end of each sweep is a new sample of the chain. There is no acceptance step: every new value is kept.</p>
+<p>Gibbs sampling is in fact a special case of Metropolis-Hastings, where the proposal changes only one coordinate, by sampling it from its full conditional. With this proposal, the acceptance probability is always exactly 1, which is why no candidate is ever rejected.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Proof that the acceptance probability is 1
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Let’s consider the update of the coordinate <span class="math inline">x_k</span>: the candidate <span class="math inline">x'</span> is equal to <span class="math inline">x</span>, except for its coordinate <span class="math inline">x'_k</span>, which is sampled from <span class="math inline">q(x' | x) = p(x'_k | x_{-k})</span>. As the other coordinates are unchanged, <span class="math inline">x'_{-k} = x_{-k}</span>. Using <span class="math inline">p(x) = p(x_k | x_{-k}) \, p(x_{-k})</span>, the ratio in the acceptance probability of Metropolis-Hastings is:</p>
+<p><span class="math display">
+    \dfrac{p(x') \, q(x | x')}{p(x) \, q(x' | x)} = \dfrac{p(x'_k | x_{-k}) \, p(x_{-k}) \; p(x_k | x_{-k})}{p(x_k | x_{-k}) \, p(x_{-k}) \; p(x'_k | x_{-k})} = 1
+</span></p>
+<p>All terms cancel: the candidate is always accepted. As Metropolis-Hastings satisfies detailed balance (<a href="#sec-metropolishastings" class="quarto-xref"><span>The Metropolis-Hastings algorithm</span></a>), each coordinate update leaves <span class="math inline">p(x)</span> stationary, and so does a whole sweep.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="when-is-it-useful" class="level3">
+<h3 class="anchored" data-anchor-id="when-is-it-useful">When is it useful?</h3>
+<p>Gibbs sampling only makes sense when the full conditionals are easy to sample from, which happens more often than one might think: the joint distribution <span class="math inline">p(x)</span> can be very complex, while each coordinate taken separately, all others being fixed, follows a simple distribution. This is typically the case in models built from simple conditional distributions:</p>
+<ul>
+<li>in Bayesian models with conjugate priors (<a href="../basics/3-Bayesian.html#sec-map" class="quarto-xref"><span>Maximum a posteriori (MAP)</span></a>), the conditional distribution of each parameter, given the data and the other parameters, is a known distribution;</li>
+<li>in latent variable models (<a href="../variationalinference/1-LatentVariables.html" class="quarto-xref"><span>Latent variable models</span></a>), we can alternate between sampling the latent variables given the parameters, and the parameters given the latent variables.</li>
+</ul>
+<p>Gibbs sampling was originally introduced for image restoration <span class="citation" data-cites="Geman1984">(<a href="../references.html#ref-Geman1984" role="doc-biblioref">Geman and Geman, 1984</a>)</span>, where each pixel only depends on its neighbors, and was for a long time the workhorse of Bayesian statistics.</p>
+</section>
+<section id="example-correlated-coordinates" class="level3">
+<h3 class="anchored" data-anchor-id="example-correlated-coordinates">Example: correlated coordinates</h3>
+<p>Let’s apply Gibbs sampling to a bivariate normal distribution, with zero mean, unit variances and correlation <span class="math inline">\rho</span>. Its full conditionals are one-dimensional normal distributions (we admit this result):</p>
+<p><span class="math display">
+    p(x_1 | x_2) = \mathcal{N}(\rho \, x_2, \sqrt{1 - \rho^2}) \qquad p(x_2 | x_1) = \mathcal{N}(\rho \, x_1, \sqrt{1 - \rho^2})
+</span></p>
+<p>Each update moves the chain parallel to one axis: horizontally when <span class="math inline">x_1</span> is updated, vertically when <span class="math inline">x_2</span> is. <a href="#fig-gibbssampling" class="quarto-xref">Figure&nbsp;<span>10.4</span></a> shows the path of the chain in two cases.</p>
+<div id="fig-gibbssampling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gibbssampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/gibbs-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;10.4: Gibbs sampling of a bivariate normal distribution with unit variances, starting from (-3, -3), for 30 sweeps. The blue ellipses delimit 1, 2 and 3 standard deviations. Each update moves the chain parallel to one axis. Left: uncorrelated coordinates. Right: strongly correlated coordinates."><img src="../img/gibbs-sampling.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gibbssampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.4: Gibbs sampling of a bivariate normal distribution with unit variances, starting from <span class="math inline">(-3, -3)</span>, for 30 sweeps. The blue ellipses delimit 1, 2 and 3 standard deviations. Each update moves the chain parallel to one axis. Left: uncorrelated coordinates. Right: strongly correlated coordinates.
+</figcaption>
+</figure>
+</div>
+<ul>
+<li>When the coordinates are <strong>independent</strong> (<span class="math inline">\rho = 0</span>, left), each conditional is the full distribution of the coordinate: every sweep produces an independent sample, wherever the chain was before. The first sweep immediately brings the chain from its initial state to the center of the distribution.</li>
+<li>When the coordinates are <strong>strongly correlated</strong> (<span class="math inline">\rho = 0.95</span>, right), the conditionals are very narrow: once <span class="math inline">x_2</span> is fixed, <span class="math inline">x_1</span> can only change a little, and vice versa. The chain can only move along the diagonal of the distribution with small, staircase-like steps, and successive samples are strongly correlated.</li>
+</ul>
+<p>This is the main limitation of Gibbs sampling: it explores the distribution efficiently only when the coordinates are weakly dependent. Strong dependencies, which are common in practice (for example between the parameters of a model), make it as slow as a random walk with a too small step size. Grouping strongly correlated coordinates and sampling them jointly (<strong>blocked</strong> Gibbs sampling) reduces the problem, when their joint conditional is still simple.</p>
+</section>
+</section>
+<section id="sec-mcmcposterior" class="level2">
+<h2 class="anchored" data-anchor-id="sec-mcmcposterior">Example: sampling a posterior</h2>
+<p>Let’s go back to the Bayesian estimation of the parameters of a normal distribution (<a href="../basics/3-Bayesian.html#sec-map" class="quarto-xref"><span>Maximum a posteriori (MAP)</span></a>). To keep the math simple, the MAP example assumed that the standard deviation <span class="math inline">\sigma</span> of the data was known, and chose a normal prior for the mean <span class="math inline">\mu</span>, so that the posterior was a normal distribution. Let’s now estimate <strong>both</strong> parameters <span class="math inline">\theta = (\mu, \sigma)</span> from <span class="math inline">N = 20</span> samples <span class="math inline">X = \{x_i\}</span> of <span class="math inline">\mathcal{N}(3, 2)</span>, with priors that are not conjugate: a broad normal prior <span class="math inline">\mathcal{N}(0, 5)</span> for <span class="math inline">\mu</span>, and a broad half-normal prior for <span class="math inline">\sigma</span> (a normal distribution <span class="math inline">\mathcal{N}(0, 5)</span> restricted to positive values).</p>
+<p>The posterior has no simple closed form, but its unnormalized version, the likelihood times the prior, is easy to evaluate for any <span class="math inline">(\mu, \sigma)</span>:</p>
+<p><span class="math display">
+    \tilde{p}(\mu, \sigma | X) = p(X | \mu, \sigma) \, p(\mu) \, p(\sigma) = \prod_{i=1}^N \mathcal{N}(x_i ; \mu, \sigma) \; \mathcal{N}(\mu ; 0, 5) \; p(\sigma)
+</span></p>
+<p>This is all Metropolis-Hastings needs: the evidence <span class="math inline">p(X)</span> is never computed. With only two parameters, we could still normalize the posterior numerically on a grid, but the same code would work with hundreds of parameters, where no grid is possible (<a href="1-MonteCarlo.html#sec-curse" class="quarto-xref"><span>Numerical integration does not scale</span></a>).</p>
+<p>We use random-walk Metropolis in the two-dimensional space of the parameters, with the proposal <span class="math inline">\mathcal{N}((\mu, \sigma), 0.7)</span> (the same step size in both directions), during 20000 steps after a burn-in of 1000 steps. Candidates with a negative standard deviation have a probability of zero under the prior: they are simply always rejected.</p>
+<p>One practical detail matters: the likelihood is a product of <span class="math inline">N</span> densities, which quickly becomes too small to be represented by floating-point numbers. The acceptance test is therefore computed in the log domain, by comparing <span class="math inline">\log u</span> with the difference <span class="math inline">\log \tilde{p}(\mu', \sigma' | X) - \log \tilde{p}(\mu, \sigma | X)</span>, where the log-likelihood is a sum instead of a product, as in <a href="../basics/2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>.</p>
+<p>The left part of <a href="#fig-mcmcposterior" class="quarto-xref">Figure&nbsp;<span>10.5</span></a> shows the samples of the chain. Instead of a single point estimate, we get the whole posterior distribution of the parameters, and in particular how uncertain they are: with 20 data points, the mean is somewhere between about 1.8 and 3.5, and the standard deviation between 1.3 and 2.6. Any other quantity is a simple Monte Carlo average over the chain: the posterior mean of a parameter is the average of its samples, the probability that <span class="math inline">\mu &gt; 3</span> is the fraction of the samples where this is true, and so on.</p>
+<div id="fig-mcmcposterior" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mcmcposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/mcmc-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;10.5: Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior p(\mu, \sigma | X) (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities \mathcal{N}(\mu_t, \sigma_t) of all the samples of the chain (a few of them in green)."><img src="../img/mcmc-posterior.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mcmcposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10.5: Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior <span class="math inline">p(\mu, \sigma | X)</span> (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities <span class="math inline">\mathcal{N}(\mu_t, \sigma_t)</span> of all the samples of the chain (a few of them in green).
+</figcaption>
+</figure>
+</div>
+<p>The same holds for the <strong>posterior predictive</strong> distribution, which was out of reach in <a href="../basics/3-Bayesian.html#sec-map" class="quarto-xref"><span>Maximum a posteriori (MAP)</span></a>. It is an expectation over the posterior:</p>
+<p><span class="math display">
+    p(x | X) = \int p(x | \mu, \sigma) \, p(\mu, \sigma | X) \, d\mu \, d\sigma = \mathbb{E}_{(\mu, \sigma) \sim p(\mu, \sigma | X)} [\mathcal{N}(x ; \mu, \sigma)]
+</span></p>
+<p>and is therefore estimated by averaging the normal densities corresponding to all the samples <span class="math inline">(\mu_t, \sigma_t)</span> of the chain:</p>
+<p><span class="math display">
+    p(x | X) \approx \dfrac{1}{T} \, \sum_{t=1}^T \mathcal{N}(x ; \mu_t, \sigma_t)
+</span></p>
+<p>The right part of <a href="#fig-mcmcposterior" class="quarto-xref">Figure&nbsp;<span>10.5</span></a> shows the result. Each sample of the chain is a plausible normal distribution for the data; their average is broader than each of them, as it also takes into account our uncertainty about the parameters. With more data, the posterior would become narrower, and the predictive distribution would get closer to a single normal distribution.</p>
+<p>This example is small, but it contains the whole workflow of Bayesian inference with MCMC: write down the unnormalized posterior (likelihood times prior), sample it with a Markov chain, and compute any quantity of interest as an average over the chain.</p>
+</section>
+<section id="sec-mcmclimits" class="level2">
+<h2 class="anchored" data-anchor-id="sec-mcmclimits">Limits: towards gradient-based samplers</h2>
+<p>Metropolis-Hastings and Gibbs sampling solve the main problem of the previous chapter: they do not need a global proposal matching the whole target, only local moves and the ability to evaluate <span class="math inline">\tilde{p}(x)</span>. Their weakness is that these local moves are <strong>blind</strong>: a random-walk proposal draws candidates in random directions, without using any information about the shape of the target, and the acceptance step only corrects them afterwards.</p>
+<p>In a few dimensions, this is not a problem, as a reasonable fraction of the random directions leads to regions of high probability. In high dimensions, almost all random directions lead away from the small region where the probability mass is concentrated (<a href="1-MonteCarlo.html#sec-curse" class="quarto-xref"><span>Numerical integration does not scale</span></a>): a large step is then almost certainly rejected. To keep a reasonable acceptance rate, the step size must shrink when the dimension increases, and the chain explores the target with smaller and smaller steps. As for a random walk, the distance travelled only grows with the square root of the number of steps, so the number of steps needed to explore the target grows with the dimension. Gibbs sampling has the same problem as soon as the coordinates are correlated (<a href="#sec-gibbs" class="quarto-xref"><span>Gibbs sampling</span></a>), and it additionally requires simple conditional distributions.</p>
+<p>The solution is to propose moves that <strong>follow the shape of the target</strong>. The gradient of the log-density <span class="math inline">\nabla_x \log \tilde{p}(x)</span> points, at each state, in the direction where the probability increases fastest. Like the ratio <span class="math inline">\tilde{p}(x') / \tilde{p}(x)</span>, it does not depend on the normalization constant, as <span class="math inline">\log Z</span> is a constant whose gradient is zero:</p>
+<p><span class="math display">
+    \nabla_x \log p(x) = \nabla_x \log \tilde{p}(x) - \nabla_x \log Z = \nabla_x \log \tilde{p}(x)
+</span></p>
+<p>Moving along the gradient, plus some noise to keep exploring, is the idea of <strong>Langevin dynamics</strong>; simulating the motion of a particle on the landscape of the log-density is the idea of <strong>Hamiltonian Monte Carlo</strong>. Both methods make large moves that are nevertheless accepted with a high probability, and scale much better with the dimension. They are presented in the next chapter. The gradient of the log-density, called the <strong>score</strong>, will also be at the heart of score-based diffusion models.</p>
+<p>The methods of this chapter can be summarized as follows, in the same format as at the end of <a href="1-MonteCarlo.html" class="quarto-xref"><span>Monte Carlo and importance sampling</span></a>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: left;">Requires</th>
+<th style="text-align: left;">Produces</th>
+<th style="text-align: left;">Fails when</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Metropolis-Hastings</td>
+<td style="text-align: left;"><span class="math inline">\tilde{p}(x)</span>, local proposal <span class="math inline">q(x' \mid x)</span></td>
+<td style="text-align: left;">correlated samples of <span class="math inline">p(x)</span></td>
+<td style="text-align: left;">the step size is badly tuned, the modes are far apart, high dimensions</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gibbs sampling</td>
+<td style="text-align: left;">simple full conditionals <span class="math inline">p(x_k \mid x_{-k})</span></td>
+<td style="text-align: left;">correlated samples of <span class="math inline">p(x)</span></td>
+<td style="text-align: left;">the coordinates are strongly correlated</td>
+</tr>
+</tbody>
+</table>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Bishop2006" class="csl-entry" role="listitem">
+Bishop, C. M. (2006). <em>Pattern recognition and machine learning</em>. New York: Springer.
+</div>
+<div id="ref-Geman1984" class="csl-entry" role="listitem">
+Geman, S., and Geman, D. (1984). Stochastic <span>Relaxation</span>, <span>Gibbs Distributions</span>, and the <span>Bayesian Restoration</span> of <span>Images</span>. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em> PAMI-6, 721–741. doi:<a href="https://doi.org/10.1109/TPAMI.1984.4767596">10.1109/TPAMI.1984.4767596</a>.
+</div>
+<div id="ref-Hastings1970" class="csl-entry" role="listitem">
+Hastings, W. K. (1970). Monte <span>Carlo</span> sampling methods using <span>Markov</span> chains and their applications. <em>Biometrika</em> 57, 97–109. doi:<a href="https://doi.org/10.1093/biomet/57.1.97">10.1093/biomet/57.1.97</a>.
+</div>
+<div id="ref-MacKay2003" class="csl-entry" role="listitem">
+MacKay, D. J. C. (2003). <em>Information theory, inference, and learning algorithms</em>. Cambridge, UK ; New York: Cambridge University Press.
+</div>
+<div id="ref-Metropolis1953" class="csl-entry" role="listitem">
+Metropolis, N., Rosenbluth, A. W., Rosenbluth, M. N., Teller, A. H., and Teller, E. (1953). Equation of <span>State Calculations</span> by <span>Fast Computing Machines</span>. <em>The Journal of Chemical Physics</em> 21, 1087–1092. doi:<a href="https://doi.org/10.1063/1.1699114">10.1063/1.1699114</a>.
+</div>
+<div id="ref-Roberts1997" class="csl-entry" role="listitem">
+Roberts, G. O., Gelman, A., and Gilks, W. R. (1997). Weak convergence and optimal scaling of random walk <span>Metropolis</span> algorithms. <em>The Annals of Applied Probability</em> 7. doi:<a href="https://doi.org/10.1214/aoap/1034625254">10.1214/aoap/1034625254</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../../src/sampling/1-MonteCarlo.html" class="pagination-link" aria-label="Monte Carlo and importance sampling">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Monte Carlo and importance sampling</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../src/sampling/3-HMC.html" class="pagination-link" aria-label="Langevin dynamics and Hamiltonian Monte Carlo">
+        <span class="nav-page-text"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p><a href="http://creativecommons.org/licenses/by-nc-sa/4.0">Creative Commons BY-NC-SA 4.0</a>. Author <a href="mailto:julien.vitay@gmail.com">Julien Vitay</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
