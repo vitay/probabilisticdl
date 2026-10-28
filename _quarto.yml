@@ -45,6 +45,7 @@ book:
         - src/variationalinference/2-VariationalInference.qmd
         - src/variationalinference/3-VAE.qmd
         - src/variationalinference/4-GradientEstimators.qmd
+        - src/variationalinference/5-TighterBounds.qmd
     - src/references.qmd
 
 bibliography: 

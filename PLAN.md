@@ -59,7 +59,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 - [x] **2. Variational inference** `{#sec-variationalinference}` — merged with the former chapter "Why maximizing the ELBO works": the intractable posterior, the evidence lower bound (single derivation $\log p_\theta(x) = \text{ELBO} + \text{KL}$; Jensen / importance sampling view in a collapsed callout), why maximizing the ELBO works `{#sec-elbo}` (gradient w.r.t. $\phi$, decoder, EM, figure `elbo-gap.png` from `src/img/elbo-gap.py`) [@Luo2022a], a tractable loss (reconstruction + regularization), summary.
 - [x] **3. Variational autoencoders** `{#sec-vae}` — intro continues the VI chapter with three open questions (distributions, gradient, latent space); choosing the distributions (prior, encoder outputs $\mu_x, \sigma_x$, decoder), the loss (BCE / MSE reconstruction, closed-form KL, log-variance), the reparameterization trick `{#sec-reparameterization}` (gradient of an expectation over $q_\phi$, $z = \mu + \sigma \odot \xi$, REINFORCE mentioned), a smooth latent space (why autoencoders cannot generate, noise → local smoothness, KL → no holes / overlaps / interpolation, MNIST 2D manifold, link to `image-manifold.png`, blurriness and $\beta$-VAE). Figures from the Neurocomputing slides (towardsdatascience, Keras blog).
 - [x] **4. Gradient estimators** `{#sec-gradientestimators}` — the gradient of an expectation, reparameterization (pathwise) estimator, score-function estimator (log-derivative trick, two scores, baselines; figure `gradient-estimators.png`), application to reinforcement learning `{#sec-reinforcementlearning}` (figures `rl-agent.png`, `policy-search.svg` from the Deep RL book; REINFORCE, PPO, RLHF), summary table.
-- [~] **5. Tighter and weighted bounds** `{#sec-tighterbounds}` — outline agreed, writing section by section.
+- [x] **5. Tighter and weighted bounds** `{#sec-tighterbounds}` — IWAE `{#sec-iwae}` (short, no figure) [@Burda2016], $\beta$-VAE `{#sec-betavae}` (disentanglement, figure `betavae-results.png` [@Higgins2016], posterior collapse, KL annealing), summary of Part IV (transition to diffusion as hierarchical VAEs).
 
 ### Part V — Deep generative models — planned
 
@@ -372,26 +372,26 @@ File: `src/variationalinference/5-TighterBounds.qmd`, label `{#sec-tighterbounds
 
 **Goal:** two modifications of the ELBO: making the bound tighter with several importance samples (IWAE), and weighting its two terms differently ($\beta$-VAE). Short chapter.
 
-**References:** in `Library.bib`: `Higgins2016` ($\beta$-VAE). To add: Burda, Grosse & Salakhutdinov (2016), *Importance Weighted Autoencoders*, ICLR (arXiv:1509.00519).
+**References:** in `Library.bib`: `Higgins2016` ($\beta$-VAE). `Burda2016` (IWAE).
 
 ### Sections
 
-1. [ ] **Importance-weighted autoencoders** `{#sec-iwae}`
+1. [x] **Importance-weighted autoencoders** `{#sec-iwae}` — approved, short (no figure: little practical interest) [@Burda2016].
     - Recap of the callout of @sec-variationalinference: the ELBO is the logarithm of a single importance weight $p_\theta(x, z) / q_\phi(z | x)$, averaged; Jensen's inequality creates the gap.
     - IWAE bound: average $K$ importance weights **inside** the logarithm: $\mathcal{L}_K = \mathbb{E}[\log \frac{1}{K} \sum_k \frac{p_\theta(x, z_k)}{q_\phi(z_k | x)}]$; $\mathcal{L}_1$ is the ELBO, $\mathcal{L}_K$ increases with $K$ and tends to $\log p_\theta(x)$ (stated) — the average of the weights is the importance sampling estimate of the evidence (@sec-importance), more accurate with more samples.
     - Consequence: the encoder no longer needs to match the posterior exactly; the gradient weights the $K$ samples by their normalized importance weights (self-normalized importance sampling).
     - Cost: $K$ forward passes through the decoder per input; known side effect: the encoder can become worse while the bound gets tighter (one sentence).
     - *Figure (proposed):* `iwae-bound.png` (own script) — on a toy latent variable model where $\log p_\theta(x)$ is computable (linear-Gaussian), $\mathcal{L}_K$ as a function of $K$ (log scale) approaching $\log p_\theta(x)$, for a fixed, imperfect encoder.
-2. [ ] **$\beta$-VAE** `{#sec-betavae}`
+2. [x] **$\beta$-VAE** `{#sec-betavae}` — approved (with posterior collapse and KL annealing).
     - Loss: reconstruction $+ \, \beta \, \text{KL}(q_\phi(z|x) || p_\theta(z))$; $\beta = 1$ is the ELBO.
     - $\beta > 1$: stronger pressure towards the factorized prior → more regular latent space, **disentangled** factors of variation [@Higgins2016], blurrier reconstructions; $\beta < 1$: sharper reconstructions, less regular latent space (link to the trade-off of @sec-vae).
     - For $\beta \neq 1$ the loss is no longer a bound on the evidence: it trades likelihood for structure.
     - Figure `betavae-results.png` (from the Neurocomputing slides, source @Higgins2016): traversals of single latent dimensions controlling skin colour, age/gender, saturation.
-3. [ ] **Summary of Part IV** — short: latent variable models, VI, VAE, gradient estimators, bounds; transition to the deep generative models of Part V (diffusion models as hierarchical VAEs).
+3. [x] **Summary of Part IV** — approved. — short: latent variable models, VI, VAE, gradient estimators, bounds; transition to the deep generative models of Part V (diffusion models as hierarchical VAEs).
 
 ### Decisions
 
 - Two chapters.
-- IWAE figure from an own toy computation.
+- IWAE figure dropped: a trained VAE encoder closes the gap of the toy model, and IWAE has little practical interest; short section without figure (bound, when it helps, evaluation).
 - Posterior collapse included in the $\beta$-VAE section: with a powerful decoder, the KL term can drive $q_\phi(z|x)$ to the prior for every input, the latent variables are ignored; KL annealing (increasing $\beta$ from 0 to 1 during training) as a remedy.
 
