@@ -93,7 +93,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 ## Open items
 
-- [ ] GitHub repository and publishing (e.g. GitHub Pages from `docs/`).
+- [~] GitHub repository `git@github.com:vitay/probabilisticinference.git`; CI `.github/workflows/quarto-publish.yml` renders and publishes to the `gh-pages` branch on every push to `main` (as in the Deep RL book).
 
 ---
 
