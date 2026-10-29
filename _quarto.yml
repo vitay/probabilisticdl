@@ -50,6 +50,7 @@ book:
       chapters:
         - src/generative/1-Diffusion.qmd
         - src/generative/2-ConditionalDiffusion.qmd
+        - src/generative/3-OptimalTransport.qmd
     - src/references.qmd
 
 bibliography: 

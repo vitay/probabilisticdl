@@ -1,0 +1,220 @@
+# Optimal transport {#sec-ot}
+
+Throughout this book, distributions have been compared with the KL divergence: maximum likelihood minimizes the KL between the data and the model, variational inference the KL between an approximate and a true posterior, and diffusion models a sum of KL divergences between Gaussians. The KL divergence compares the densities of the two distributions **at the same points**, and is blind to the geometry of the space in which they live. **Optimal transport** compares distributions in a different way: by the cost of moving one of them onto the other. It provides distances that remain meaningful when the distributions do not overlap, and, more importantly for generative modeling, paths that transform one distribution into another. These paths are what the flow matching models of the next chapter learn.
+
+## Comparing distributions without overlap
+
+Let's consider two uniform distributions on intervals of length 1: $p$ on $[0, 1]$, and $q$ on $[d, d + 1]$, i.e. the same distribution shifted by $d$ (@fig-otvskl). How far apart are they?
+
+* As soon as $d > 0$, part of the mass of $p$ lies where $q$ is zero, and the KL divergence $\text{KL}(p || q)$ is **infinite** (@sec-kl). It is infinite for a shift of $0.001$ and for a shift of $1000$: it says that the distributions are different, but not by how much.
+* The Jensen-Shannon divergence (@sec-kl), which compares both distributions to their average, remains finite. It is equal to $d \log 2$ as long as the two intervals overlap, as only the non-overlapping parts of length $d$ contribute, but it becomes constant, equal to its maximum $\log 2$, as soon as they are disjoint ($d \geq 1$). Its gradient with respect to the shift is then zero: if $q$ was a model, nothing would tell it in which direction to move to get closer to $p$.
+
+![Two uniform distributions $p$ and $q$ shifted by $d$ (left), and the divergences between them as a function of the shift (right). The KL divergence is infinite for any shift; the Jensen-Shannon divergence saturates at $\log 2$ when the supports are disjoint; the Wasserstein distance $W_2$ simply grows with the shift.](../img/ot-vs-kl.png){#fig-otvskl}
+
+This is not an artificial situation. The data of interest typically lie on low-dimensional manifolds of a high-dimensional space (@sec-latentvariables), and a model at the beginning of training puts its mass on a different manifold: the two distributions have practically no overlap. Divergences comparing densities point by point then give little or no information about how to improve the model. This was one of the main difficulties of the original generative adversarial networks, whose training implicitly minimizes the Jensen-Shannon divergence.
+
+What we would like is a measure of the **effort** needed to transform one distribution into the other. Imagine the density of $p$ as a pile of sand, and the density of $q$ as a hole of the same volume: the effort is the amount of sand that has to be moved, multiplied by the distance it travels. Shifting the pile by a distance $d$ requires moving all the sand by $d$: the effort grows smoothly with the shift, whether the distributions overlap or not. This is the idea of the **earth mover's distance**, formalized by optimal transport: in @fig-otvskl, the Wasserstein distance $W_2$, defined in the next sections, is simply equal to the shift $d$.
+
+## Monge's problem
+
+The question of moving piles of earth at the lowest cost was formulated by the French mathematician Gaspard Monge in 1781, for the construction of fortifications. In modern terms, we look for a **transport map** $T$ that moves each point $x$ of the source distribution $p$ to a point $T(x)$, in such a way that the transported points follow the target distribution $q$:
+
+$$
+    x \sim p \quad \Rightarrow \quad T(x) \sim q
+$$
+
+The distribution of the transported points is called the **push-forward** of $p$ by $T$, and is noted $T_\# p$: the constraint is $T_\# p = q$. Moving a unit of mass from $x$ to $y$ has a **cost** $c(x, y)$; in this chapter, we use the squared Euclidean distance $c(x, y) = ||x - y||^2$. Among all the maps that transform $p$ into $q$, **Monge's problem** looks for the one with the lowest average cost:
+
+$$
+    \min_{T \, : \, T_\# p = q} \; \mathbb{E}_{x \sim p} [||x - T(x)||^2]
+$$
+
+For the shifted uniform distributions of @fig-otvskl, the best map is the translation $T(x) = x + d$: every grain of sand moves by $d$, and the average cost is $d^2$. Its square root, $d$, is the distance plotted in the figure.
+
+Transport maps are nothing new in this book: inverse transform sampling (@sec-simplesampling) and the reparameterization trick (@sec-reparameterization) are maps transforming a simple distribution (uniform or normal) into the desired one, and the decoder of a generative model is a learned map from the latent distribution onto the data distribution. What optimal transport adds is the notion of the **best** map, the one that moves the mass as little as possible.
+
+Monge's formulation has two important limitations:
+
+* An admissible map does not always exist. If $p$ puts all its mass on a single point, and $q$ splits it between two points, no map can transform $p$ into $q$: a map sends each point to a single destination, and cannot split its mass.
+* The constraint $T_\# p = q$ is very difficult to handle: the set of maps satisfying it has no simple structure, and Monge's problem resisted mathematicians for almost two centuries.
+
+Both limitations disappear when the mass leaving a point is allowed to be split between several destinations, which is the relaxation proposed by Kantorovich.
+
+## Kantorovich's relaxation and the Wasserstein distance
+
+### Couplings
+
+In 1942, the mathematician and economist Leonid Kantorovich proposed to replace the transport map by a **transport plan**, or **coupling**: a joint distribution $\pi(x, y)$ over pairs of source and target points, which says how much mass is moved from $x$ to $y$. The mass leaving a point can now be split between several destinations, and the mass arriving at a point can come from several origins. For the plan to transform $p$ into $q$, the total mass leaving each point $x$ must be its mass under $p$, and the total mass arriving at each point $y$ its mass under $q$. In other words, the **marginals** of the coupling must be the two distributions:
+
+$$
+    \int \pi(x, y) \, dy = p(x) \qquad \int \pi(x, y) \, dx = q(y)
+$$
+
+In the discrete case, a coupling is simply a matrix whose rows sum to the probabilities of $p$ and whose columns sum to the probabilities of $q$. A coupling always exists: the **independent coupling** $\pi(x, y) = p(x) \, q(y)$, which sends the mass of each source point to all the target points, in proportion of their probability, satisfies both constraints. It corresponds to pairing samples of $p$ and $q$ at random. A transport map $T$ is the special case of a coupling where all the mass of $x$ goes to the single point $T(x)$.
+
+### The Wasserstein distance
+
+**Kantorovich's problem** looks for the coupling with the lowest average cost:
+
+$$
+    \min_{\pi} \; \mathbb{E}_{(x, y) \sim \pi} [||x - y||^2] \qquad \text{over the couplings } \pi \text{ of } p \text{ and } q
+$$
+
+Contrary to Monge's problem, this problem always has a solution, the **optimal coupling**: the constraints on the marginals are linear, and so is the objective, so that it is a (possibly infinite-dimensional) linear program. When an optimal transport map exists, which is the case for example when $p$ has a density, the optimal coupling is concentrated on this map, and both problems give the same answer.
+
+The minimal cost defines the **2-Wasserstein distance** between the two distributions:
+
+$$
+    W_2(p, q) = \left( \min_{\pi} \; \mathbb{E}_{(x, y) \sim \pi} [||x - y||^2] \right)^{1/2}
+$$
+
+Unlike the KL divergence, it is a true **distance** between distributions: it is symmetric, zero only when the distributions are equal, and satisfies the triangle inequality. As seen in @fig-otvskl, it is finite and informative even when the distributions do not overlap: it measures how far the mass has to travel, not how much the densities differ at each point. Other costs define other distances; in particular, the cost $||x - y||$ (without the square) defines the 1-Wasserstein distance $W_1$, also called the earth mover's distance.
+
+### Optimal transport between samples
+
+In machine learning, the distributions are usually only known through samples. For two sets of $N$ samples $\{x_i\}$ and $\{y_j\}$ with equal weights, the optimal coupling has a very simple form: each source sample is sent entirely to a single target sample, so that the coupling is a **permutation**, i.e. a pairing of the samples. Finding the optimal pairing is the classical **assignment problem**, which can be solved exactly, for example with the Hungarian algorithm, in a time growing with $N^3$.
+
+@fig-otcoupling compares two couplings between samples of a standard normal distribution and of the two-dimensional mixture of @fig-score. With the independent coupling, the samples are paired at random: the segments joining the pairs are long, go in all directions, and cross each other very often. The optimal coupling pairs each sample with a nearby one: the average squared distance is almost three times smaller, the segments point in consistent directions, from the center towards the two modes, and they cross much less often. These short, consistent segments will play an important role for flow matching, which learns to move samples along such paths.
+
+![Couplings between 40 samples of a standard normal distribution (blue) and 40 samples of the two-dimensional mixture of @fig-score (orange). Left: independent coupling (random pairs). Right: optimal coupling, obtained by solving the assignment problem; its average squared distance is an estimate of $W_2(p, q)^2$.](../img/ot-coupling.png){#fig-otcoupling}
+
+## Closed forms
+
+In general, optimal transport has no closed form, and must be computed numerically. Two important special cases are exceptions.
+
+### One dimension: sorting
+
+On the real line, the optimal transport for the squared cost is **monotone**: it never makes two grains of sand cross each other. The smallest source samples are sent to the smallest target samples, the largest to the largest: for two sets of $N$ samples, the optimal pairing is obtained by simply **sorting** both sets, and pairing them in order. For continuous distributions with cumulative distribution functions $F_p$ and $F_q$, a point is sent to the point of $q$ with the same rank, i.e. the same quantile:
+
+$$
+    T(x) = F_q^{-1}(F_p(x))
+$$
+
+This should look familiar: when $p$ is the uniform distribution on $[0, 1]$, $F_p(u) = u$ and the optimal map is $T(u) = F_q^{-1}(u)$, which is exactly **inverse transform sampling** (@sec-simplesampling). Inverse transform sampling is the optimal way of transporting uniform samples onto a target distribution. The Wasserstein distance is then the average squared difference between the quantiles of the two distributions:
+
+$$
+    W_2(p, q)^2 = \int_0^1 (F_p^{-1}(u) - F_q^{-1}(u))^2 \, du
+$$
+
+### Normal distributions
+
+Between two univariate normal distributions $p = \mathcal{N}(\mu_p, \sigma_p)$ and $q = \mathcal{N}(\mu_q, \sigma_q)$, the optimal map is the affine function that standardizes the source and rescales it to the target:
+
+$$
+    T(x) = \mu_q + \dfrac{\sigma_q}{\sigma_p} \, (x - \mu_p)
+$$
+
+With $p = \mathcal{N}(0, 1)$, this is the **reparameterization trick** of @sec-reparameterization: transforming standard normal noise into a sample of $\mathcal{N}(\mu, \sigma)$ with $\mu + \sigma \, \xi$ is optimal transport. The Wasserstein distance has a remarkably simple form:
+
+$$
+    W_2(p, q)^2 = (\mu_p - \mu_q)^2 + (\sigma_p - \sigma_q)^2
+$$
+
+i.e. it is the Euclidean distance between the parameters $(\mu, \sigma)$ of the two distributions. In several dimensions, the first term becomes $||\mu_p - \mu_q||^2$, and the second one a more complex function of the covariance matrices.
+
+It is instructive to compare this result with the KL divergence between the same distributions (@sec-klnormal):
+
+$$
+    \text{KL}(p || q) = \log \dfrac{\sigma_q}{\sigma_p} + \dfrac{\sigma_p^2 + (\mu_p - \mu_q)^2}{2 \sigma_q^2} - \dfrac{1}{2}
+$$
+
+Both depend on the distance between the means, but in different units. The KL divergence measures it relatively to the width $\sigma_q$ of the distributions: two very narrow distributions with slightly different means have almost no overlap, and a very large KL divergence, which becomes infinite when $\sigma \rightarrow 0$. The Wasserstein distance measures it in the units of the space itself: two narrow distributions at a distance $d$ are at a Wasserstein distance close to $d$, however narrow they are. The KL divergence is also not symmetric, whereas the Wasserstein distance is.
+
+## Interpolating between distributions
+
+### Displacement interpolation
+
+Optimal transport does not only measure how far apart two distributions are: it also describes how to go from one to the other. The simplest way to interpolate between two distributions $p$ and $q$ is the **mixture** $(1 - t) \, p + t \, q$, with $t$ going from 0 to 1. The mass does not move: it progressively disappears from $p$ and reappears in $q$, and the intermediate distributions have two separate bumps (@fig-otinterpolation, left).
+
+Optimal transport suggests another interpolation, called **displacement interpolation**: move each sample $x$ of $p$ along the straight line towards its destination $T(x)$, at constant speed:
+
+$$
+    x_t = (1 - t) \, x + t \, T(x)
+$$
+
+The distribution $p_t$ of the moving samples slides from $p$ at $t = 0$ to $q$ at $t = 1$ (@fig-otinterpolation, right). The intermediate distributions are genuinely "in between" $p$ and $q$: between two normal distributions, they are normal distributions whose mean and standard deviation are interpolated linearly. They are also equally spaced in the sense of the Wasserstein distance, $W_2(p, p_t) = t \, W_2(p, q)$: the displacement interpolation is the **shortest path** between $p$ and $q$ in the space of distributions equipped with the Wasserstein distance.
+
+![Two ways of interpolating between $p = \mathcal{N}(-2, 0.5)$ (top) and $q = \mathcal{N}(2, 1)$ (bottom). Left: the mixture fades $p$ out and $q$ in, without moving any mass. Right: the displacement interpolation of optimal transport moves the mass along straight lines, and the intermediate distributions slide from $p$ to $q$.](../img/ot-interpolation.png){#fig-otinterpolation}
+
+### The dynamic view
+
+This suggests a third, **dynamic** formulation of optimal transport, in terms of motion rather than of maps or couplings. Let's describe the transformation of $p$ into $q$ by a **velocity field** $v_t(x)$: at time $t$, a particle at position $x$ moves with velocity $v_t(x)$, i.e. follows the ordinary differential equation:
+
+$$
+    \dfrac{dx}{dt} = v_t(x)
+$$
+
+Starting from samples of $p$ at $t = 0$, the particles should arrive at time $t = 1$ distributed according to $q$. Many velocity fields achieve this. Among them, @Benamou2000 showed that optimal transport is the one with the minimal average **kinetic energy**:
+
+$$
+    W_2(p, q)^2 = \min_{v} \; \int_0^1 \mathbb{E}_{x \sim p_t} [||v_t(x)||^2] \, dt
+$$
+
+where $p_t$ is the distribution of the particles at time $t$. The optimal particles move along straight lines at constant speed, from $x$ to $T(x)$, and two particles are never at the same place at the same time: the velocity field is well defined everywhere.
+
+This dynamic view connects optimal transport to the generative models of the previous chapters. The probability flow of diffusion models (@sec-diffusion) is also an ordinary differential equation $dx / dt = v_t(x)$ transporting noise onto data, but its trajectories are curved, and it needs many integration steps. A generative model that learned the velocity field of optimal transport from noise to data would move its samples along straight lines, which can in principle be integrated in very few steps. Learning such velocity fields is the idea of **flow matching**, the subject of the next chapter.
+
+## Entropic regularization and the Sinkhorn algorithm
+
+### Blurring the coupling
+
+Computing optimal transport exactly between large sets of samples is expensive: the assignment problem requires a time growing with $N^3$, and its solution changes abruptly when the samples move, which makes it difficult to use inside a neural network trained by gradient descent. A very effective alternative is to **regularize** the problem with the entropy of the coupling (@sec-informationtheory):
+
+$$
+    \min_{\pi} \; \mathbb{E}_{(x, y) \sim \pi} [||x - y||^2] - \epsilon \, H(\pi)
+$$
+
+where $\epsilon > 0$ controls the strength of the regularization. Maximizing the entropy pushes the coupling to be as random as possible, while minimizing the cost pushes it to send each point only to its best destination. The two extreme cases are:
+
+* $\epsilon \rightarrow 0$: the entropy term disappears, and we recover the exact optimal coupling;
+* $\epsilon \rightarrow \infty$: only the entropy matters, and the coupling becomes the independent coupling $p(x) \, q(y)$, which is the coupling of maximal entropy with the given marginals.
+
+In between, the regularized coupling is a **blurred** version of the optimal one: each source point sends its mass mostly to its optimal destination, but also a little to the nearby points.
+
+### The Sinkhorn algorithm
+
+The entropic regularization has a remarkable consequence: the optimal coupling takes a very simple form. For samples $\{x_i\}$ and $\{y_j\}$, it is a matrix of the form:
+
+$$
+    \pi_{ij} = u_i \, K_{ij} \, v_j \qquad \text{with} \qquad K_{ij} = \exp \left( - \dfrac{||x_i - y_j||^2}{\epsilon} \right)
+$$
+
+The matrix $K$ is fixed: it is large for nearby pairs and small for distant ones, and the temperature $\epsilon$ plays the same role as the temperature of the softmax (@sec-softmax). The only unknowns are the scaling vectors $u$ and $v$, one coefficient per sample, which must be chosen so that the rows of $\pi$ sum to the weights of $p$ and its columns to the weights of $q$. The **Sinkhorn algorithm** finds them by alternately rescaling the rows and the columns:
+
+1. rescale the rows: choose $u$ so that each row of $\pi$ has the right sum, $u_i = p_i / \sum_j K_{ij} \, v_j$;
+2. rescale the columns: choose $v$ so that each column of $\pi$ has the right sum, $v_j = q_j / \sum_i K_{ij} \, u_i$;
+3. repeat until convergence.
+
+Each iteration only involves products between a matrix and a vector, which run very efficiently on GPUs, and every operation is differentiable, so that the regularized transport cost can be used as a loss function and backpropagated through. Popularized by @Cuturi2013, the Sinkhorn algorithm made optimal transport practical for machine learning, where it is used for example to compare sets of samples, to align distributions between domains, or to compute couplings between minibatches of samples.
+
+### Schrödinger bridges
+
+Entropic optimal transport also has a dynamic version. In 1931, Erwin Schrödinger asked the following question: if a cloud of particles, moving randomly by diffusion, is observed in a distribution $p$ at a first time and in a distribution $q$ at a later time, what is the most likely way in which the particles moved between the two observations? The answer, called the **Schrödinger bridge**, is a stochastic process transporting $p$ onto $q$, and its coupling between the start and end points is the entropic optimal coupling, with a regularization $\epsilon$ proportional to the amount of diffusion.
+
+When $q$ is the data distribution and $p$ a standard normal distribution, a Schrödinger bridge is a diffusion process transforming noise into data, like the reverse process of a diffusion model. Unlike diffusion models, which need a forward process ending exactly in a standard normal distribution, Schrödinger bridges can connect any two distributions, for example two different datasets of images, and can be learned with score-based methods [@Bortoli2023].
+
+## Wasserstein GANs
+
+Generative adversarial networks train a generator by pitting it against a discriminator, and their original formulation implicitly minimizes the Jensen-Shannon divergence between the data and the generated samples, whose gradient vanishes when the two distributions do not overlap (@fig-otvskl). **Wasserstein GANs** [@Arjovsky2017] minimize the 1-Wasserstein distance instead. The coupling formulation is impractical in high dimensions, but the 1-Wasserstein distance has an equivalent **dual** formulation, which only involves functions of a single variable:
+
+$$
+    W_1(p, q) = \max_{f \, : \, 1\text{-Lipschitz}} \; \mathbb{E}_{x \sim p} [f(x)] - \mathbb{E}_{y \sim q} [f(y)]
+$$
+
+where the maximum is over all functions $f$ whose slope is at most 1 everywhere. The function $f$, called the **critic**, is a neural network trained to give high values to real data and low values to generated samples; the constraint on its slope, enforced for example by penalizing its gradient, prevents it from separating the two sets infinitely sharply. The generator is trained to minimize the resulting estimate of the distance. As the Wasserstein distance decreases smoothly when the generated samples get closer to the data, even without overlap, the generator receives useful gradients throughout training, which made GANs much more stable.
+
+## Summary
+
+Optimal transport offers an alternative to the KL divergence for comparing distributions, based on the geometry of the space rather than on the values of the densities:
+
+| | KL divergence | Wasserstein distance |
+|:---|:---|:---|
+| Compares | the densities, point by point | the positions of the mass |
+| Requires | densities (or samples of one, density of the other) | samples of both and a cost |
+| Symmetric | no | yes |
+| Without overlap | infinite or constant | finite, grows with the distance |
+| Normal distributions | distance between means in units of $\sigma$ | distance between means in units of the space |
+| Computation | Monte Carlo average | assignment, Sinkhorn, or dual (critic) |
+| Also provides | — | transport maps, couplings and straight paths |
+
+Beyond being a distance, optimal transport provides **paths** between distributions: maps, couplings and velocity fields, which move the mass as little as possible. Learning such velocity fields directly is the idea of **flow matching**, presented in the next chapter, where optimal couplings between noise and data samples (@fig-otcoupling) will make the learned trajectories straighter, and sampling faster.

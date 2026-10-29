@@ -73,8 +73,19 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
         - The averaging happens at the right place: the MSE denoiser predicts $\mathbb{E}[x_0 | x_t]$, blurry at high noise but exactly the score of the noisy distribution (Tweedie's formula); the modes are separated progressively as the noise decreases (the noise-levels argument of @sec-hmclimits, seen from the training side).
         - Flow matching: same picture — MSE regression of conditional velocities over data samples (covering), learned field $\mathbb{E}[u_t(x | x_0) | x_t]$; not literally a KL (closer to transport distances).
         - Mode-seeking comes back at sampling time: classifier-free guidance samples roughly from $p(x | c) \, p(c | x)^w$, sharpening towards the modes (diversity traded for quality).
-- [ ] **Optimal transport** — after the two diffusion chapters, before flow matching. A different geometry to compare $p_\theta$ and $p$ than the KL: Monge problem, Kantorovich couplings, Wasserstein distances (closed forms in 1D by sorting, between Gaussians); comparison with the KL on distributions with separated supports (KL infinite / constant, Wasserstein smooth); entropic regularization and the Sinkhorn algorithm (link to entropy); applications: WGAN, OT couplings in flow matching, Schrödinger bridges (pointer). One-sentence pointer from @sec-klml. Detailed outline to write when we get there.
+- [x] **3. Optimal transport** `{#sec-ot}` — written (detailed plan below, "Chapter plan: Optimal transport"); Jensen-Shannon defined in @sec-kl.
 - [ ] **Flow matching** — after optimal transport: continuous normalizing flows, velocity field regression on conditional paths [@Lipman2023], link to the probability-flow ODE of the diffusion chapter, OT couplings / rectified flows (straighter paths, fewer sampling steps). Detailed outline to write when we get there.
+    - Moved from the OT chapter, to place after the flow matching objective (draft text):
+
+      ### Optimal transport for flow matching
+
+      The dynamic view introduced above suggests building generative models that learn a velocity field transporting noise onto data. Flow matching, presented in the next chapter, trains such a velocity field by regression on pairs of a noise sample and a data sample, moved along straight lines. Which pairs to use is exactly the question of the coupling:
+
+      * With the **independent coupling**, noise and data samples are paired at random. The straight paths between the pairs cross each other in all directions (@fig-otcoupling, left), and the learned velocity field, which averages over all the paths passing through a point, follows curved trajectories that need many integration steps.
+      * With an **optimal coupling** computed on each minibatch of samples [@Tong2024], the pairs are close and the paths point in consistent directions (@fig-otcoupling, right): the learned trajectories are straighter, and fewer steps are needed to generate a sample.
+
+      **Rectified flows** [@Liu2022e] reach a similar result without computing any optimal transport: after training a first flow, they pair each noise sample with the data sample that the flow generates from it, and train a new flow on these pairs, which progressively straightens the trajectories. This idea is at the heart of recent large-scale image generators such as recent versions of Stable Diffusion (@sec-imagegenerators).
+
 - [ ] GANs as divergence minimization (f-divergences).
 
 ### Part VI — Uncertainty and Bayesian deep learning — optional
@@ -459,4 +470,58 @@ Files: `src/generative/1-Diffusion.qmd` (`{#sec-diffusion}`, sections 1-6) and `
 - Own 2D toy figures with the exact optimal denoiser of a Gaussian mixture.
 - $\epsilon$ for the noise and $\epsilon_\theta$ for the network, as in the literature; step sizes written $\eta$ in these chapters.
 - Diffusion first in Part V; normalizing flows and GANs later; "Energy-based models and score matching" partly absorbed by section 6.
+
+---
+
+## Chapter plan: Optimal transport
+
+File: `src/generative/3-OptimalTransport.qmd`, label `{#sec-ot}`, third chapter of *Deep generative models*, before flow matching.
+
+**Goal of the chapter:** the whole book compares distributions with the KL divergence, which compares densities point by point and ignores the geometry of the space. Optimal transport compares distributions by the cost of moving one onto the other: it gives distances (Wasserstein) that remain meaningful when distributions do not overlap, and transport maps and paths between distributions, which flow matching will learn. Main ideas, few formulas, own figures; no measure theory.
+
+**Notation** (to agree on):
+
+- $p$ and $q$ the source and target distributions (as in @sec-forwardreverse); $x \sim p$, $y \sim q$.
+- $c(x, y) = ||x - y||^2$ the cost of moving a unit of mass from $x$ to $y$.
+- $T$ a transport map, with $T(x) \sim q$ when $x \sim p$ (written $T_\# p = q$, the push-forward, defined in words).
+- $\pi(x, y)$ a coupling (transport plan): a joint distribution whose marginals are $p$ and $q$.
+- $W_2(p, q)$ the 2-Wasserstein distance (and $W_1$ for the WGAN pointer).
+
+**References** (all in `Library.bib`): `Villani2009` (reference book), `Peyre2020` (Peyré & Cuturi, *Computational Optimal Transport*), `Cuturi2013` (Sinkhorn), `Arjovsky2017` (WGAN), `Tong2024` (minibatch OT for flow matching), `Liu2022e` (rectified flow), `Bortoli2023` (diffusion Schrödinger bridge).
+
+### Sections
+
+1. [x] **Comparing distributions without overlap** — approved (JS defined in @sec-kl).
+    - The KL compares densities at the same points: it is infinite as soon as $q$ misses part of the support of $p$, and it does not depend on **how far** the two distributions are; the Jensen-Shannon divergence is constant ($\log 2$) for disjoint supports → no gradient (the training problem of the original GANs).
+    - Data on low-dimensional manifolds (@sec-latentvariables) typically have such non-overlapping supports.
+    - Idea: measure the **effort** needed to move the mass of one distribution onto the other (earth mover's distance).
+    - *Figure (proposed, own):* `ot-vs-kl.png` — two narrow distributions shifted by $d$; left: the distributions for a few shifts; right: KL / Jensen-Shannon and $W_2$ as functions of $d$ (KL infinite or saturating, $W_2 = d$).
+2. [x] **Monge's problem** — approved.
+    - Moving a pile of sand into a hole: transport map $T$ moving each $x$ to $T(x)$, pushing $p$ onto $q$, minimizing the average cost $\mathbb{E}_{x \sim p}[c(x, T(x))]$.
+    - Limits: a map may not exist (one point mass cannot be split into two), and the constraint $T_\# p = q$ is hard to handle.
+3. [x] **Kantorovich's relaxation and the Wasserstein distance** — approved (optimal pairing: 12 crossings vs. 129 for random pairs, so the text says 'cross much less often', not 'do not cross').
+    - Couplings: instead of a map, a joint distribution $\pi(x, y)$ saying how much mass goes from $x$ to $y$, with marginals $p$ and $q$; the independent coupling $p(x) \, q(y)$ always exists.
+    - Optimal coupling and Wasserstein distance: $W_2(p, q)^2 = \min_\pi \mathbb{E}_{(x, y) \sim \pi}[||x - y||^2]$; a true distance (symmetric, triangle inequality), unlike the KL.
+    - Samples: for two sets of $N$ samples with equal weights, the optimal coupling is an **assignment** (a permutation), solvable exactly for small $N$.
+    - *Figure (proposed, own):* `ot-coupling.png` — 2D samples of a standard normal and of the two-mode mixture of @fig-score, paired by the independent (random) coupling vs. the optimal assignment: random pairs cross, optimal pairs do not.
+4. [x] **Closed forms** — approved (also: the affine map between normals is the reparameterization trick).
+    - 1D: the optimal map sorts the samples, $T = F_q^{-1} \circ F_p$ — inverse transform sampling of @sec-simplesampling is optimal transport from the uniform distribution.
+    - Normal distributions: $W_2^2 = (\mu_p - \mu_q)^2 + (\sigma_p - \sigma_q)^2$ in 1D (multivariate formula stated), to compare with the closed-form KL of @sec-klnormal.
+5. [x] **Interpolating between distributions** — approved (claims 'never at the same place at the same time', not 'non-crossing'; Benamou-Brenier [@Benamou2000]).
+    - Displacement interpolation: move each sample along a straight line, $x_t = (1 - t) \, x + t \, T(x)$: the intermediate distributions slide from $p$ to $q$, whereas the mixture $(1 - t) \, p + t \, q$ makes the mass disappear and reappear.
+    - Dynamic view (Benamou-Brenier, stated): optimal transport is the flow of minimal kinetic energy, with straight, non-crossing trajectories → the velocity field that flow matching will learn.
+    - *Figure (proposed, own):* `ot-interpolation.png` — 1D: mixture interpolation vs. displacement interpolation between two distributions.
+6. [x] **Entropic regularization and the Sinkhorn algorithm** — approved.
+    - Exact OT is expensive for large sample sets; adding an entropy term $- \epsilon \, H(\pi)$ (@sec-informationtheory) makes the problem smooth, and solvable by alternately rescaling the rows and columns of a matrix (Sinkhorn); $\epsilon \rightarrow 0$: exact OT, $\epsilon \rightarrow \infty$: independent coupling.
+    - Pointer: the dynamic version of entropic OT is the Schrödinger bridge, a diffusion process between two arbitrary distributions (link to @sec-diffusion).
+7. [x] **Wasserstein GANs** and **Summary** (two sections) — approved: dual of $W_1$, critic; summary table; the subsection "Optimal transport for flow matching" was moved to the flow matching chapter (text kept in its plan entry). — short pointers and summary.
+    - Wasserstein GANs [@Arjovsky2017]: $W_1$ through its dual form (1-Lipschitz critic), useful gradients even without overlap.
+    - Flow matching with OT couplings [@Tong2024] and rectified flows: straighter paths, fewer sampling steps (next chapter).
+    - Summary table: KL vs. Wasserstein (requires, symmetric, sensitive to geometry, defined without overlap, cost).
+
+### Decisions
+
+- All seven sections, including Sinkhorn.
+- All three own figures.
+- Notation $p$ / $q$ for source / target.
 

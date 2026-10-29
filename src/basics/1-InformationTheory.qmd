@@ -176,6 +176,12 @@ $$
     \text{KL}(p || q) \neq \text{KL}(q || p)
 $$
 
-The two directions behave very differently when they are minimized, as we will see in @sec-forwardreverse. Other divergences to measure the similarity between two distributions are symmetric, such as the [Jensen-Shannon divergence](https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence).
+The two directions behave very differently when they are minimized, as we will see in @sec-forwardreverse. Other divergences are symmetric. The **Jensen-Shannon divergence** compares both distributions to their average $m = \frac{1}{2} (p + q)$:
+
+$$
+    \text{JS}(p, q) = \dfrac{1}{2} \, \text{KL}(p || m) + \dfrac{1}{2} \, \text{KL}(q || m)
+$$
+
+It is symmetric, $\text{JS}(p, q) = \text{JS}(q, p)$, and always finite, even when $q(x) = 0$ where $p(x) > 0$, as the average $m$ is positive wherever one of the two distributions is. It is zero when the distributions are equal, and at most $\log 2$, a value reached when they do not overlap at all.
 
 Refer to <https://towardsdatascience.com/entropy-cross-entropy-and-kl-divergence-explained-b09cdae917a> for nice visual explanations of the cross-entropy and KL divergence.

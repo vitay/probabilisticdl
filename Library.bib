@@ -2888,6 +2888,22 @@
   file = {/Users/vitay/Documents/Zotero/storage/9PBMGEU8/Benaïchouche et al. - 2021 - Unsupervised Reconstruction of Sea Surface Currents from AIS Maritime Traffic Data Using Trainable V.pdf}
 }
 
+@article{Benamou2000,
+  title = {A Computational Fluid Mechanics Solution to the {{Monge-Kantorovich}} Mass Transfer Problem},
+  author = {Benamou, Jean-David and Brenier, Yann},
+  year = 2000,
+  month = jan,
+  journal = {Numerische Mathematik},
+  volume = {84},
+  number = {3},
+  pages = {375--393},
+  issn = {0945-3245},
+  doi = {10.1007/s002110050002},
+  urldate = {2026-10-29},
+  langid = {english},
+  keywords = {Mathematics Subject Classification (1991):65M60}
+}
+
 @inproceedings{Bender2021,
   title = {On the {{Dangers}} of {{Stochastic Parrots}}: {{Can Language Models Be Too Big}}?},
   shorttitle = {On the {{Dangers}} of {{Stochastic Parrots}}},
@@ -3946,6 +3962,23 @@
   urldate = {2019-02-15},
   abstract = {The basal ganglia, in particular the striatum, are central to theories of behavioral control, and often identified as a seat of action selection. Reinforcement learning (RL) models---which have driven much recent experimental work on this region---cast striatum as a dynamic controller, integrating sensory and motivational information to construct efficient and enriching behavioral policies. Befitting this informationally central role, the BG sit at the nexus of multiple anatomical `loops' of synaptic projections, connecting a wide range of cortical and subcortical structures. Numerous pioneering anatomical studies conducted over the past several decades have meticulously catalogued these loops, and labeled them according to the inferred functions of the connected regions. The specific cotermina of the projections are highly localized to several different subregions of the striatum, leading to the suggestion that these subregions perform complementary but distinct functions. However, until recently, the dominant computational framework outlined only a bipartite, dorsal/ventral, division of striatum. We review recent computational and experimental advances that argue for a more finely fractionated delineation. In particular, experimental data provide extensive insight into unique functions subserved by the dorsomedial striatum (DMS). These functions appear to correspond well with theories of a `model-based' RL subunit, and may also shed light on the suborganization of ventral striatum. Finally, we discuss the limitations of these ideas and how they point the way toward future refinements of neurocomputational theories of striatal function, bringing them into contact with other areas of computational theory and other regions of the brain.},
   file = {/Users/vitay/Documents/Zotero/storage/CK9Z3YUD/Bornstein_Daw_2011_Multiplicity of control in the basal ganglia.pdf;/Users/vitay/Documents/Zotero/storage/TTL48BE8/S0959438811000365.html}
+}
+
+@misc{Bortoli2023,
+  title = {Diffusion {{Schr\"odinger Bridge}} with {{Applications}} to {{Score-Based Generative Modeling}}},
+  author = {Bortoli, Valentin De and Thornton, James and Heng, Jeremy and Doucet, Arnaud},
+  year = 2023,
+  month = apr,
+  number = {arXiv:2106.01357},
+  eprint = {2106.01357},
+  primaryclass = {stat.ML},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2106.01357},
+  urldate = {2026-10-29},
+  abstract = {Progressively applying Gaussian noise transforms complex data distributions to approximately Gaussian. Reversing this dynamic defines a generative model. When the forward noising process is given by a Stochastic Differential Equation (SDE), Song et al. (2021) demonstrate how the time inhomogeneous drift of the associated reverse-time SDE may be estimated using score-matching. A limitation of this approach is that the forward-time SDE must be run for a sufficiently long time for the final distribution to be approximately Gaussian. In contrast, solving the Schr\"odinger Bridge problem (SB), i.e. an entropy-regularized optimal transport problem on path spaces, yields diffusions which generate samples from the data distribution in finite time. We present Diffusion SB (DSB), an original approximation of the Iterative Proportional Fitting (IPF) procedure to solve the SB problem, and provide theoretical analysis along with generative modeling experiments. The first DSB iteration recovers the methodology proposed by Song et al. (2021), with the flexibility of using shorter time intervals, as subsequent DSB iterations reduce the discrepancy between the final-time marginal of the forward (resp. backward) SDE with respect to the prior (resp. data) distribution. Beyond generative modeling, DSB offers a widely applicable computational optimal transport tool as the continuous state-space analogue of the popular Sinkhorn algorithm (Cuturi, 2013).},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Probability,Statistics - Machine Learning},
+  file = {/Users/vitay/Documents/Zotero/storage/E95KHXS7/Bortoli et al. - 2023 - Diffusion Schrödinger Bridge with Applications to Score-Based Generative Modeling.pdf}
 }
 
 @article{Bosch-Bouju2013,
@@ -7755,6 +7788,19 @@
   urldate = {2023-03-24},
   abstract = {Humans choose actions based on both habit and planning. Habitual control is computationally frugal but adapts slowly to novel circumstances, whereas planning is computationally expensive but can adapt swiftly. Current research emphasizes the competition between habits and plans for behavioral control, yet many complex tasks instead favor their integration. We consider a hierarchical architecture that exploits the computational efficiency of habitual control to select goals while preserving the flexibility of planning to achieve those goals. We formalize this mechanism in a reinforcement learning setting, illustrate its costs and benefits, and experimentally demonstrate its spontaneous application in a sequential decision-making task.},
   file = {/Users/vitay/Documents/Zotero/storage/CECVIJDH/Cushman_Morris_2015_Habitual_control_of_goal_selection_in_humans.pdf}
+}
+
+@inproceedings{Cuturi2013,
+  title = {Sinkhorn {{Distances}}: {{Lightspeed Computation}} of {{Optimal Transport}}},
+  shorttitle = {Sinkhorn {{Distances}}},
+  booktitle = {Advances in {{Neural Information Processing Systems}}},
+  author = {Cuturi, Marco},
+  year = 2013,
+  volume = {26},
+  publisher = {Curran Associates, Inc.},
+  urldate = {2026-10-29},
+  abstract = {Optimal transportation distances are a fundamental family of parameterized distances for histograms in the probability simplex. Despite their appealing theoretical properties, excellent performance and intuitive formulation, their computation involves the resolution of a linear program whose cost is prohibitive whenever the histograms' dimension exceeds a few hundreds. We propose in this work a new family of optimal transportation distances that look at transportation problems from a maximum-entropy perspective. We smooth the classical optimal transportation problem with an entropic regularization term, and show that the resulting optimum is also a distance which can be computed through Sinkhorn's matrix scaling algorithm at a speed that is several orders of magnitude faster than that of transportation solvers. We also report improved performance on the MNIST benchmark problem over competing distances.},
+  file = {/Users/vitay/Documents/Zotero/storage/JPNWKVN6/Cuturi - 2013 - Sinkhorn Distances Lightspeed Computation of Optimal Transport.pdf}
 }
 
 @article{Dabney2017,
@@ -23695,6 +23741,24 @@
   file = {/Users/vitay/Documents/Zotero/storage/DWPYCTNT/Liu_et_al_2022_tension.pdf}
 }
 
+@misc{Liu2022e,
+  title = {Flow {{Straight}} and {{Fast}}: {{Learning}} to {{Generate}} and {{Transfer Data}} with {{Rectified Flow}}},
+  shorttitle = {Flow {{Straight}} and {{Fast}}},
+  author = {Liu, Xingchao and Gong, Chengyue and Liu, Qiang},
+  year = 2022,
+  month = sep,
+  number = {arXiv:2209.03003},
+  eprint = {2209.03003},
+  primaryclass = {cs.LG},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2209.03003},
+  urldate = {2026-10-29},
+  abstract = {We present rectified flow, a surprisingly simple approach to learning (neural) ordinary differential equation (ODE) models to transport between two empirically observed distributions {$\pi\_$}0 and {$\pi\_$}1, hence providing a unified solution to generative modeling and domain transfer, among various other tasks involving distribution transport. The idea of rectified flow is to learn the ODE to follow the straight paths connecting the points drawn from {$\pi\_$}0 and {$\pi\_$}1 as much as possible. This is achieved by solving a straightforward nonlinear least squares optimization problem, which can be easily scaled to large models without introducing extra parameters beyond standard supervised learning. The straight paths are special and preferred because they are the shortest paths between two points, and can be simulated exactly without time discretization and hence yield computationally efficient models. We show that the procedure of learning a rectified flow from data, called rectification, turns an arbitrary coupling of {$\pi\_$}0 and {$\pi\_$}1 to a new deterministic coupling with provably non-increasing convex transport costs. In addition, recursively applying rectification allows us to obtain a sequence of flows with increasingly straight paths, which can be simulated accurately with coarse time discretization in the inference phase. In empirical studies, we show that rectified flow performs superbly on image generation, image-to-image translation, and domain adaptation. In particular, on image generation and translation, our method yields nearly straight flows that give high quality results even with a single Euler discretization step.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning},
+  file = {/Users/vitay/Documents/Zotero/storage/QSAINJMM/Liu et al. - 2022 - Flow Straight and Fast Learning to Generate and Transfer Data with Rectified Flow.pdf}
+}
+
 @article{Liu2024,
   title = {Midbrain Signaling of Identity Prediction Errors Depends on Orbitofrontal Cortex Networks},
   author = {Liu, Qingfang and Zhao, Yao and Attanti, Sumedha and Voss, Joel L. and Schoenbaum, Geoffrey and Kahnt, Thorsten},
@@ -30682,6 +30746,23 @@
   pages = {7496--7503},
   abstract = {Functional neuroimaging in human subjects and studies of monkeys with lesions limited to the mid-dorsolateral (MDL) prefrontal cortex have shown that this specific region of the prefrontal cortex is involved in visual working memory, although its precise role remains a matter of debate. The present study compared the effect on visual working memory of lesions restricted to the mid-dorsolateral prefrontal cortex of the monkey with that of lesions to the anterior inferotemporal cortex, a region of the temporal cortex specialized for visual memory. Increasing the delay during which information had to be maintained in visual working memory impaired performance after lesions of the anterior inferotemporal cortex, but not after mid-dorsolateral prefrontal lesions. By contrast, increasing the number of stimuli that had to be monitored impaired the performance of animals with mid-dorsolateral prefrontal lesions, but not that of animals with anterior inferotemporal lesions. This demonstration of a double dissociation between the effects of these two lesions provides strong evidence that the role of the mid-dorsolateral prefrontal cortex in visual working memory does not lie in the maintenance of information per se, but rather in the executive process of monitoring this information. In addition, the present study demonstrated that lesions limited to area 9, which constitutes the superior part of the mid-dorsolateral prefrontal region, give rise to a mild impairment in the monitoring of information, whereas lesions of the complete mid-dorsolateral prefrontal region yield a very severe impairment.},
   keywords = {Analysis of Variance,Animals,Attention,Cerebral,Photic Stimulation,Prefrontal Cortex,Short-Term}
+}
+
+@misc{Peyre2020,
+  title = {Computational {{Optimal Transport}}},
+  author = {Peyr{\'e}, Gabriel and Cuturi, Marco},
+  year = 2020,
+  month = mar,
+  number = {arXiv:1803.00567},
+  eprint = {1803.00567},
+  primaryclass = {stat.ML},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.1803.00567},
+  urldate = {2026-10-29},
+  abstract = {Optimal transport (OT) theory can be informally described using the words of the French mathematician Gaspard Monge (1746-1818): A worker with a shovel in hand has to move a large pile of sand lying on a construction site. The goal of the worker is to erect with all that sand a target pile with a prescribed shape (for example, that of a giant sand castle). Naturally, the worker wishes to minimize her total effort, quantified for instance as the total distance or time spent carrying shovelfuls of sand. Mathematicians interested in OT cast that problem as that of comparing two probability distributions, two different piles of sand of the same volume. They consider all of the many possible ways to morph, transport or reshape the first pile into the second, and associate a "global" cost to every such transport, using the "local" consideration of how much it costs to move a grain of sand from one place to another. Recent years have witnessed the spread of OT in several fields, thanks to the emergence of approximate solvers that can scale to sizes and dimensions that are relevant to data sciences. Thanks to this newfound scalability, OT is being increasingly used to unlock various problems in imaging sciences (such as color or texture processing), computer vision and graphics (for shape manipulation) or machine learning (for regression, classification and density fitting). This short book reviews OT with a bias toward numerical methods and their applications in data sciences, and sheds lights on the theoretical properties of OT that make it particularly useful for some of these applications.},
+  archiveprefix = {arXiv},
+  keywords = {Statistics - Machine Learning},
+  file = {/Users/vitay/Documents/Zotero/storage/EPX3IY6Q/Peyré and Cuturi - 2020 - Computational Optimal Transport.pdf}
 }
 
 @article{Pfeiffer2010,
@@ -40714,6 +40795,22 @@
   pmid = {30228231},
   keywords = {basal ganglia,category learning,computational model,physiological data,prefrontal cortex},
   file = {/Users/vitay/Documents/Zotero/storage/9QM2PAVD/Villagrasa_et_al_2018_On_the_Role_of_Cortex-Basal_Ganglia_Interactions_for_Category_Learning.pdf;/Users/vitay/Documents/Zotero/storage/8LUP8TIL/9551.html}
+}
+
+@book{Villani2009,
+  title = {Optimal {{Transport}}},
+  author = {Villani, C{\'e}dric},
+  editor = {Berger, M. and Eckmann, B. and De La Harpe, P. and Hirzebruch, F. and Hitchin, N. and H{\"o}rmander, L. and Kupiainen, A. and Lebeau, G. and Ratner, M. and Serre, D. and Sinai, {\relax Ya}. G. and Sloane, N. J. A. and Vershik, A. M. and Waldschmidt, M.},
+  year = 2009,
+  series = {Grundlehren Der Mathematischen {{Wissenschaften}}},
+  volume = {338},
+  publisher = {Springer},
+  address = {Berlin, Heidelberg},
+  doi = {10.1007/978-3-540-71050-9},
+  urldate = {2026-10-29},
+  copyright = {http://www.springer.com/tdm},
+  isbn = {978-3-540-71049-3 978-3-540-71050-9},
+  keywords = {curvature,dynamical systems,Monge-Kantorovich problem,Optimal transport,partial differential equations,Riemannian geometry}
 }
 
 @inproceedings{Vinayakumar2017,
