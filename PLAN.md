@@ -65,7 +65,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 - [ ] Normalizing flows — change of variables, exact likelihood.
 - [ ] Energy-based models and score matching.
-- [~] ★ **1. Denoising diffusion models** `{#sec-diffusion}` and **2. Conditional and latent diffusion** `{#sec-conditionaldiffusion}` — outline below ("Chapter plan: Diffusion models"), agreed; writing section by section. Notes: port `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/` (~850 lines; its images `langevin.gif`, `kerneldensityestimation.png`, `manifold.png` are in the Obsidian `Inference/img/` folder); hierarchical-VAE derivation of @Luo2022a.
+- [x] ★ **1. Denoising diffusion models** `{#sec-diffusion}` and **2. Conditional and latent diffusion** `{#sec-conditionaldiffusion}` — written (detailed plan below, "Chapter plan: Diffusion models"). Notes: port `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/` (~850 lines; its images `langevin.gif`, `kerneldensityestimation.png`, `manifold.png` are in the Obsidian `Inference/img/` folder); hierarchical-VAE derivation of @Luo2022a.
     - Planned paragraph: **diffusion and flow matching in the forward / reverse KL dichotomy** (link to @sec-forwardreverse).
         - Rule of thumb: an expectation over the **data** is mass-covering (MLE, VAE, diffusion, flow matching); over the **model's own samples** it is mode-seeking (VI, mode collapse of GAN generators).
         - Diffusion is trained by maximizing an ELBO on $\log p_\theta(x)$ (hierarchical VAE, @Luo2022a); the encoder is the fixed noising process, and each term $\text{KL}(q(x_{t-1}|x_t, x_0) || p_\theta(x_{t-1}|x_t))$ has the data-driven distribution first → forward KL / maximum likelihood. With the right weighting, score matching also bounds $\text{KL}(p_\text{data} || p_\theta)$ [@Song2021].
@@ -442,13 +442,16 @@ Files: `src/generative/1-Diffusion.qmd` (`{#sec-diffusion}`, sections 1-6) and `
     - The reverse step is a Langevin step with a learned, noise-dependent score: diffusion = score-based generative models with decreasing noise levels [@Song2020a], which solves the problems of @sec-hmclimits (score learned everywhere, modes correctly weighted).
     - Averaging at the right place: blurry predictions of $x_0$ at high noise are exactly the right score; modes separated progressively.
     - One paragraph: continuous-time view (forward SDE, reverse SDE, deterministic probability-flow ODE behind DDIM) and pointer to flow matching [@Lipman2023], which learns such a deterministic flow directly.
-7. [ ] **Conditional generation**
+7. [x] **Conditional generation** `{#sec-guidance}` (chapter 2, section 1) — approved (own exact CFG figure on overlapping classes; MRI figure from the notes, source Song2022a; intro figure `conditional-generation.png`: 1D cat/dog modes, unconditional vs. conditional trajectories, Twemoji icons CC-BY 4.0).
     - Conditioning the network on a class or a text embedding, $\epsilon_\theta(x_t, c, t)$.
     - Classifier guidance [@Dhariwal2021] (Bayes' rule on scores) and classifier-free guidance [@Ho2022]: extrapolation between conditional and unconditional scores; sharpening, i.e. mode-seeking at sampling time (diversity vs. quality).
     - Text conditioning with CLIP embeddings [@Radford2021], one paragraph.
-8. [ ] **Latent diffusion models**
+8. [x] **Latent diffusion models** `{#sec-latentdiffusion}` (chapter 2, section 2) — approved (figures from the notes: `latent-diffusion.png` [@Rombach2022], `lsgm.png` [@Vahdat2021]; summary as section 3).
     - Diffusion in the latent space of a pretrained autoencoder [@Rombach2022]: cheaper, focuses on semantics; the VAE of Part IV comes back (figure from the notes: LDM architecture).
     - Summary of the chapter (table: model / encoder / trained with / samples with?), and the link back to the whole book.
+
+8b. [x] **Modern text-to-image models** `{#sec-imagegenerators}` (chapter 2, section 3) — approved: Stable Diffusion, GLIDE [@Nichol2022], DALL-E 2 / unCLIP [@Ramesh2022] (figure from the notes), Imagen cascade [@Saharia2022] (figure from <https://imagen.research.google>), current trends (transformers [@Peebles2023], flow matching [@Esser2024]).
+9. [x] **Summary** (chapter 2, section 4) — approved: table of the ingredients of the book used by diffusion models, five-bullet recap, transition to optimal transport and flow matching.
 
 ### Decisions
 

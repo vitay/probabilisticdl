@@ -49,6 +49,7 @@ book:
     - part: "**Deep generative models**"
       chapters:
         - src/generative/1-Diffusion.qmd
+        - src/generative/2-ConditionalDiffusion.qmd
     - src/references.qmd
 
 bibliography: 
