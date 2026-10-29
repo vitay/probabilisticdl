@@ -65,7 +65,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 - [ ] Normalizing flows — change of variables, exact likelihood.
 - [ ] Energy-based models and score matching.
-- [ ] ★ Diffusion models — port `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/` (~850 lines; its images `langevin.gif`, `kerneldensityestimation.png`, `manifold.png` are in the Obsidian `Inference/img/` folder); hierarchical-VAE derivation of @Luo2022a.
+- [~] ★ **1. Denoising diffusion models** `{#sec-diffusion}` and **2. Conditional and latent diffusion** `{#sec-conditionaldiffusion}` — outline below ("Chapter plan: Diffusion models"), agreed; writing section by section. Notes: port `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/` (~850 lines; its images `langevin.gif`, `kerneldensityestimation.png`, `manifold.png` are in the Obsidian `Inference/img/` folder); hierarchical-VAE derivation of @Luo2022a.
     - Planned paragraph: **diffusion and flow matching in the forward / reverse KL dichotomy** (link to @sec-forwardreverse).
         - Rule of thumb: an expectation over the **data** is mass-covering (MLE, VAE, diffusion, flow matching); over the **model's own samples** it is mode-seeking (VI, mode collapse of GAN generators).
         - Diffusion is trained by maximizing an ELBO on $\log p_\theta(x)$ (hierarchical VAE, @Luo2022a); the encoder is the fixed noising process, and each term $\text{KL}(q(x_{t-1}|x_t, x_0) || p_\theta(x_{t-1}|x_t))$ has the data-driven distribution first → forward KL / maximum likelihood. With the right weighting, score matching also bounds $\text{KL}(p_\text{data} || p_\theta)$ [@Song2021].
@@ -73,6 +73,8 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
         - The averaging happens at the right place: the MSE denoiser predicts $\mathbb{E}[x_0 | x_t]$, blurry at high noise but exactly the score of the noisy distribution (Tweedie's formula); the modes are separated progressively as the noise decreases (the noise-levels argument of @sec-hmclimits, seen from the training side).
         - Flow matching: same picture — MSE regression of conditional velocities over data samples (covering), learned field $\mathbb{E}[u_t(x | x_0) | x_t]$; not literally a KL (closer to transport distances).
         - Mode-seeking comes back at sampling time: classifier-free guidance samples roughly from $p(x | c) \, p(c | x)^w$, sharpening towards the modes (diversity traded for quality).
+- [ ] **Optimal transport** — after the two diffusion chapters, before flow matching. A different geometry to compare $p_\theta$ and $p$ than the KL: Monge problem, Kantorovich couplings, Wasserstein distances (closed forms in 1D by sorting, between Gaussians); comparison with the KL on distributions with separated supports (KL infinite / constant, Wasserstein smooth); entropic regularization and the Sinkhorn algorithm (link to entropy); applications: WGAN, OT couplings in flow matching, Schrödinger bridges (pointer). One-sentence pointer from @sec-klml. Detailed outline to write when we get there.
+- [ ] **Flow matching** — after optimal transport: continuous normalizing flows, velocity field regression on conditional paths [@Lipman2023], link to the probability-flow ODE of the diffusion chapter, OT couplings / rectified flows (straighter paths, fewer sampling steps). Detailed outline to write when we get there.
 - [ ] GANs as divergence minimization (f-divergences).
 
 ### Part VI — Uncertainty and Bayesian deep learning — optional
@@ -93,7 +95,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 ## Open items
 
-- [~] GitHub repository `git@github.com:vitay/probabilisticinference.git`; CI `.github/workflows/quarto-publish.yml` renders and publishes to the `gh-pages` branch on every push to `main` (as in the Deep RL book).
+- [x] GitHub repository `git@github.com:vitay/probabilisticinference.git`; CI `.github/workflows/quarto-publish.yml` renders and publishes to the `gh-pages` branch on every push to `main` (as in the Deep RL book); site <https://vitay.github.io/probabilisticinference/>.
 
 ---
 
@@ -394,4 +396,64 @@ File: `src/variationalinference/5-TighterBounds.qmd`, label `{#sec-tighterbounds
 - Two chapters.
 - IWAE figure dropped: a trained VAE encoder closes the gap of the toy model, and IWAE has little practical interest; short section without figure (bound, when it helps, evaluation).
 - Posterior collapse included in the $\beta$-VAE section: with a powerful decoder, the KL term can drive $q_\phi(z|x)$ to the prior for every input, the latent variables are ignored; KL annealing (increasing $\beta$ from 0 to 1 during training) as a remedy.
+
+---
+
+## Chapter plan: Diffusion models
+
+Files: `src/generative/1-Diffusion.qmd` (`{#sec-diffusion}`, sections 1-6) and `src/generative/2-ConditionalDiffusion.qmd` (`{#sec-conditionaldiffusion}`, sections 7-8), first chapters of a new part **Deep generative models** (`src/generative/`, Part V in `_quarto.yml`). Source material: `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/Diffusion tutorial.md` (DDPM, improved DDPM, DDIM, score-based models, guidance, latent diffusion).
+
+**Goal of the chapter:** present denoising diffusion models as the meeting point of the two halves of the book: they are hierarchical VAEs trained with the ELBO of Part IV, whose network learns the score of Part III, and they are sampled with (a discretization of) Langevin dynamics. Keep the main text on the ideas; the long ELBO derivation and the posterior of the forward process in collapsed callouts.
+
+**Notation** (to agree on):
+
+- $x_0$ a data sample, $p(x_0)$ the data distribution (as in the rest of the book); $x_1, \ldots, x_T$ the noisy versions, $t$ the diffusion step, $T$ the number of steps.
+- $q(x_t | x_{t-1})$ the forward (noising) process: it plays the role of the encoder $q$ of Part IV, but has no parameters.
+- $\beta_t$ the variance schedule, $\alpha_t = 1 - \beta_t$, $\bar{\alpha}_t = \prod_{s \leq t} \alpha_s$.
+- $\epsilon \sim \mathcal{N}(0, I)$ the noise and $\epsilon_\theta(x_t, t)$ the denoising network, as in the literature. $\epsilon$ was the step size of Langevin dynamics in @sec-hmc: in this chapter, step sizes are written $\eta$.
+- $p_\theta(x_{t-1} | x_t)$ the learned reverse process; $s_\theta(x_t, t)$ the learned score.
+
+**References** (all in `Library.bib`): `Sohl-Dickstein2015` (origin), `Ho2020` (DDPM), `Nichol2021` (improved DDPM, cosine schedule), `Song2022` (DDIM), `Song2020a` (NCSN, score-based), `Song2021` (maximum likelihood training of score-based models), `Luo2022a` (unified perspective), `Karras2022` (design space), `Dhariwal2021` (classifier guidance), `Ho2022` (classifier-free guidance), `Radford2021` (CLIP), `Rombach2022` (latent diffusion), `Vahdat2021`, `Ronneberger2015` (U-Net), `Lipman2023` (flow matching, pointer only). Optional, not in the library: Hyvärinen (2005) score matching, Vincent (2011) denoising score matching.
+
+### Sections
+
+1. [x] **From VAEs to diffusion models** — approved.
+    - The weakness of VAEs (@sec-tighterbounds summary): a single decoder maps a simple distribution onto the data in one step. Diffusion: many small steps, each easy to invert.
+    - Idea: destroy the data progressively with noise (fixed encoder), learn to undo each step (decoder); generation starts from pure noise. A hierarchical VAE with $T$ latent layers of the same dimension as the data [@Sohl-Dickstein2015; @Ho2020].
+    - Figure (from the notes, source towardsdatascience): `diffusion-steps.webp`, an image progressively noised and denoised.
+2. [x] **The forward process** — approved.
+    - $q(x_t | x_{t-1}) = \mathcal{N}(\sqrt{1 - \beta_t} \, x_{t-1}, \sqrt{\beta_t})$, i.e. $x_t = \sqrt{1 - \beta_t} \, x_{t-1} + \sqrt{\beta_t} \, \epsilon$; the shrinking factor keeps the variance bounded.
+    - Closed form in one step (sum of Gaussians): $x_t = \sqrt{\bar{\alpha}_t} \, x_0 + \sqrt{1 - \bar{\alpha}_t} \, \epsilon$; for large $t$, $q(x_T) \approx \mathcal{N}(0, I)$ whatever the data; schedules (linear, cosine [@Nichol2021]).
+    - Figure (own, `diffusion-forward.png`): the 2D mixture of @fig-score noised at a few steps $t$ (samples), ending as a standard normal.
+3. [x] **The reverse process** — approved.
+    - The true reverse step $q(x_{t-1} | x_t)$ is intractable (it depends on the whole data distribution), but nearly Gaussian when $\beta_t$ is small; conditioned on $x_0$ it is Gaussian with a closed form (collapsed derivation, Bayes' rule).
+    - Learned reverse step $p_\theta(x_{t-1} | x_t) = \mathcal{N}(\mu_\theta(x_t, t), \sigma_t)$, with the mean parameterized through a network $\epsilon_\theta(x_t, t)$ predicting the noise contained in $x_t$.
+    - Network: a U-Net taking $x_t$ and $t$ [@Ronneberger2015] (one paragraph, figure from the notes optional).
+4. [x] **Training: the ELBO of a hierarchical VAE** — approved.
+    - The ELBO of @sec-variationalinference with the forward process as encoder: a sum of KL divergences between Gaussians, $\text{KL}(q(x_{t-1} | x_t, x_0) || p_\theta(x_{t-1} | x_t))$, in closed form (@sec-klnormal); full derivation in a collapsed callout [@Luo2022a].
+    - Simplification [@Ho2020]: each term is a squared error between noises → the simple loss $\mathbb{E}_{x_0, t, \epsilon}[|| \epsilon - \epsilon_\theta(\sqrt{\bar{\alpha}_t} \, x_0 + \sqrt{1 - \bar{\alpha}_t} \, \epsilon, t) ||^2]$: a regression, no sequence to simulate; training algorithm.
+    - The decoder is trained with a forward KL, i.e. maximum likelihood (paragraph planned in the Part V notes above): mass-covering, but not blurry, as each reverse step is nearly Gaussian and the chain of many steps is arbitrarily multimodal; [@Song2021].
+5. [x] **Sampling** — approved; learned variances [@Nichol2021] added before DDIM (static + GIF tabset; DDIM checked with 50 steps on the exact denoiser).
+    - Ancestral sampling of the reverse chain from $x_T \sim \mathcal{N}(0, I)$ (@sec-simplesampling); algorithm.
+    - Figure (own, `diffusion-reverse.png`): reverse process on the 2D mixture with the **exact** optimal denoiser (computable in closed form for a Gaussian mixture, i.e. what a perfect network would learn): samples at a few steps, from noise to the two modes.
+    - Speed: $T \approx 1000$ network evaluations; DDIM [@Song2022]: deterministic sampling with the same trained network in far fewer steps (short).
+6. [x] **Diffusion models learn the score** — approved (figure `diffusion-score.png`; continuous time [@Song2021a]).
+    - The noise predicted by the network is proportional to the score of the noisy distribution: $s_\theta(x_t, t) = - \epsilon_\theta(x_t, t) / \sqrt{1 - \bar{\alpha}_t}$ (one line from the Gaussian score of @sec-score; Tweedie's formula in words: the denoiser predicts $\mathbb{E}[x_0 | x_t]$).
+    - The reverse step is a Langevin step with a learned, noise-dependent score: diffusion = score-based generative models with decreasing noise levels [@Song2020a], which solves the problems of @sec-hmclimits (score learned everywhere, modes correctly weighted).
+    - Averaging at the right place: blurry predictions of $x_0$ at high noise are exactly the right score; modes separated progressively.
+    - One paragraph: continuous-time view (forward SDE, reverse SDE, deterministic probability-flow ODE behind DDIM) and pointer to flow matching [@Lipman2023], which learns such a deterministic flow directly.
+7. [ ] **Conditional generation**
+    - Conditioning the network on a class or a text embedding, $\epsilon_\theta(x_t, c, t)$.
+    - Classifier guidance [@Dhariwal2021] (Bayes' rule on scores) and classifier-free guidance [@Ho2022]: extrapolation between conditional and unconditional scores; sharpening, i.e. mode-seeking at sampling time (diversity vs. quality).
+    - Text conditioning with CLIP embeddings [@Radford2021], one paragraph.
+8. [ ] **Latent diffusion models**
+    - Diffusion in the latent space of a pretrained autoencoder [@Rombach2022]: cheaper, focuses on semantics; the VAE of Part IV comes back (figure from the notes: LDM architecture).
+    - Summary of the chapter (table: model / encoder / trained with / samples with?), and the link back to the whole book.
+
+### Decisions
+
+- Two chapters: "Denoising diffusion models" (sections 1-6) and "Conditional and latent diffusion" (sections 7-8, plus the summary).
+- Own 2D toy figures with the exact optimal denoiser of a Gaussian mixture.
+- $\epsilon$ for the noise and $\epsilon_\theta$ for the network, as in the literature; step sizes written $\eta$ in these chapters.
+- Diffusion first in Part V; normalizing flows and GANs later; "Energy-based models and score matching" partly absorbed by section 6.
 
