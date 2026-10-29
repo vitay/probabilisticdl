@@ -51,6 +51,7 @@ book:
         - src/generative/1-Diffusion.qmd
         - src/generative/2-ConditionalDiffusion.qmd
         - src/generative/3-OptimalTransport.qmd
+        - src/generative/4-FlowMatching.qmd
     - src/references.qmd
 
 bibliography: 

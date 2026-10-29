@@ -439,6 +439,23 @@
   file = {/Users/vitay/Documents/Zotero/storage/ZVTHR4B8/Albelwi_Mahmood_2017_A_Framework_for_Designing_the_Architectures_of_Deep_Convolutional_Neural.pdf;/Users/vitay/Documents/Zotero/storage/R32YDGU7/242.html}
 }
 
+@misc{Albergo2023,
+  title = {Building {{Normalizing Flows}} with {{Stochastic Interpolants}}},
+  author = {Albergo, Michael S. and {Vanden-Eijnden}, Eric},
+  year = 2023,
+  month = mar,
+  number = {arXiv:2209.15571},
+  eprint = {2209.15571},
+  primaryclass = {cs.LG},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2209.15571},
+  urldate = {2026-10-29},
+  abstract = {A generative model based on a continuous-time normalizing flow between any pair of base and target probability densities is proposed. The velocity field of this flow is inferred from the probability current of a time-dependent density that interpolates between the base and the target in finite time. Unlike conventional normalizing flow inference methods based the maximum likelihood principle, which require costly backpropagation through ODE solvers, our interpolant approach leads to a simple quadratic loss for the velocity itself which is expressed in terms of expectations that are readily amenable to empirical estimation. The flow can be used to generate samples from either the base or target, and to estimate the likelihood at any time along the interpolant. In addition, the flow can be optimized to minimize the path length of the interpolant density, thereby paving the way for building optimal transport maps. In situations where the base is a Gaussian density, we also show that the velocity of our normalizing flow can also be used to construct a diffusion model to sample the target as well as estimate its score. However, our approach shows that we can bypass this diffusion completely and work at the level of the probability flow with greater simplicity, opening an avenue for methods based solely on ordinary differential equations as an alternative to those based on stochastic differential equations. Benchmarking on density estimation tasks illustrates that the learned flow can match and surpass conventional continuous flows at a fraction of the cost, and compares well with diffusions on image generation on CIFAR-10 and ImageNet \$32\textbackslash times32\$. The method scales ab-initio ODE flows to previously unreachable image resolutions, demonstrated up to \$128\textbackslash times128\$.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
+  file = {/Users/vitay/Documents/Zotero/storage/83L45EUB/Albergo and Vanden-Eijnden - 2023 - Building Normalizing Flows with Stochastic Interpolants.pdf}
+}
+
 @article{Albertin2015,
   title = {Neuronal {{Activity}} in the {{Nucleus Accumbens}} and {{Hippocampus}} in {{Rats}} during {{Formation}} of {{Seeking Behavior}} in a {{Radial Maze}}},
   author = {Albertin, S V and Wiener, S I},
@@ -6217,6 +6234,18 @@
   year = 2016,
   month = jun,
   abstract = {This paper describes InfoGAN, an information-theoretic extension to the Generative Adversarial Network that is able to learn disentangled representations in a completely unsupervised manner. InfoGAN is a generative adversarial network that also maximizes the mutual information between a small subset of the latent variables and the observation. We derive a lower bound to the mutual information objective that can be optimized efficiently, and show that our training procedure can be interpreted as a variation of the Wake-Sleep algorithm. Specifically, InfoGAN successfully disentangles writing styles from digit shapes on the MNIST dataset, pose from lighting of 3D rendered images, and background digits from the central digit on the SVHN dataset. It also discovers visual concepts that include hair styles, presence/absence of eyeglasses, and emotions on the CelebA face dataset. Experiments show that InfoGAN learns interpretable representations that are competitive with representations learned by existing fully supervised methods.}
+}
+
+@inproceedings{Chen2018,
+  title = {Neural {{Ordinary Differential Equations}}},
+  booktitle = {Advances in {{Neural Information Processing Systems}}},
+  author = {Chen, Ricky T. Q. and Rubanova, Yulia and Bettencourt, Jesse and Duvenaud, David K},
+  year = 2018,
+  volume = {31},
+  publisher = {Curran Associates, Inc.},
+  urldate = {2026-10-29},
+  abstract = {We introduce a new family of deep neural network models. Instead of specifying a discrete sequence of hidden layers, we parameterize the derivative of the hidden state using a neural network. The output of the network is computed using a blackbox differential equation solver. These continuous-depth models have constant memory cost, adapt their evaluation strategy to each input, and can explicitly trade numerical precision for speed. We demonstrate these properties in continuous-depth residual networks and continuous-time latent variable models. We also construct continuous normalizing flows, a generative model that can train by maximum likelihood, without partitioning or ordering the data dimensions. For training, we show how to scalably backpropagate through any ODE solver, without access to its internal operations. This allows end-to-end training of ODEs within larger models.},
+  file = {/Users/vitay/Documents/Zotero/storage/S738LFFE/Chen et al. - 2018 - Neural Ordinary Differential Equations.pdf}
 }
 
 @misc{Chen2020,
@@ -23427,6 +23456,23 @@
   abstract = {We introduce a new paradigm for generative modeling built on Continuous Normalizing Flows (CNFs), allowing us to train CNFs at unprecedented scale. Specifically, we present the notion of Flow Matching (FM), a simulation-free approach for training CNFs based on regressing vector fields of fixed conditional probability paths. Flow Matching is compatible with a general family of Gaussian probability paths for transforming between noise and data samples -- which subsumes existing diffusion paths as specific instances. Interestingly, we find that employing FM with diffusion paths results in a more robust and stable alternative for training diffusion models. Furthermore, Flow Matching opens the door to training CNFs with other, non-diffusion probability paths. An instance of particular interest is using Optimal Transport (OT) displacement interpolation to define the conditional probability paths. These paths are more efficient than diffusion paths, provide faster training and sampling, and result in better generalization. Training CNFs using Flow Matching on ImageNet leads to consistently better performance than alternative diffusion-based methods in terms of both likelihood and sample quality, and allows fast and reliable sample generation using off-the-shelf numerical ODE solvers.},
   archiveprefix = {arXiv},
   file = {/Users/vitay/Documents/Zotero/storage/ZUX7VV9C/Lipman et al. - 2023 - Flow Matching for Generative Modeling.pdf}
+}
+
+@misc{Lipman2024,
+  title = {Flow {{Matching Guide}} and {{Code}}},
+  author = {Lipman, Yaron and Havasi, Marton and Holderrieth, Peter and Shaul, Neta and Le, Matt and Karrer, Brian and Chen, Ricky T. Q. and {Lopez-Paz}, David and {Ben-Hamu}, Heli and Gat, Itai},
+  year = 2024,
+  month = dec,
+  number = {arXiv:2412.06264},
+  eprint = {2412.06264},
+  primaryclass = {cs.LG},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2412.06264},
+  urldate = {2026-10-29},
+  abstract = {Flow Matching (FM) is a recent framework for generative modeling that has achieved state-of-the-art performance across various domains, including image, video, audio, speech, and biological structures. This guide offers a comprehensive and self-contained review of FM, covering its mathematical foundations, design choices, and extensions. By also providing a PyTorch package featuring relevant examples (e.g., image and text generation), this work aims to serve as a resource for both novice and experienced researchers interested in understanding, applying and further developing FM.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning},
+  file = {/Users/vitay/Documents/Zotero/storage/HDJ8I42N/Lipman et al. - 2024 - Flow Matching Guide and Code.pdf}
 }
 
 @article{Lisman2005,

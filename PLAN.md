@@ -74,18 +74,8 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
         - Flow matching: same picture — MSE regression of conditional velocities over data samples (covering), learned field $\mathbb{E}[u_t(x | x_0) | x_t]$; not literally a KL (closer to transport distances).
         - Mode-seeking comes back at sampling time: classifier-free guidance samples roughly from $p(x | c) \, p(c | x)^w$, sharpening towards the modes (diversity traded for quality).
 - [x] **3. Optimal transport** `{#sec-ot}` — written (detailed plan below, "Chapter plan: Optimal transport"); Jensen-Shannon defined in @sec-kl.
-- [ ] **Flow matching** — after optimal transport: continuous normalizing flows, velocity field regression on conditional paths [@Lipman2023], link to the probability-flow ODE of the diffusion chapter, OT couplings / rectified flows (straighter paths, fewer sampling steps). Detailed outline to write when we get there.
-    - Moved from the OT chapter, to place after the flow matching objective (draft text):
-
-      ### Optimal transport for flow matching
-
-      The dynamic view introduced above suggests building generative models that learn a velocity field transporting noise onto data. Flow matching, presented in the next chapter, trains such a velocity field by regression on pairs of a noise sample and a data sample, moved along straight lines. Which pairs to use is exactly the question of the coupling:
-
-      * With the **independent coupling**, noise and data samples are paired at random. The straight paths between the pairs cross each other in all directions (@fig-otcoupling, left), and the learned velocity field, which averages over all the paths passing through a point, follows curved trajectories that need many integration steps.
-      * With an **optimal coupling** computed on each minibatch of samples [@Tong2024], the pairs are close and the paths point in consistent directions (@fig-otcoupling, right): the learned trajectories are straighter, and fewer steps are needed to generate a sample.
-
-      **Rectified flows** [@Liu2022e] reach a similar result without computing any optimal transport: after training a first flow, they pair each noise sample with the data sample that the flow generates from it, and train a new flow on these pairs, which progressively straightens the trajectories. This idea is at the heart of recent large-scale image generators such as recent versions of Stable Diffusion (@sec-imagegenerators).
-
+- [x] **4. Flow matching** `{#sec-flowmatching}` — written (detailed plan below, "Chapter plan: Flow matching"). Original entry: after optimal transport: continuous normalizing flows, velocity field regression on conditional paths [@Lipman2023], link to the probability-flow ODE of the diffusion chapter, OT couplings / rectified flows (straighter paths, fewer sampling steps). Detailed outline to write when we get there.
+    - (The draft text moved from the OT chapter is now in section 6 of the flow matching chapter.)
 - [ ] GANs as divergence minimization (f-divergences).
 
 ### Part VI — Uncertainty and Bayesian deep learning — optional
@@ -524,4 +514,53 @@ File: `src/generative/3-OptimalTransport.qmd`, label `{#sec-ot}`, third chapter 
 - All seven sections, including Sinkhorn.
 - All three own figures.
 - Notation $p$ / $q$ for source / target.
+
+---
+
+## Chapter plan: Flow matching
+
+File: `src/generative/4-FlowMatching.qmd`, label `{#sec-flowmatching}`, fourth chapter of *Deep generative models*, after optimal transport.
+
+**Goal of the chapter:** learn directly a velocity field that transports noise onto data, by a simple regression, without any noising process or likelihood computation. Show that diffusion models are a particular case (curved Gaussian paths), and that optimal transport couplings straighten the paths. As for diffusion, all toy figures use the exact velocity field of a Gaussian mixture (no training).
+
+**Notation** (to agree on):
+
+- **Time runs from noise to data**, as in the flow matching literature: $t = 0$ noise, $t = 1$ data — the opposite of the diffusion chapters ($t = 0$ data, $t = T$ noise); stated explicitly at the beginning.
+- $x_0 \sim p_0 = \mathcal{N}(0, I)$ the noise, $x_1 \sim p_1 = p$ the data (consistent with $p$ / $q$ = source / target of @sec-ot, here $p_0$ / $p_1$).
+- $p_t$ the distribution at time $t$; $v_t(x)$ (learned: $v_\theta(x, t)$) the velocity field; $u_t(x | x_0, x_1)$ the conditional velocity.
+
+**References** (all in `Library.bib`): `Lipman2023`, `Liu2022e` (rectified flow), `Albergo2023` (stochastic interpolants), `Tong2024` (minibatch OT), `Esser2024` (Stable Diffusion 3), `Song2021a` (probability flow), `Chen2018` (neural ODEs, continuous normalizing flows), `Lipman2024` (*Flow Matching Guide and Code*).
+
+### Sections
+
+1. [x] **Flows** — approved (added schematic `flow.png`: 1D field in the (t, x) plane, exact, functions reused in section 6).
+    - A velocity field $v_t(x)$ and the ODE $dx/dt = v_t(x)$ transport samples of $p_0$ into samples of $p_1$ (the dynamic view of @sec-ot, the probability flow of @sec-diffusion).
+    - Continuity equation stated in words (mass conservation: the density changes only because mass flows).
+    - Continuous normalizing flows (Chen et al.) learn $v_\theta$ by maximum likelihood, which requires simulating the ODE during training: expensive. Flow matching learns it by regression, without simulation.
+2. [x] **Conditional paths and the marginal velocity** — approved (static + GIF tabset; the GIF shows both clouds have the same p_t).
+    - Pick a noise sample $x_0$ and a data sample $x_1$ (independent coupling) and join them by a straight line, $x_t = (1 - t) \, x_0 + t \, x_1$, with constant velocity $u_t = x_1 - x_0$.
+    - The distribution $p_t$ of all these interpolated points goes from noise to data; the velocity field that generates it, the **marginal velocity**, is the average of the conditional velocities of all the lines passing through a point: $v_t(x) = \mathbb{E}[x_1 - x_0 | x_t = x]$ (stated, collapsed justification).
+    - The lines cross, so the marginal velocity averages over different directions: the marginal trajectories are **curved**, even though each conditional path is straight, and never cross.
+    - *Figure (own, exact):* `flow-matching-paths.png` — 2D mixture of @fig-score: left, straight conditional paths between random pairs (noise, data); right, trajectories of the exact marginal flow from the same noise samples (curved, non-crossing).
+3. [x] **The flow matching loss** — approved.
+    - The marginal velocity is unknown, but regressing on the conditional velocity gives the same gradients: $\mathcal{L}(\theta) = \mathbb{E}_{t, x_0, x_1}[|| v_\theta(x_t, t) - (x_1 - x_0) ||^2]$ (collapsed proof: the two losses differ by a constant) [@Lipman2023; @Liu2022e].
+    - Training algorithm (sample $t$, $x_0$, $x_1$, interpolate, regress): as simple as the diffusion loss, and the same denoising flavor (predicting the direction from noise to data).
+4. [x] **Sampling** — approved (static + GIF over the number of steps).
+    - Integrate the ODE from $x_0 \sim \mathcal{N}(0, I)$ with a few Euler steps $x_{t + h} = x_t + h \, v_\theta(x_t, t)$; error due to the curvature of the trajectories.
+    - *Figure (own, exact):* `flow-matching-sampling.png` — samples generated with 1, 2, 5 and 50 Euler steps on the exact field: few steps fail where trajectories are curved.
+5. [x] **Diffusion models are flow matching models** — approved.
+    - Gaussian paths $x_t = \alpha_t \, x_1 + \sigma_t \, x_0$: the straight line is $\alpha_t = t$, $\sigma_t = 1 - t$; diffusion (variance-preserving) corresponds to $\alpha_t^2 + \sigma_t^2 = 1$ (curved schedule).
+    - For Gaussian paths, velocity, noise prediction and score are linear functions of each other (one line, Tweedie): a diffusion model's probability flow is a flow matching model with a particular path; flow matching mostly changes the path and the regression target.
+    - Why straight paths: constant conditional velocity, simpler regression target, fewer sampling steps.
+6. [x] **Straightening the flow: optimal transport couplings and rectified flows** — approved (1D static figure only, the GIF was dropped; 2x2 grid: minibatch conditional paths on top (random pairs cross, sorted pairs do not), resulting flows below; 1D end points of the marginal flow = OT map, checked numerically). — draft text moved from the OT chapter (above, in the Part V entry): independent vs. minibatch OT couplings [@Tong2024] (reuse @fig-otcoupling), rectified flows / reflow [@Liu2022e].
+    - *Figure (own, exact):* `flow-matching-1d.png` — 1D: trajectories of the marginal flow with the independent coupling (curved) vs. the optimal transport (straight lines from quantile matching, @sec-ot), same endpoints (in 1D the marginal flow already realizes the monotone OT map, but along curved paths).
+7. [x] **Summary** — approved.
+    - Table: diffusion vs. flow matching (path, training target, sampler, steps, likelihood).
+    - Modern use: Stable Diffusion 3 and other large models [@Esser2024]; end of Part V for now (normalizing flows, GANs as possible later chapters).
+
+### Decisions
+
+- Flow matching convention: $t = 0$ noise, $t = 1$ data, with an explicit warning.
+- All three own figures, each as a static figure + GIF in a tabset (as in @sec-diffusion).
+- Keep the 1D figure in section 6, in addition to reusing @fig-otcoupling.
 
