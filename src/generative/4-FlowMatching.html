@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Flow matching – Probabilistic inference for machine learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../src/references.html" rel="next">
+<link href="../../src/generative/3-OptimalTransport.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5c1318cf63eba56dbef7ba16bc7d56f5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-af1da4bb2192535958fe56112dabcf43.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span id="sec-flowmatching" class="quarto-section-identifier"><span class="chapter-title">Flow matching</span></span></h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Probabilistic inference for machine learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Basics</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/1-InformationTheory.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Information theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/2-MLE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Maximum likelihood estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/3-Bayesian.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Bayesian estimation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Statistical machine learning</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/1-Paradigms.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Learning paradigms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/2-KL.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Kullback-Leibler divergence in machine learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/3-Softmax.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Softmax classifier for discrete distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/4-MDN.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Mixture density networks for continuous distributions</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Sampling methods</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/1-MonteCarlo.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Monte Carlo and importance sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/2-MCMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/3-HMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Variational inference</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/1-LatentVariables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Latent variable models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/2-VariationalInference.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/3-VAE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational autoencoders</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/4-GradientEstimators.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Gradient estimators</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/5-TighterBounds.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Tighter and weighted bounds</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Deep generative models</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/1-Diffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Denoising diffusion models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/2-ConditionalDiffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Conditional and latent diffusion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/3-OptimalTransport.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Optimal transport</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/4-FlowMatching.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Flow matching</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#flows" id="toc-flows" class="nav-link active" data-scroll-target="#flows">Flows</a></li>
+  <li><a href="#conditional-paths-and-the-marginal-velocity" id="toc-conditional-paths-and-the-marginal-velocity" class="nav-link" data-scroll-target="#conditional-paths-and-the-marginal-velocity">Conditional paths and the marginal velocity</a>
+  <ul class="collapse">
+  <li><a href="#straight-lines-between-noise-and-data" id="toc-straight-lines-between-noise-and-data" class="nav-link" data-scroll-target="#straight-lines-between-noise-and-data">Straight lines between noise and data</a></li>
+  <li><a href="#the-marginal-velocity" id="toc-the-marginal-velocity" class="nav-link" data-scroll-target="#the-marginal-velocity">The marginal velocity</a></li>
+  </ul></li>
+  <li><a href="#the-flow-matching-loss" id="toc-the-flow-matching-loss" class="nav-link" data-scroll-target="#the-flow-matching-loss">The flow matching loss</a></li>
+  <li><a href="#sampling" id="toc-sampling" class="nav-link" data-scroll-target="#sampling">Sampling</a></li>
+  <li><a href="#diffusion-models-are-flow-matching-models" id="toc-diffusion-models-are-flow-matching-models" class="nav-link" data-scroll-target="#diffusion-models-are-flow-matching-models">Diffusion models are flow matching models</a>
+  <ul class="collapse">
+  <li><a href="#gaussian-paths" id="toc-gaussian-paths" class="nav-link" data-scroll-target="#gaussian-paths">Gaussian paths</a></li>
+  <li><a href="#velocity-noise-and-score" id="toc-velocity-noise-and-score" class="nav-link" data-scroll-target="#velocity-noise-and-score">Velocity, noise and score</a></li>
+  <li><a href="#why-straight-paths" id="toc-why-straight-paths" class="nav-link" data-scroll-target="#why-straight-paths">Why straight paths?</a></li>
+  </ul></li>
+  <li><a href="#straightening-the-flow" id="toc-straightening-the-flow" class="nav-link" data-scroll-target="#straightening-the-flow">Straightening the flow</a>
+  <ul class="collapse">
+  <li><a href="#optimal-transport-couplings" id="toc-optimal-transport-couplings" class="nav-link" data-scroll-target="#optimal-transport-couplings">Optimal transport couplings</a></li>
+  <li><a href="#rectified-flows" id="toc-rectified-flows" class="nav-link" data-scroll-target="#rectified-flows">Rectified flows</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span id="sec-flowmatching" class="quarto-section-identifier"><span class="chapter-title">Flow matching</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Diffusion models learn to generate data by learning to undo a noising process, one step at a time (<a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>). Their continuous-time version showed that they can also be sampled with a deterministic flow, an ordinary differential equation transporting noise onto data, and <a href="3-OptimalTransport.html" class="quarto-xref"><span>Optimal transport</span></a> showed that some flows are better than others: the ones of optimal transport move the mass along straight lines. <strong>Flow matching</strong> <span class="citation" data-cites="Lipman2023 Liu2022e Albergo2023">(<a href="../references.html#ref-Albergo2023" role="doc-biblioref">Albergo and Vanden-Eijnden, 2023</a>; <a href="../references.html#ref-Lipman2023" role="doc-biblioref">Lipman et al., 2023</a>; <a href="../references.html#ref-Liu2022e" role="doc-biblioref">Liu et al., 2022</a>)</span> learns such a flow directly, with a regression as simple as the one of diffusion models, but without any noising process. It has become the training method of many recent large generative models.</p>
+<div class="callout callout-style-default callout-warning no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Time runs from noise to data
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This chapter follows the convention of the flow matching literature: the time <span class="math inline">t</span> goes from <span class="math inline">t = 0</span>, where the samples are <strong>noise</strong>, <span class="math inline">x_0 \sim p_0 = \mathcal{N}(0, I)</span>, to <span class="math inline">t = 1</span>, where they are <strong>data</strong>, <span class="math inline">x_1 \sim p_1</span>. This is the opposite of the diffusion chapters, where <span class="math inline">x_0</span> was the data and <span class="math inline">x_T</span> the noise.</p>
+</div>
+</div>
+<section id="flows" class="level2">
+<h2 class="anchored" data-anchor-id="flows">Flows</h2>
+<p>A <strong>flow</strong> is defined by a time-dependent <strong>velocity field</strong> <span class="math inline">v_t(x)</span>, which gives, at each time <span class="math inline">t \in [0, 1]</span> and each position <span class="math inline">x</span>, the velocity of a particle located there. Starting from a sample of the noise distribution, a particle follows the ordinary differential equation (ODE):</p>
+<p><span class="math display">
+    \dfrac{dx}{dt} = v_t(x) \qquad \text{with} \qquad x(0) = x_0 \sim p_0
+</span></p>
+<p>until it reaches its final position <span class="math inline">x(1)</span> at <span class="math inline">t = 1</span>. Moving all the samples of <span class="math inline">p_0</span> in this way transforms their distribution: at each time <span class="math inline">t</span>, the particles follow a distribution <span class="math inline">p_t</span>, which goes from <span class="math inline">p_0</span> at <span class="math inline">t = 0</span> to some final distribution at <span class="math inline">t = 1</span>. The goal of a generative model is to find a velocity field whose final distribution is the data distribution <span class="math inline">p_1</span>. This is the dynamic view of transport of <a href="3-OptimalTransport.html" class="quarto-xref"><span>Optimal transport</span></a>, and the probability flow of diffusion models (<a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>) is one such velocity field.</p>
+<p><a href="#fig-flow" class="quarto-xref">Figure&nbsp;<span>20.1</span></a> illustrates this in one dimension, with time on the horizontal axis. The velocity field is represented by arrows: at each time and position, it tells in which direction and how fast a particle moves. The particles start from the noise distribution on the left, follow the arrows, and progressively gather into the two modes of the data distribution on the right. In between, their distribution <span class="math inline">p_t</span> progressively deforms from one into the other.</p>
+<div id="fig-flow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/flow.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;20.1: A flow in one dimension. The velocity field v_t(x) (grey arrows) moves the samples of the noise distribution p_0 (left) along trajectories (orange) that end in the data distribution p_1 (right); the distribution p_t of the samples changes continuously in between, as shown at t = 0.5. The velocity field is the one learned by flow matching for this simple data distribution, computed exactly."><img src="../img/flow.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-flow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.1: A flow in one dimension. The velocity field <span class="math inline">v_t(x)</span> (grey arrows) moves the samples of the noise distribution <span class="math inline">p_0</span> (left) along trajectories (orange) that end in the data distribution <span class="math inline">p_1</span> (right); the distribution <span class="math inline">p_t</span> of the samples changes continuously in between, as shown at <span class="math inline">t = 0.5</span>. The velocity field is the one learned by flow matching for this simple data distribution, computed exactly.
+</figcaption>
+</figure>
+</div>
+<p>How the distribution <span class="math inline">p_t</span> evolves under the flow is described by the <strong>continuity equation</strong> of fluid mechanics, which expresses the conservation of mass: the probability mass is neither created nor destroyed, so the density at a point only changes because mass flows in or out of it. We will not need its exact form here, only the fact that a velocity field determines how the whole distribution moves.</p>
+<p>Models that learn a velocity field <span class="math inline">v_\theta(x, t)</span> with a neural network are called <strong>continuous normalizing flows</strong> <span class="citation" data-cites="Chen2018">(<a href="../references.html#ref-Chen2018" role="doc-biblioref">Chen et al., 2018</a>)</span>. They can in principle be trained by maximum likelihood, as the continuity equation allows computing how the log-density of each sample changes along its trajectory. But this requires simulating the ODE for every training sample, and computing derivatives of the network along the whole trajectory: training is very slow, and scales badly to high-dimensional data such as images. Flow matching avoids this simulation entirely: the velocity field is learned by regression on samples of the paths, without ever solving the ODE during training.</p>
+</section>
+<section id="conditional-paths-and-the-marginal-velocity" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-paths-and-the-marginal-velocity">Conditional paths and the marginal velocity</h2>
+<section id="straight-lines-between-noise-and-data" class="level3">
+<h3 class="anchored" data-anchor-id="straight-lines-between-noise-and-data">Straight lines between noise and data</h3>
+<p>Which velocity field transports the noise onto the data? We do not know it, but we can easily build paths from noise to data. Let’s pick a noise sample <span class="math inline">x_0 \sim \mathcal{N}(0, I)</span> and a data sample <span class="math inline">x_1</span> from the training set, independently of each other, and join them by a straight line travelled at constant speed:</p>
+<p><span class="math display">
+    x_t = (1 - t) \, x_0 + t \, x_1
+</span></p>
+<p>Along this <strong>conditional path</strong>, the velocity is constant and very simple:</p>
+<p><span class="math display">
+    u_t = \dfrac{d x_t}{dt} = x_1 - x_0
+</span></p>
+<p>Repeating this for all pairs of noise and data samples defines a distribution <span class="math inline">p_t</span> of the interpolated points at each time <span class="math inline">t</span>. It goes from the noise distribution at <span class="math inline">t = 0</span> to the data distribution at <span class="math inline">t = 1</span>, and blends both in between: for each <span class="math inline">t</span>, <span class="math inline">p_t</span> is obtained by shrinking the data by a factor <span class="math inline">t</span> and blurring it with noise of standard deviation <span class="math inline">1 - t</span>. We already have a way to generate samples of <span class="math inline">p_t</span> for any <span class="math inline">t</span>, by interpolating random pairs. But generating data requires a <strong>velocity field</strong>: a rule that tells, for a point <span class="math inline">x</span> at time <span class="math inline">t</span>, where to go, without knowing in advance which pair it belongs to.</p>
+</section>
+<section id="the-marginal-velocity" class="level3">
+<h3 class="anchored" data-anchor-id="the-marginal-velocity">The marginal velocity</h3>
+<p>Many conditional paths pass through the same point <span class="math inline">x</span> at time <span class="math inline">t</span>: lines between different noise and data samples cross each other (<a href="#fig-flowmatchingpaths" class="quarto-xref">Figure&nbsp;<span>20.2</span></a>, left). The velocity field that moves the whole distribution <span class="math inline">p_t</span> along, called the <strong>marginal velocity</strong>, is the <strong>average</strong> of the velocities of all the conditional paths passing through <span class="math inline">x</span> at time <span class="math inline">t</span>:</p>
+<p><span class="math display">
+    v_t(x) = \mathbb{E}[x_1 - x_0 \, | \, x_t = x]
+</span></p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why the average?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Think of the probability mass flowing through a small region around <span class="math inline">x</span> at time <span class="math inline">t</span>. Each conditional path passing through this region carries its own share of the mass with velocity <span class="math inline">x_1 - x_0</span>. The total flux of mass through the region is the sum of the fluxes of all the paths, i.e.&nbsp;the density <span class="math inline">p_t(x)</span> multiplied by their average velocity. A single velocity field moving the same amount of mass in the same way must therefore have this average velocity at <span class="math inline">x</span>. Formally, the continuity equation is linear in the product of the density and the velocity, so the marginal densities and fluxes of the conditional paths add up <span class="citation" data-cites="Lipman2023">(<a href="../references.html#ref-Lipman2023" role="doc-biblioref">Lipman et al., 2023</a>)</span>.</p>
+<p>As the path is a straight line, the conditional velocity can also be written in terms of the end point: <span class="math inline">x_1 - x_0 = (x_1 - x_t) / (1 - t)</span>, so that <span class="math inline">v_t(x) = (\mathbb{E}[x_1 | x_t = x] - x) / (1 - t)</span>: the marginal velocity points towards the average data sample compatible with the current position, which is what the toy figures of this chapter compute exactly.</p>
+</div>
+</div>
+</div>
+<p>The marginal velocity transports the noise distribution onto the data distribution, through exactly the same intermediate distributions <span class="math inline">p_t</span> as the conditional paths. But its trajectories are not the conditional paths. Each conditional path is a straight line, but the marginal velocity averages over many lines going in different directions, so its trajectories are <strong>curved</strong> (<a href="#fig-flowmatchingpaths" class="quarto-xref">Figure&nbsp;<span>20.2</span></a>, right). A particle does not end at a predetermined data sample: it follows the average direction, and commits progressively to one of the modes. Unlike the conditional paths, the trajectories of the marginal flow never meet, as the velocity field defines a single direction at each point and time.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Paths</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Animation</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div id="fig-flowmatchingpaths" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-flowmatchingpaths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/flow-matching-paths.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;20.2: Left: straight conditional paths between random pairs of noise samples (grey) and data samples (orange) of the two-dimensional mixture of Figure&nbsp;fig-score. Right: trajectories of the marginal flow, starting from the same noise samples, computed with the exact marginal velocity; they are curved, and end in the data distribution, but not at the data samples of the left panel."><img src="../img/flow-matching-paths.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-flowmatchingpaths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.2: Left: straight conditional paths between random pairs of noise samples (grey) and data samples (orange) of the two-dimensional mixture of <a href="../sampling/3-HMC.html#fig-score" class="quarto-xref">Figure&nbsp;<span>11.1</span></a>. Right: trajectories of the marginal flow, starting from the same noise samples, computed with the exact marginal velocity; they are curved, and end in the data distribution, but not at the data samples of the left panel.
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="../img/flow-matching-paths.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Particles moving along the conditional paths (left) and along the marginal flow (right): individual particles move differently, but at every time t, both clouds have the same distribution p_t (contours)."><img src="../img/flow-matching-paths.gif" class="img-fluid figure-img" style="width:90.0%" alt="Particles moving along the conditional paths (left) and along the marginal flow (right): individual particles move differently, but at every time t, both clouds have the same distribution p_t (contours)."></a></p>
+<figcaption>Particles moving along the conditional paths (left) and along the marginal flow (right): individual particles move differently, but at every time <span class="math inline">t</span>, both clouds have the same distribution <span class="math inline">p_t</span> (contours).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="the-flow-matching-loss" class="level2">
+<h2 class="anchored" data-anchor-id="the-flow-matching-loss">The flow matching loss</h2>
+<p>We would like to train a neural network <span class="math inline">v_\theta(x, t)</span> to approximate the marginal velocity, for example by minimizing the squared error between the two at all times and positions:</p>
+<p><span class="math display">
+    \mathcal{L}_\text{FM}(\theta) = \mathbb{E}_{t \sim \mathcal{U}(0, 1), \, x \sim p_t} [|| v_\theta(x, t) - v_t(x) ||^2]
+</span></p>
+<p>But the marginal velocity <span class="math inline">v_t(x)</span> is an average over all the data, which we cannot compute. The key result of flow matching is that we do not need it: regressing on the velocity of the <strong>conditional</strong> paths, which is known, works just as well. The <strong>conditional flow matching</strong> loss is:</p>
+<p><span class="math display">
+    \mathcal{L}_\text{CFM}(\theta) = \mathbb{E}_{t \sim \mathcal{U}(0, 1), \, x_0 \sim \mathcal{N}(0, I), \, x_1 \sim p_1} [|| v_\theta((1 - t) \, x_0 + t \, x_1, t) - (x_1 - x_0) ||^2]
+</span></p>
+<p>The two losses differ only by a constant that does not depend on <span class="math inline">\theta</span>, so they have the same gradients and the same minimum <span class="citation" data-cites="Lipman2023">(<a href="../references.html#ref-Lipman2023" role="doc-biblioref">Lipman et al., 2023</a>)</span>. The reason is the same as for the noise predictor of diffusion models (<a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>): the best prediction of a quantity in the sense of the squared error is its expected value. The network cannot know from which pair <span class="math inline">(x_0, x_1)</span> the point <span class="math inline">x_t</span> comes, so the best it can do is to predict the average of <span class="math inline">x_1 - x_0</span> over all the pairs compatible with <span class="math inline">x_t</span>, which is precisely the marginal velocity.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Proof
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Expanding the squares, both losses contain the term <span class="math inline">\mathbb{E}[||v_\theta(x_t, t)||^2]</span>, which is the same as the points <span class="math inline">x_t</span> follow <span class="math inline">p_t</span> in both cases. The terms that do not involve <span class="math inline">\theta</span> (the squared norms of the targets) are constants. Only the cross terms remain to compare. For the conditional loss, conditioning on <span class="math inline">x_t</span>:</p>
+<p><span class="math display">
+    \mathbb{E}_{t, x_0, x_1} [v_\theta(x_t, t) \cdot (x_1 - x_0)] = \mathbb{E}_{t, x_t} [v_\theta(x_t, t) \cdot \mathbb{E}[x_1 - x_0 | x_t]] = \mathbb{E}_{t, x_t} [v_\theta(x_t, t) \cdot v_t(x_t)]
+</span></p>
+<p>which is the cross term of the marginal loss. The two losses therefore differ by a constant.</p>
+</div>
+</div>
+</div>
+<p>Training a flow matching model is therefore as simple as training a diffusion model. Each training iteration consists in:</p>
+<ol type="1">
+<li>sampling a data sample <span class="math inline">x_1</span> from the training set, a noise sample <span class="math inline">x_0 \sim \mathcal{N}(0, I)</span>, and a time <span class="math inline">t \in [0, 1]</span>;</li>
+<li>computing the interpolated point <span class="math inline">x_t = (1 - t) \, x_0 + t \, x_1</span>;</li>
+<li>updating the network to reduce the squared error <span class="math inline">|| v_\theta(x_t, t) - (x_1 - x_0) ||^2</span>.</li>
+</ol>
+<p>The structure is the same as the training of diffusion models: sample data, noise and a time, mix them, and regress. Only the mixing and the target differ: a straight interpolation instead of the noise schedule <span class="math inline">\sqrt{\bar{\alpha}_t}</span>, and the direction from the noise to the data instead of the noise itself. No ODE is ever solved during training, which is the main advantage over continuous normalizing flows. As for diffusion models, the distribution of the times <span class="math inline">t</span> used during training matters in practice: large models sample them more often in the middle of the interval, where the prediction is the most difficult <span class="citation" data-cites="Esser2024">(<a href="../references.html#ref-Esser2024" role="doc-biblioref">Esser et al., 2024</a>)</span>.</p>
+</section>
+<section id="sampling" class="level2">
+<h2 class="anchored" data-anchor-id="sampling">Sampling</h2>
+<p>Once the velocity field is learned, generating a new sample consists in drawing a noise sample <span class="math inline">x_0 \sim \mathcal{N}(0, I)</span> and integrating the ODE <span class="math inline">dx / dt = v_\theta(x, t)</span> from <span class="math inline">t = 0</span> to <span class="math inline">t = 1</span>. The simplest numerical method is the <strong>Euler method</strong>: the time interval is divided into <span class="math inline">K</span> steps of size <span class="math inline">h = 1 / K</span>, and at each step the sample moves in a straight line along the current velocity:</p>
+<p><span class="math display">
+    x_{t + h} = x_t + h \, v_\theta(x_t, t)
+</span></p>
+<p>Each step requires one evaluation of the network, as one step of the reverse process of a diffusion model. The Euler method is exact when the trajectories are straight lines travelled at constant speed: a single step would then be enough. When the trajectories are curved, following the velocity in a straight line overshoots or undershoots the curve, and more steps are needed.</p>
+<p><a href="#fig-flowmatchingsampling" class="quarto-xref">Figure&nbsp;<span>20.3</span></a> shows the effect of the number of steps with the exact velocity field of <a href="#fig-flowmatchingpaths" class="quarto-xref">Figure&nbsp;<span>20.2</span></a>. With a single step, all the samples land on the same point, the mean of the data: at <span class="math inline">t = 0</span>, the noise sample says nothing about which data sample it will become, so the marginal velocity points towards the average data sample, <span class="math inline">\mathbb{E}[x_1] - x_0</span>, and a single step follows it all the way. With a few more steps, the samples have time to change direction and split between the two modes, but the modes are still too narrow and their proportions wrong. Around 50 steps, the samples follow the data distribution. The more curved the trajectories, the more steps are needed, which is why straightening the trajectories is an important goal (see below). In practice, higher-order integration methods, which evaluate the velocity at several points of each step, reduce the number of steps further.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Snapshots</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">Animation</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div id="fig-flowmatchingsampling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-flowmatchingsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/flow-matching-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;20.3: Samples generated by integrating the exact marginal velocity of Figure&nbsp;fig-flowmatchingpaths with 1, 2, 5 and 50 Euler steps, from the same noise samples. With one step, all samples collapse onto the mean of the data; with enough steps, they follow the data distribution (contours)."><img src="../img/flow-matching-sampling.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-flowmatchingsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.3: Samples generated by integrating the exact marginal velocity of <a href="#fig-flowmatchingpaths" class="quarto-xref">Figure&nbsp;<span>20.2</span></a> with 1, 2, 5 and 50 Euler steps, from the same noise samples. With one step, all samples collapse onto the mean of the data; with enough steps, they follow the data distribution (contours).
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="../img/flow-matching-sampling.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Samples generated with an increasing number of Euler steps, from 1 to 50."><img src="../img/flow-matching-sampling.gif" class="img-fluid figure-img" style="width:60.0%" alt="Samples generated with an increasing number of Euler steps, from 1 to 50."></a></p>
+<figcaption>Samples generated with an increasing number of Euler steps, from 1 to 50.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="diffusion-models-are-flow-matching-models" class="level2">
+<h2 class="anchored" data-anchor-id="diffusion-models-are-flow-matching-models">Diffusion models are flow matching models</h2>
+<section id="gaussian-paths" class="level3">
+<h3 class="anchored" data-anchor-id="gaussian-paths">Gaussian paths</h3>
+<p>The straight line is not the only possible conditional path. More generally, flow matching can use any <strong>Gaussian path</strong> of the form:</p>
+<p><span class="math display">
+    x_t = \alpha_t \, x_1 + \sigma_t \, x_0 \qquad \text{with} \qquad x_0 \sim \mathcal{N}(0, I)
+</span></p>
+<p>where the coefficients <span class="math inline">\alpha_t</span> and <span class="math inline">\sigma_t</span> go from <span class="math inline">\alpha_0 = 0</span>, <span class="math inline">\sigma_0 = 1</span> (pure noise) to <span class="math inline">\alpha_1 = 1</span>, <span class="math inline">\sigma_1 = 0</span> (pure data). The straight line of the previous sections corresponds to <span class="math inline">\alpha_t = t</span> and <span class="math inline">\sigma_t = 1 - t</span>. The conditional velocity is then <span class="math inline">\dot{\alpha}_t \, x_1 + \dot{\sigma}_t \, x_0</span>, where the dots denote the derivatives with respect to time, and the flow matching loss is unchanged otherwise.</p>
+<p>This form should look familiar: it is exactly the one-shot formula of the forward process of diffusion models (<a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>), <span class="math inline">\sqrt{\bar{\alpha}} \, x_{\text{data}} + \sqrt{1 - \bar{\alpha}} \, \epsilon</span>, with time running in the opposite direction. Diffusion models use the coefficients <span class="math inline">\alpha_t = \sqrt{\bar{\alpha}}</span> and <span class="math inline">\sigma_t = \sqrt{1 - \bar{\alpha}}</span>, which satisfy <span class="math inline">\alpha_t^2 + \sigma_t^2 = 1</span>: the variance of the samples is preserved along the path. In the plane spanned by <span class="math inline">x_0</span> and <span class="math inline">x_1</span>, this path is not a straight line but an arc of circle: the conditional paths of diffusion models are <strong>curved</strong>, even for a single pair of noise and data samples.</p>
+</section>
+<section id="velocity-noise-and-score" class="level3">
+<h3 class="anchored" data-anchor-id="velocity-noise-and-score">Velocity, noise and score</h3>
+<p>For Gaussian paths, the three quantities that a network can be trained to predict, the velocity, the noise and the score, are linear functions of each other. The marginal velocity can be written as:</p>
+<p><span class="math display">
+    v_t(x) = \dfrac{\dot{\alpha}_t}{\alpha_t} \, x + \left( \dfrac{\dot{\alpha}_t \, \sigma_t^2}{\alpha_t} - \dot{\sigma}_t \, \sigma_t \right) \nabla_x \log p_t(x)
+</span></p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Derivation
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Along a conditional path, <span class="math inline">x_1 = (x_t - \sigma_t \, x_0) / \alpha_t</span>, so that the conditional velocity can be written as a function of the current point and of the noise:</p>
+<p><span class="math display">
+    \dot{\alpha}_t \, x_1 + \dot{\sigma}_t \, x_0 = \dfrac{\dot{\alpha}_t}{\alpha_t} \, x_t + \left( \dot{\sigma}_t - \dfrac{\dot{\alpha}_t \, \sigma_t}{\alpha_t} \right) x_0
+</span></p>
+<p>The marginal velocity is its average given <span class="math inline">x_t = x</span>, which only involves the average noise <span class="math inline">\mathbb{E}[x_0 | x_t = x]</span>. By Tweedie’s formula (<a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>), this average noise is proportional to the score of <span class="math inline">p_t</span>: <span class="math inline">\mathbb{E}[x_0 | x_t = x] = - \sigma_t \, \nabla_x \log p_t(x)</span>. Replacing it gives the result.</p>
+</div>
+</div>
+</div>
+<p>The velocity is a combination of the current position and of the score of the noisy data distribution. A network trained to predict the noise, as in diffusion models, therefore also defines a velocity field, and conversely. In particular, the probability flow ODE of a diffusion model (<a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>) is exactly the marginal flow of flow matching with the variance-preserving path: both transport the noise onto the data through the same intermediate distributions.</p>
+<p>Diffusion models and flow matching models are thus two members of the same family. They differ by three choices, rather than by their principle:</p>
+<ul>
+<li>the <strong>path</strong>: an arc of circle for diffusion models, a straight line for the simplest flow matching;</li>
+<li>the <strong>target</strong> of the regression: the noise, the score or the velocity, which are equivalent up to time-dependent factors, but weight the errors differently at different times;</li>
+<li>the <strong>sampler</strong>: a stochastic reverse process or a deterministic ODE, which can both be used with either model.</li>
+</ul>
+</section>
+<section id="why-straight-paths" class="level3">
+<h3 class="anchored" data-anchor-id="why-straight-paths">Why straight paths?</h3>
+<p>If both families are equivalent, why prefer straight paths? With a straight path, the conditional velocity <span class="math inline">x_1 - x_0</span> is constant along the path, which gives the network a simple, well-scaled regression target at all times. More importantly, straight conditional paths tend to give straighter marginal trajectories than the curved paths of diffusion models, which can be integrated with fewer steps. In a large-scale comparison of paths and training targets for text-to-image models, straight paths with an appropriate distribution of training times gave the best results <span class="citation" data-cites="Esser2024">(<a href="../references.html#ref-Esser2024" role="doc-biblioref">Esser et al., 2024</a>)</span>, and they are now used by many large generative models.</p>
+<p>But, as <a href="#fig-flowmatchingpaths" class="quarto-xref">Figure&nbsp;<span>20.2</span></a> showed, straight conditional paths do not make the marginal trajectories straight: with random pairs of noise and data, the marginal velocity averages over crossing paths, and its trajectories curve. Straightening the marginal trajectories requires changing how noise and data samples are <strong>paired</strong>, which brings optimal transport back.</p>
+</section>
+</section>
+<section id="straightening-the-flow" class="level2">
+<h2 class="anchored" data-anchor-id="straightening-the-flow">Straightening the flow</h2>
+<section id="optimal-transport-couplings" class="level3">
+<h3 class="anchored" data-anchor-id="optimal-transport-couplings">Optimal transport couplings</h3>
+<p>The flow matching loss pairs noise and data samples at random, which is the independent coupling of <a href="3-OptimalTransport.html" class="quarto-xref"><span>Optimal transport</span></a>. But the loss remains valid for any coupling: the conditional paths only have to start from noise and end on data. With the <strong>optimal coupling</strong>, the pairs are close to each other and their paths point in consistent directions, so that the marginal velocity averages over paths that agree, and its trajectories are close to the straight lines of optimal transport. The optimal coupling of the whole dataset cannot be computed, but it can be computed on each minibatch, with the assignment or the Sinkhorn algorithm, for a small additional cost <span class="citation" data-cites="Tong2024">(<a href="../references.html#ref-Tong2024" role="doc-biblioref">Tong et al., 2024</a>)</span>: the learned trajectories are straighter, and fewer steps are needed to generate a sample.</p>
+<p><a href="#fig-flowmatching1d" class="quarto-xref">Figure&nbsp;<span>20.4</span></a> illustrates this in one dimension, where the optimal coupling of a minibatch is obtained by sorting both sets of samples. The conditional paths of random pairs cross, those of sorted pairs do not (top). With random pairs, the trajectories of the marginal flow are curved; with sorted pairs, all the paths passing through a point agree, and the trajectories are the straight lines of optimal transport (bottom). Interestingly, both flows end at the same points: in one dimension, a flow cannot make two particles cross, and the order-preserving map is the optimal transport map (<a href="3-OptimalTransport.html" class="quarto-xref"><span>Optimal transport</span></a>). The marginal flow of random pairs finds the optimal destinations, but along curved paths, which require more integration steps.</p>
+<div id="fig-flowmatching1d" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-flowmatching1d-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/flow-matching-1d.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;20.4: Flow matching with random and optimal pairs in one dimension, from the noise (left of each panel) to a bimodal data distribution (right). Top: the conditional paths of a minibatch of training pairs; random pairs cross (left), while optimal pairs, obtained by sorting both sets, do not (right). Bottom: the resulting flows, from the same noise samples. With random pairs, the trajectories of the marginal flow are curved (left); with optimal pairs, they are the straight lines of optimal transport (right). Both reach exactly the same end points."><img src="../img/flow-matching-1d.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-flowmatching1d-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.4: Flow matching with random and optimal pairs in one dimension, from the noise (left of each panel) to a bimodal data distribution (right). Top: the conditional paths of a minibatch of training pairs; random pairs cross (left), while optimal pairs, obtained by sorting both sets, do not (right). Bottom: the resulting flows, from the same noise samples. With random pairs, the trajectories of the marginal flow are curved (left); with optimal pairs, they are the straight lines of optimal transport (right). Both reach exactly the same end points.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="rectified-flows" class="level3">
+<h3 class="anchored" data-anchor-id="rectified-flows">Rectified flows</h3>
+<p><strong>Rectified flows</strong> <span class="citation" data-cites="Liu2022e">(<a href="../references.html#ref-Liu2022e" role="doc-biblioref">Liu et al., 2022</a>)</span> straighten the trajectories without computing any optimal transport. After training a first flow with random pairs, each noise sample is paired with the data sample that this flow <strong>generates</strong> from it, by integrating the ODE. These new pairs are much more consistent than random pairs: the flow does not make its trajectories cross, so the straight lines between the start and end points of its trajectories cross much less. A second flow, trained on these pairs, has straighter trajectories, and the procedure, called <strong>reflow</strong>, can be repeated. After a few iterations, the trajectories are almost straight, and samples can be generated with very few steps, sometimes a single one. Rectified flows are at the heart of recent large-scale image generators, such as recent versions of Stable Diffusion <span class="citation" data-cites="Esser2024">(<a href="../references.html#ref-Esser2024" role="doc-biblioref">Esser et al., 2024</a>)</span>.</p>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>Flow matching learns the velocity field of a flow transporting noise onto data, by a simple regression on the velocity of conditional paths between noise and data samples. Compared to the diffusion models of <a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>, it changes a few choices rather than the principle:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Diffusion models</th>
+<th style="text-align: left;">Flow matching</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Conditional path</td>
+<td style="text-align: left;">arc of circle (variance-preserving), via a noising process</td>
+<td style="text-align: left;">straight line between a noise and a data sample</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Coupling of noise and data</td>
+<td style="text-align: left;">independent</td>
+<td style="text-align: left;">independent, or optimal transport on minibatches</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Regression target</td>
+<td style="text-align: left;">the noise (equivalently, the score)</td>
+<td style="text-align: left;">the velocity <span class="math inline">x_1 - x_0</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Training</td>
+<td style="text-align: left;">regression at random times, no simulation</td>
+<td style="text-align: left;">regression at random times, no simulation</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sampling</td>
+<td style="text-align: left;">stochastic reverse process or deterministic ODE</td>
+<td style="text-align: left;">deterministic ODE (Euler or higher-order steps)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of steps</td>
+<td style="text-align: left;">tens to hundreds</td>
+<td style="text-align: left;">fewer when the trajectories are straight; reflow towards a single step</td>
+</tr>
+</tbody>
+</table>
+<p>Both families learn the same kind of object, a time-dependent vector field (the score or the velocity) that transforms a simple distribution into the data distribution through a continuum of intermediate distributions, and both inherit the ideas of the previous chapters: the reparameterization of the noisy samples, denoising as a regression on conditional expectations, the dynamic view of optimal transport. The straight paths of flow matching make the regression target simpler and the sampling faster, which is why most recent large-scale image and video generators are trained with flow matching, often combined with transformers instead of U-Nets <span class="citation" data-cites="Esser2024">(<a href="../references.html#ref-Esser2024" role="doc-biblioref">Esser et al., 2024</a>)</span>. The conditioning and guidance methods of <a href="2-ConditionalDiffusion.html" class="quarto-xref"><span>Conditional and latent diffusion</span></a>, and the use of a latent space, apply unchanged.</p>
+<p>For a detailed, implementation-oriented presentation of flow matching and its many variants, see <span class="citation" data-cites="Lipman2024">Lipman et al. (<a href="../references.html#ref-Lipman2024" role="doc-biblioref">2024</a>)</span>.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Albergo2023" class="csl-entry" role="listitem">
+Albergo, M. S., and Vanden-Eijnden, E. (2023). Building <span>Normalizing Flows</span> with <span>Stochastic Interpolants</span>. doi:<a href="https://doi.org/10.48550/arXiv.2209.15571">10.48550/arXiv.2209.15571</a>.
+</div>
+<div id="ref-Chen2018" class="csl-entry" role="listitem">
+Chen, R. T. Q., Rubanova, Y., Bettencourt, J., and Duvenaud, D. K. (2018). Neural <span>Ordinary Differential Equations</span>. in <em>Advances in <span>Neural Information Processing Systems</span></em> (Curran Associates, Inc.).
+</div>
+<div id="ref-Esser2024" class="csl-entry" role="listitem">
+Esser, P., Kulal, S., Blattmann, A., Entezari, R., Müller, J., Saini, H., et al. (2024). Scaling <span>Rectified Flow Transformers</span> for <span>High-Resolution Image Synthesis</span>. doi:<a href="https://doi.org/10.48550/arXiv.2403.03206">10.48550/arXiv.2403.03206</a>.
+</div>
+<div id="ref-Lipman2023" class="csl-entry" role="listitem">
+Lipman, Y., Chen, R. T. Q., Ben-Hamu, H., Nickel, M., and Le, M. (2023). Flow <span>Matching</span> for <span>Generative Modeling</span>. doi:<a href="https://doi.org/10.48550/arXiv.2210.02747">10.48550/arXiv.2210.02747</a>.
+</div>
+<div id="ref-Lipman2024" class="csl-entry" role="listitem">
+Lipman, Y., Havasi, M., Holderrieth, P., Shaul, N., Le, M., Karrer, B., et al. (2024). Flow <span>Matching Guide</span> and <span>Code</span>. doi:<a href="https://doi.org/10.48550/arXiv.2412.06264">10.48550/arXiv.2412.06264</a>.
+</div>
+<div id="ref-Liu2022e" class="csl-entry" role="listitem">
+Liu, X., Gong, C., and Liu, Q. (2022). Flow <span>Straight</span> and <span>Fast</span>: <span>Learning</span> to <span>Generate</span> and <span>Transfer Data</span> with <span>Rectified Flow</span>. doi:<a href="https://doi.org/10.48550/arXiv.2209.03003">10.48550/arXiv.2209.03003</a>.
+</div>
+<div id="ref-Tong2024" class="csl-entry" role="listitem">
+Tong, A., Fatras, K., Malkin, N., Huguet, G., Zhang, Y., Rector-Brooks, J., et al. (2024). Improving and generalizing flow-based generative models with minibatch optimal transport. doi:<a href="https://doi.org/10.48550/arXiv.2302.00482">10.48550/arXiv.2302.00482</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../../src/generative/3-OptimalTransport.html" class="pagination-link" aria-label="Optimal transport">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Optimal transport</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../src/references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p><a href="http://creativecommons.org/licenses/by-nc-sa/4.0">Creative Commons BY-NC-SA 4.0</a>. Author <a href="mailto:julien.vitay@gmail.com">Julien Vitay</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

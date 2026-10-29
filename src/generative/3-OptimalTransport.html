@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Optimal transport – Probabilistic inference for machine learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../src/generative/4-FlowMatching.html" rel="next">
+<link href="../../src/generative/2-ConditionalDiffusion.html" rel="prev">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5c1318cf63eba56dbef7ba16bc7d56f5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-af1da4bb2192535958fe56112dabcf43.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span id="sec-ot" class="quarto-section-identifier"><span class="chapter-title">Optimal transport</span></span></h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../../">Probabilistic inference for machine learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Basics</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/1-InformationTheory.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Information theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/2-MLE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Maximum likelihood estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/basics/3-Bayesian.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Bayesian estimation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Statistical machine learning</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/1-Paradigms.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Learning paradigms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/2-KL.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Kullback-Leibler divergence in machine learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/3-Softmax.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Softmax classifier for discrete distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/statisticalml/4-MDN.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Mixture density networks for continuous distributions</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Sampling methods</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/1-MonteCarlo.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Monte Carlo and importance sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/2-MCMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/sampling/3-HMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Variational inference</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/1-LatentVariables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Latent variable models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/2-VariationalInference.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/3-VAE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational autoencoders</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/4-GradientEstimators.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Gradient estimators</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/variationalinference/5-TighterBounds.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Tighter and weighted bounds</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Deep generative models</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/1-Diffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Denoising diffusion models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/2-ConditionalDiffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Conditional and latent diffusion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/3-OptimalTransport.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Optimal transport</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/4-FlowMatching.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Flow matching</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#comparing-distributions-without-overlap" id="toc-comparing-distributions-without-overlap" class="nav-link active" data-scroll-target="#comparing-distributions-without-overlap">Comparing distributions without overlap</a></li>
+  <li><a href="#monges-problem" id="toc-monges-problem" class="nav-link" data-scroll-target="#monges-problem">Monge’s problem</a></li>
+  <li><a href="#kantorovichs-relaxation-and-the-wasserstein-distance" id="toc-kantorovichs-relaxation-and-the-wasserstein-distance" class="nav-link" data-scroll-target="#kantorovichs-relaxation-and-the-wasserstein-distance">Kantorovich’s relaxation and the Wasserstein distance</a>
+  <ul class="collapse">
+  <li><a href="#couplings" id="toc-couplings" class="nav-link" data-scroll-target="#couplings">Couplings</a></li>
+  <li><a href="#the-wasserstein-distance" id="toc-the-wasserstein-distance" class="nav-link" data-scroll-target="#the-wasserstein-distance">The Wasserstein distance</a></li>
+  <li><a href="#optimal-transport-between-samples" id="toc-optimal-transport-between-samples" class="nav-link" data-scroll-target="#optimal-transport-between-samples">Optimal transport between samples</a></li>
+  </ul></li>
+  <li><a href="#closed-forms" id="toc-closed-forms" class="nav-link" data-scroll-target="#closed-forms">Closed forms</a>
+  <ul class="collapse">
+  <li><a href="#one-dimension-sorting" id="toc-one-dimension-sorting" class="nav-link" data-scroll-target="#one-dimension-sorting">One dimension: sorting</a></li>
+  <li><a href="#normal-distributions" id="toc-normal-distributions" class="nav-link" data-scroll-target="#normal-distributions">Normal distributions</a></li>
+  </ul></li>
+  <li><a href="#interpolating-between-distributions" id="toc-interpolating-between-distributions" class="nav-link" data-scroll-target="#interpolating-between-distributions">Interpolating between distributions</a>
+  <ul class="collapse">
+  <li><a href="#displacement-interpolation" id="toc-displacement-interpolation" class="nav-link" data-scroll-target="#displacement-interpolation">Displacement interpolation</a></li>
+  <li><a href="#the-dynamic-view" id="toc-the-dynamic-view" class="nav-link" data-scroll-target="#the-dynamic-view">The dynamic view</a></li>
+  </ul></li>
+  <li><a href="#entropic-regularization-and-the-sinkhorn-algorithm" id="toc-entropic-regularization-and-the-sinkhorn-algorithm" class="nav-link" data-scroll-target="#entropic-regularization-and-the-sinkhorn-algorithm">Entropic regularization and the Sinkhorn algorithm</a>
+  <ul class="collapse">
+  <li><a href="#blurring-the-coupling" id="toc-blurring-the-coupling" class="nav-link" data-scroll-target="#blurring-the-coupling">Blurring the coupling</a></li>
+  <li><a href="#the-sinkhorn-algorithm" id="toc-the-sinkhorn-algorithm" class="nav-link" data-scroll-target="#the-sinkhorn-algorithm">The Sinkhorn algorithm</a></li>
+  <li><a href="#schrödinger-bridges" id="toc-schrödinger-bridges" class="nav-link" data-scroll-target="#schrödinger-bridges">Schrödinger bridges</a></li>
+  </ul></li>
+  <li><a href="#wasserstein-gans" id="toc-wasserstein-gans" class="nav-link" data-scroll-target="#wasserstein-gans">Wasserstein GANs</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span id="sec-ot" class="quarto-section-identifier"><span class="chapter-title">Optimal transport</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Throughout this book, distributions have been compared with the KL divergence: maximum likelihood minimizes the KL between the data and the model, variational inference the KL between an approximate and a true posterior, and diffusion models a sum of KL divergences between Gaussians. The KL divergence compares the densities of the two distributions <strong>at the same points</strong>, and is blind to the geometry of the space in which they live. <strong>Optimal transport</strong> compares distributions in a different way: by the cost of moving one of them onto the other. It provides distances that remain meaningful when the distributions do not overlap, and, more importantly for generative modeling, paths that transform one distribution into another. These paths are what the flow matching models of the next chapter learn.</p>
+<section id="comparing-distributions-without-overlap" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-distributions-without-overlap">Comparing distributions without overlap</h2>
+<p>Let’s consider two uniform distributions on intervals of length 1: <span class="math inline">p</span> on <span class="math inline">[0, 1]</span>, and <span class="math inline">q</span> on <span class="math inline">[d, d + 1]</span>, i.e.&nbsp;the same distribution shifted by <span class="math inline">d</span> (<a href="#fig-otvskl" class="quarto-xref">Figure&nbsp;<span>19.1</span></a>). How far apart are they?</p>
+<ul>
+<li>As soon as <span class="math inline">d &gt; 0</span>, part of the mass of <span class="math inline">p</span> lies where <span class="math inline">q</span> is zero, and the KL divergence <span class="math inline">\text{KL}(p || q)</span> is <strong>infinite</strong> (<a href="../basics/1-InformationTheory.html#sec-kl" class="quarto-xref"><span>Kullback-Leibler divergence</span></a>). It is infinite for a shift of <span class="math inline">0.001</span> and for a shift of <span class="math inline">1000</span>: it says that the distributions are different, but not by how much.</li>
+<li>The Jensen-Shannon divergence (<a href="../basics/1-InformationTheory.html#sec-kl" class="quarto-xref"><span>Kullback-Leibler divergence</span></a>), which compares both distributions to their average, remains finite. It is equal to <span class="math inline">d \log 2</span> as long as the two intervals overlap, as only the non-overlapping parts of length <span class="math inline">d</span> contribute, but it becomes constant, equal to its maximum <span class="math inline">\log 2</span>, as soon as they are disjoint (<span class="math inline">d \geq 1</span>). Its gradient with respect to the shift is then zero: if <span class="math inline">q</span> was a model, nothing would tell it in which direction to move to get closer to <span class="math inline">p</span>.</li>
+</ul>
+<div id="fig-otvskl" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-otvskl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/ot-vs-kl.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;19.1: Two uniform distributions p and q shifted by d (left), and the divergences between them as a function of the shift (right). The KL divergence is infinite for any shift; the Jensen-Shannon divergence saturates at \log 2 when the supports are disjoint; the Wasserstein distance W_2 simply grows with the shift."><img src="../img/ot-vs-kl.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-otvskl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19.1: Two uniform distributions <span class="math inline">p</span> and <span class="math inline">q</span> shifted by <span class="math inline">d</span> (left), and the divergences between them as a function of the shift (right). The KL divergence is infinite for any shift; the Jensen-Shannon divergence saturates at <span class="math inline">\log 2</span> when the supports are disjoint; the Wasserstein distance <span class="math inline">W_2</span> simply grows with the shift.
+</figcaption>
+</figure>
+</div>
+<p>This is not an artificial situation. The data of interest typically lie on low-dimensional manifolds of a high-dimensional space (<a href="../variationalinference/1-LatentVariables.html" class="quarto-xref"><span>Latent variable models</span></a>), and a model at the beginning of training puts its mass on a different manifold: the two distributions have practically no overlap. Divergences comparing densities point by point then give little or no information about how to improve the model. This was one of the main difficulties of the original generative adversarial networks, whose training implicitly minimizes the Jensen-Shannon divergence.</p>
+<p>What we would like is a measure of the <strong>effort</strong> needed to transform one distribution into the other. Imagine the density of <span class="math inline">p</span> as a pile of sand, and the density of <span class="math inline">q</span> as a hole of the same volume: the effort is the amount of sand that has to be moved, multiplied by the distance it travels. Shifting the pile by a distance <span class="math inline">d</span> requires moving all the sand by <span class="math inline">d</span>: the effort grows smoothly with the shift, whether the distributions overlap or not. This is the idea of the <strong>earth mover’s distance</strong>, formalized by optimal transport: in <a href="#fig-otvskl" class="quarto-xref">Figure&nbsp;<span>19.1</span></a>, the Wasserstein distance <span class="math inline">W_2</span>, defined in the next sections, is simply equal to the shift <span class="math inline">d</span>.</p>
+</section>
+<section id="monges-problem" class="level2">
+<h2 class="anchored" data-anchor-id="monges-problem">Monge’s problem</h2>
+<p>The question of moving piles of earth at the lowest cost was formulated by the French mathematician Gaspard Monge in 1781, for the construction of fortifications. In modern terms, we look for a <strong>transport map</strong> <span class="math inline">T</span> that moves each point <span class="math inline">x</span> of the source distribution <span class="math inline">p</span> to a point <span class="math inline">T(x)</span>, in such a way that the transported points follow the target distribution <span class="math inline">q</span>:</p>
+<p><span class="math display">
+    x \sim p \quad \Rightarrow \quad T(x) \sim q
+</span></p>
+<p>The distribution of the transported points is called the <strong>push-forward</strong> of <span class="math inline">p</span> by <span class="math inline">T</span>, and is noted <span class="math inline">T_\# p</span>: the constraint is <span class="math inline">T_\# p = q</span>. Moving a unit of mass from <span class="math inline">x</span> to <span class="math inline">y</span> has a <strong>cost</strong> <span class="math inline">c(x, y)</span>; in this chapter, we use the squared Euclidean distance <span class="math inline">c(x, y) = ||x - y||^2</span>. Among all the maps that transform <span class="math inline">p</span> into <span class="math inline">q</span>, <strong>Monge’s problem</strong> looks for the one with the lowest average cost:</p>
+<p><span class="math display">
+    \min_{T \, : \, T_\# p = q} \; \mathbb{E}_{x \sim p} [||x - T(x)||^2]
+</span></p>
+<p>For the shifted uniform distributions of <a href="#fig-otvskl" class="quarto-xref">Figure&nbsp;<span>19.1</span></a>, the best map is the translation <span class="math inline">T(x) = x + d</span>: every grain of sand moves by <span class="math inline">d</span>, and the average cost is <span class="math inline">d^2</span>. Its square root, <span class="math inline">d</span>, is the distance plotted in the figure.</p>
+<p>Transport maps are nothing new in this book: inverse transform sampling (<a href="../sampling/1-MonteCarlo.html#sec-simplesampling" class="quarto-xref"><span>Sampling from simple distributions</span></a>) and the reparameterization trick (<a href="../variationalinference/3-VAE.html#sec-reparameterization" class="quarto-xref"><span>The reparameterization trick</span></a>) are maps transforming a simple distribution (uniform or normal) into the desired one, and the decoder of a generative model is a learned map from the latent distribution onto the data distribution. What optimal transport adds is the notion of the <strong>best</strong> map, the one that moves the mass as little as possible.</p>
+<p>Monge’s formulation has two important limitations:</p>
+<ul>
+<li>An admissible map does not always exist. If <span class="math inline">p</span> puts all its mass on a single point, and <span class="math inline">q</span> splits it between two points, no map can transform <span class="math inline">p</span> into <span class="math inline">q</span>: a map sends each point to a single destination, and cannot split its mass.</li>
+<li>The constraint <span class="math inline">T_\# p = q</span> is very difficult to handle: the set of maps satisfying it has no simple structure, and Monge’s problem resisted mathematicians for almost two centuries.</li>
+</ul>
+<p>Both limitations disappear when the mass leaving a point is allowed to be split between several destinations, which is the relaxation proposed by Kantorovich.</p>
+</section>
+<section id="kantorovichs-relaxation-and-the-wasserstein-distance" class="level2">
+<h2 class="anchored" data-anchor-id="kantorovichs-relaxation-and-the-wasserstein-distance">Kantorovich’s relaxation and the Wasserstein distance</h2>
+<section id="couplings" class="level3">
+<h3 class="anchored" data-anchor-id="couplings">Couplings</h3>
+<p>In 1942, the mathematician and economist Leonid Kantorovich proposed to replace the transport map by a <strong>transport plan</strong>, or <strong>coupling</strong>: a joint distribution <span class="math inline">\pi(x, y)</span> over pairs of source and target points, which says how much mass is moved from <span class="math inline">x</span> to <span class="math inline">y</span>. The mass leaving a point can now be split between several destinations, and the mass arriving at a point can come from several origins. For the plan to transform <span class="math inline">p</span> into <span class="math inline">q</span>, the total mass leaving each point <span class="math inline">x</span> must be its mass under <span class="math inline">p</span>, and the total mass arriving at each point <span class="math inline">y</span> its mass under <span class="math inline">q</span>. In other words, the <strong>marginals</strong> of the coupling must be the two distributions:</p>
+<p><span class="math display">
+    \int \pi(x, y) \, dy = p(x) \qquad \int \pi(x, y) \, dx = q(y)
+</span></p>
+<p>In the discrete case, a coupling is simply a matrix whose rows sum to the probabilities of <span class="math inline">p</span> and whose columns sum to the probabilities of <span class="math inline">q</span>. A coupling always exists: the <strong>independent coupling</strong> <span class="math inline">\pi(x, y) = p(x) \, q(y)</span>, which sends the mass of each source point to all the target points, in proportion of their probability, satisfies both constraints. It corresponds to pairing samples of <span class="math inline">p</span> and <span class="math inline">q</span> at random. A transport map <span class="math inline">T</span> is the special case of a coupling where all the mass of <span class="math inline">x</span> goes to the single point <span class="math inline">T(x)</span>.</p>
+</section>
+<section id="the-wasserstein-distance" class="level3">
+<h3 class="anchored" data-anchor-id="the-wasserstein-distance">The Wasserstein distance</h3>
+<p><strong>Kantorovich’s problem</strong> looks for the coupling with the lowest average cost:</p>
+<p><span class="math display">
+    \min_{\pi} \; \mathbb{E}_{(x, y) \sim \pi} [||x - y||^2] \qquad \text{over the couplings } \pi \text{ of } p \text{ and } q
+</span></p>
+<p>Contrary to Monge’s problem, this problem always has a solution, the <strong>optimal coupling</strong>: the constraints on the marginals are linear, and so is the objective, so that it is a (possibly infinite-dimensional) linear program. When an optimal transport map exists, which is the case for example when <span class="math inline">p</span> has a density, the optimal coupling is concentrated on this map, and both problems give the same answer.</p>
+<p>The minimal cost defines the <strong>2-Wasserstein distance</strong> between the two distributions:</p>
+<p><span class="math display">
+    W_2(p, q) = \left( \min_{\pi} \; \mathbb{E}_{(x, y) \sim \pi} [||x - y||^2] \right)^{1/2}
+</span></p>
+<p>Unlike the KL divergence, it is a true <strong>distance</strong> between distributions: it is symmetric, zero only when the distributions are equal, and satisfies the triangle inequality. As seen in <a href="#fig-otvskl" class="quarto-xref">Figure&nbsp;<span>19.1</span></a>, it is finite and informative even when the distributions do not overlap: it measures how far the mass has to travel, not how much the densities differ at each point. Other costs define other distances; in particular, the cost <span class="math inline">||x - y||</span> (without the square) defines the 1-Wasserstein distance <span class="math inline">W_1</span>, also called the earth mover’s distance.</p>
+</section>
+<section id="optimal-transport-between-samples" class="level3">
+<h3 class="anchored" data-anchor-id="optimal-transport-between-samples">Optimal transport between samples</h3>
+<p>In machine learning, the distributions are usually only known through samples. For two sets of <span class="math inline">N</span> samples <span class="math inline">\{x_i\}</span> and <span class="math inline">\{y_j\}</span> with equal weights, the optimal coupling has a very simple form: each source sample is sent entirely to a single target sample, so that the coupling is a <strong>permutation</strong>, i.e.&nbsp;a pairing of the samples. Finding the optimal pairing is the classical <strong>assignment problem</strong>, which can be solved exactly, for example with the Hungarian algorithm, in a time growing with <span class="math inline">N^3</span>.</p>
+<p><a href="#fig-otcoupling" class="quarto-xref">Figure&nbsp;<span>19.2</span></a> compares two couplings between samples of a standard normal distribution and of the two-dimensional mixture of <a href="../sampling/3-HMC.html#fig-score" class="quarto-xref">Figure&nbsp;<span>11.1</span></a>. With the independent coupling, the samples are paired at random: the segments joining the pairs are long, go in all directions, and cross each other very often. The optimal coupling pairs each sample with a nearby one: the average squared distance is almost three times smaller, the segments point in consistent directions, from the center towards the two modes, and they cross much less often. These short, consistent segments will play an important role for flow matching, which learns to move samples along such paths.</p>
+<div id="fig-otcoupling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-otcoupling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/ot-coupling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;19.2: Couplings between 40 samples of a standard normal distribution (blue) and 40 samples of the two-dimensional mixture of Figure&nbsp;fig-score (orange). Left: independent coupling (random pairs). Right: optimal coupling, obtained by solving the assignment problem; its average squared distance is an estimate of W_2(p, q)^2."><img src="../img/ot-coupling.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-otcoupling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19.2: Couplings between 40 samples of a standard normal distribution (blue) and 40 samples of the two-dimensional mixture of <a href="../sampling/3-HMC.html#fig-score" class="quarto-xref">Figure&nbsp;<span>11.1</span></a> (orange). Left: independent coupling (random pairs). Right: optimal coupling, obtained by solving the assignment problem; its average squared distance is an estimate of <span class="math inline">W_2(p, q)^2</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="closed-forms" class="level2">
+<h2 class="anchored" data-anchor-id="closed-forms">Closed forms</h2>
+<p>In general, optimal transport has no closed form, and must be computed numerically. Two important special cases are exceptions.</p>
+<section id="one-dimension-sorting" class="level3">
+<h3 class="anchored" data-anchor-id="one-dimension-sorting">One dimension: sorting</h3>
+<p>On the real line, the optimal transport for the squared cost is <strong>monotone</strong>: it never makes two grains of sand cross each other. The smallest source samples are sent to the smallest target samples, the largest to the largest: for two sets of <span class="math inline">N</span> samples, the optimal pairing is obtained by simply <strong>sorting</strong> both sets, and pairing them in order. For continuous distributions with cumulative distribution functions <span class="math inline">F_p</span> and <span class="math inline">F_q</span>, a point is sent to the point of <span class="math inline">q</span> with the same rank, i.e.&nbsp;the same quantile:</p>
+<p><span class="math display">
+    T(x) = F_q^{-1}(F_p(x))
+</span></p>
+<p>This should look familiar: when <span class="math inline">p</span> is the uniform distribution on <span class="math inline">[0, 1]</span>, <span class="math inline">F_p(u) = u</span> and the optimal map is <span class="math inline">T(u) = F_q^{-1}(u)</span>, which is exactly <strong>inverse transform sampling</strong> (<a href="../sampling/1-MonteCarlo.html#sec-simplesampling" class="quarto-xref"><span>Sampling from simple distributions</span></a>). Inverse transform sampling is the optimal way of transporting uniform samples onto a target distribution. The Wasserstein distance is then the average squared difference between the quantiles of the two distributions:</p>
+<p><span class="math display">
+    W_2(p, q)^2 = \int_0^1 (F_p^{-1}(u) - F_q^{-1}(u))^2 \, du
+</span></p>
+</section>
+<section id="normal-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="normal-distributions">Normal distributions</h3>
+<p>Between two univariate normal distributions <span class="math inline">p = \mathcal{N}(\mu_p, \sigma_p)</span> and <span class="math inline">q = \mathcal{N}(\mu_q, \sigma_q)</span>, the optimal map is the affine function that standardizes the source and rescales it to the target:</p>
+<p><span class="math display">
+    T(x) = \mu_q + \dfrac{\sigma_q}{\sigma_p} \, (x - \mu_p)
+</span></p>
+<p>With <span class="math inline">p = \mathcal{N}(0, 1)</span>, this is the <strong>reparameterization trick</strong> of <a href="../variationalinference/3-VAE.html#sec-reparameterization" class="quarto-xref"><span>The reparameterization trick</span></a>: transforming standard normal noise into a sample of <span class="math inline">\mathcal{N}(\mu, \sigma)</span> with <span class="math inline">\mu + \sigma \, \xi</span> is optimal transport. The Wasserstein distance has a remarkably simple form:</p>
+<p><span class="math display">
+    W_2(p, q)^2 = (\mu_p - \mu_q)^2 + (\sigma_p - \sigma_q)^2
+</span></p>
+<p>i.e.&nbsp;it is the Euclidean distance between the parameters <span class="math inline">(\mu, \sigma)</span> of the two distributions. In several dimensions, the first term becomes <span class="math inline">||\mu_p - \mu_q||^2</span>, and the second one a more complex function of the covariance matrices.</p>
+<p>It is instructive to compare this result with the KL divergence between the same distributions (<a href="../statisticalml/2-KL.html#sec-klnormal" class="quarto-xref"><span>Closed form of the KL divergence for normal distributions</span></a>):</p>
+<p><span class="math display">
+    \text{KL}(p || q) = \log \dfrac{\sigma_q}{\sigma_p} + \dfrac{\sigma_p^2 + (\mu_p - \mu_q)^2}{2 \sigma_q^2} - \dfrac{1}{2}
+</span></p>
+<p>Both depend on the distance between the means, but in different units. The KL divergence measures it relatively to the width <span class="math inline">\sigma_q</span> of the distributions: two very narrow distributions with slightly different means have almost no overlap, and a very large KL divergence, which becomes infinite when <span class="math inline">\sigma \rightarrow 0</span>. The Wasserstein distance measures it in the units of the space itself: two narrow distributions at a distance <span class="math inline">d</span> are at a Wasserstein distance close to <span class="math inline">d</span>, however narrow they are. The KL divergence is also not symmetric, whereas the Wasserstein distance is.</p>
+</section>
+</section>
+<section id="interpolating-between-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="interpolating-between-distributions">Interpolating between distributions</h2>
+<section id="displacement-interpolation" class="level3">
+<h3 class="anchored" data-anchor-id="displacement-interpolation">Displacement interpolation</h3>
+<p>Optimal transport does not only measure how far apart two distributions are: it also describes how to go from one to the other. The simplest way to interpolate between two distributions <span class="math inline">p</span> and <span class="math inline">q</span> is the <strong>mixture</strong> <span class="math inline">(1 - t) \, p + t \, q</span>, with <span class="math inline">t</span> going from 0 to 1. The mass does not move: it progressively disappears from <span class="math inline">p</span> and reappears in <span class="math inline">q</span>, and the intermediate distributions have two separate bumps (<a href="#fig-otinterpolation" class="quarto-xref">Figure&nbsp;<span>19.3</span></a>, left).</p>
+<p>Optimal transport suggests another interpolation, called <strong>displacement interpolation</strong>: move each sample <span class="math inline">x</span> of <span class="math inline">p</span> along the straight line towards its destination <span class="math inline">T(x)</span>, at constant speed:</p>
+<p><span class="math display">
+    x_t = (1 - t) \, x + t \, T(x)
+</span></p>
+<p>The distribution <span class="math inline">p_t</span> of the moving samples slides from <span class="math inline">p</span> at <span class="math inline">t = 0</span> to <span class="math inline">q</span> at <span class="math inline">t = 1</span> (<a href="#fig-otinterpolation" class="quarto-xref">Figure&nbsp;<span>19.3</span></a>, right). The intermediate distributions are genuinely “in between” <span class="math inline">p</span> and <span class="math inline">q</span>: between two normal distributions, they are normal distributions whose mean and standard deviation are interpolated linearly. They are also equally spaced in the sense of the Wasserstein distance, <span class="math inline">W_2(p, p_t) = t \, W_2(p, q)</span>: the displacement interpolation is the <strong>shortest path</strong> between <span class="math inline">p</span> and <span class="math inline">q</span> in the space of distributions equipped with the Wasserstein distance.</p>
+<div id="fig-otinterpolation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-otinterpolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/ot-interpolation.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;19.3: Two ways of interpolating between p = \mathcal{N}(-2, 0.5) (top) and q = \mathcal{N}(2, 1) (bottom). Left: the mixture fades p out and q in, without moving any mass. Right: the displacement interpolation of optimal transport moves the mass along straight lines, and the intermediate distributions slide from p to q."><img src="../img/ot-interpolation.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-otinterpolation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19.3: Two ways of interpolating between <span class="math inline">p = \mathcal{N}(-2, 0.5)</span> (top) and <span class="math inline">q = \mathcal{N}(2, 1)</span> (bottom). Left: the mixture fades <span class="math inline">p</span> out and <span class="math inline">q</span> in, without moving any mass. Right: the displacement interpolation of optimal transport moves the mass along straight lines, and the intermediate distributions slide from <span class="math inline">p</span> to <span class="math inline">q</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="the-dynamic-view" class="level3">
+<h3 class="anchored" data-anchor-id="the-dynamic-view">The dynamic view</h3>
+<p>This suggests a third, <strong>dynamic</strong> formulation of optimal transport, in terms of motion rather than of maps or couplings. Let’s describe the transformation of <span class="math inline">p</span> into <span class="math inline">q</span> by a <strong>velocity field</strong> <span class="math inline">v_t(x)</span>: at time <span class="math inline">t</span>, a particle at position <span class="math inline">x</span> moves with velocity <span class="math inline">v_t(x)</span>, i.e.&nbsp;follows the ordinary differential equation:</p>
+<p><span class="math display">
+    \dfrac{dx}{dt} = v_t(x)
+</span></p>
+<p>Starting from samples of <span class="math inline">p</span> at <span class="math inline">t = 0</span>, the particles should arrive at time <span class="math inline">t = 1</span> distributed according to <span class="math inline">q</span>. Many velocity fields achieve this. Among them, <span class="citation" data-cites="Benamou2000">Benamou and Brenier (<a href="../references.html#ref-Benamou2000" role="doc-biblioref">2000</a>)</span> showed that optimal transport is the one with the minimal average <strong>kinetic energy</strong>:</p>
+<p><span class="math display">
+    W_2(p, q)^2 = \min_{v} \; \int_0^1 \mathbb{E}_{x \sim p_t} [||v_t(x)||^2] \, dt
+</span></p>
+<p>where <span class="math inline">p_t</span> is the distribution of the particles at time <span class="math inline">t</span>. The optimal particles move along straight lines at constant speed, from <span class="math inline">x</span> to <span class="math inline">T(x)</span>, and two particles are never at the same place at the same time: the velocity field is well defined everywhere.</p>
+<p>This dynamic view connects optimal transport to the generative models of the previous chapters. The probability flow of diffusion models (<a href="1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>) is also an ordinary differential equation <span class="math inline">dx / dt = v_t(x)</span> transporting noise onto data, but its trajectories are curved, and it needs many integration steps. A generative model that learned the velocity field of optimal transport from noise to data would move its samples along straight lines, which can in principle be integrated in very few steps. Learning such velocity fields is the idea of <strong>flow matching</strong>, the subject of the next chapter.</p>
+</section>
+</section>
+<section id="entropic-regularization-and-the-sinkhorn-algorithm" class="level2">
+<h2 class="anchored" data-anchor-id="entropic-regularization-and-the-sinkhorn-algorithm">Entropic regularization and the Sinkhorn algorithm</h2>
+<section id="blurring-the-coupling" class="level3">
+<h3 class="anchored" data-anchor-id="blurring-the-coupling">Blurring the coupling</h3>
+<p>Computing optimal transport exactly between large sets of samples is expensive: the assignment problem requires a time growing with <span class="math inline">N^3</span>, and its solution changes abruptly when the samples move, which makes it difficult to use inside a neural network trained by gradient descent. A very effective alternative is to <strong>regularize</strong> the problem with the entropy of the coupling (<a href="../basics/1-InformationTheory.html" class="quarto-xref"><span>Information theory</span></a>):</p>
+<p><span class="math display">
+    \min_{\pi} \; \mathbb{E}_{(x, y) \sim \pi} [||x - y||^2] - \epsilon \, H(\pi)
+</span></p>
+<p>where <span class="math inline">\epsilon &gt; 0</span> controls the strength of the regularization. Maximizing the entropy pushes the coupling to be as random as possible, while minimizing the cost pushes it to send each point only to its best destination. The two extreme cases are:</p>
+<ul>
+<li><span class="math inline">\epsilon \rightarrow 0</span>: the entropy term disappears, and we recover the exact optimal coupling;</li>
+<li><span class="math inline">\epsilon \rightarrow \infty</span>: only the entropy matters, and the coupling becomes the independent coupling <span class="math inline">p(x) \, q(y)</span>, which is the coupling of maximal entropy with the given marginals.</li>
+</ul>
+<p>In between, the regularized coupling is a <strong>blurred</strong> version of the optimal one: each source point sends its mass mostly to its optimal destination, but also a little to the nearby points.</p>
+</section>
+<section id="the-sinkhorn-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="the-sinkhorn-algorithm">The Sinkhorn algorithm</h3>
+<p>The entropic regularization has a remarkable consequence: the optimal coupling takes a very simple form. For samples <span class="math inline">\{x_i\}</span> and <span class="math inline">\{y_j\}</span>, it is a matrix of the form:</p>
+<p><span class="math display">
+    \pi_{ij} = u_i \, K_{ij} \, v_j \qquad \text{with} \qquad K_{ij} = \exp \left( - \dfrac{||x_i - y_j||^2}{\epsilon} \right)
+</span></p>
+<p>The matrix <span class="math inline">K</span> is fixed: it is large for nearby pairs and small for distant ones, and the temperature <span class="math inline">\epsilon</span> plays the same role as the temperature of the softmax (<a href="../statisticalml/3-Softmax.html" class="quarto-xref"><span>Softmax classifier for discrete distributions</span></a>). The only unknowns are the scaling vectors <span class="math inline">u</span> and <span class="math inline">v</span>, one coefficient per sample, which must be chosen so that the rows of <span class="math inline">\pi</span> sum to the weights of <span class="math inline">p</span> and its columns to the weights of <span class="math inline">q</span>. The <strong>Sinkhorn algorithm</strong> finds them by alternately rescaling the rows and the columns:</p>
+<ol type="1">
+<li>rescale the rows: choose <span class="math inline">u</span> so that each row of <span class="math inline">\pi</span> has the right sum, <span class="math inline">u_i = p_i / \sum_j K_{ij} \, v_j</span>;</li>
+<li>rescale the columns: choose <span class="math inline">v</span> so that each column of <span class="math inline">\pi</span> has the right sum, <span class="math inline">v_j = q_j / \sum_i K_{ij} \, u_i</span>;</li>
+<li>repeat until convergence.</li>
+</ol>
+<p>Each iteration only involves products between a matrix and a vector, which run very efficiently on GPUs, and every operation is differentiable, so that the regularized transport cost can be used as a loss function and backpropagated through. Popularized by <span class="citation" data-cites="Cuturi2013">Cuturi (<a href="../references.html#ref-Cuturi2013" role="doc-biblioref">2013</a>)</span>, the Sinkhorn algorithm made optimal transport practical for machine learning, where it is used for example to compare sets of samples, to align distributions between domains, or to compute couplings between minibatches of samples.</p>
+</section>
+<section id="schrödinger-bridges" class="level3">
+<h3 class="anchored" data-anchor-id="schrödinger-bridges">Schrödinger bridges</h3>
+<p>Entropic optimal transport also has a dynamic version. In 1931, Erwin Schrödinger asked the following question: if a cloud of particles, moving randomly by diffusion, is observed in a distribution <span class="math inline">p</span> at a first time and in a distribution <span class="math inline">q</span> at a later time, what is the most likely way in which the particles moved between the two observations? The answer, called the <strong>Schrödinger bridge</strong>, is a stochastic process transporting <span class="math inline">p</span> onto <span class="math inline">q</span>, and its coupling between the start and end points is the entropic optimal coupling, with a regularization <span class="math inline">\epsilon</span> proportional to the amount of diffusion.</p>
+<p>When <span class="math inline">q</span> is the data distribution and <span class="math inline">p</span> a standard normal distribution, a Schrödinger bridge is a diffusion process transforming noise into data, like the reverse process of a diffusion model. Unlike diffusion models, which need a forward process ending exactly in a standard normal distribution, Schrödinger bridges can connect any two distributions, for example two different datasets of images, and can be learned with score-based methods <span class="citation" data-cites="Bortoli2023">(<a href="../references.html#ref-Bortoli2023" role="doc-biblioref">Bortoli et al., 2023</a>)</span>.</p>
+</section>
+</section>
+<section id="wasserstein-gans" class="level2">
+<h2 class="anchored" data-anchor-id="wasserstein-gans">Wasserstein GANs</h2>
+<p>Generative adversarial networks train a generator by pitting it against a discriminator, and their original formulation implicitly minimizes the Jensen-Shannon divergence between the data and the generated samples, whose gradient vanishes when the two distributions do not overlap (<a href="#fig-otvskl" class="quarto-xref">Figure&nbsp;<span>19.1</span></a>). <strong>Wasserstein GANs</strong> <span class="citation" data-cites="Arjovsky2017">(<a href="../references.html#ref-Arjovsky2017" role="doc-biblioref">Arjovsky et al., 2017</a>)</span> minimize the 1-Wasserstein distance instead. The coupling formulation is impractical in high dimensions, but the 1-Wasserstein distance has an equivalent <strong>dual</strong> formulation, which only involves functions of a single variable:</p>
+<p><span class="math display">
+    W_1(p, q) = \max_{f \, : \, 1\text{-Lipschitz}} \; \mathbb{E}_{x \sim p} [f(x)] - \mathbb{E}_{y \sim q} [f(y)]
+</span></p>
+<p>where the maximum is over all functions <span class="math inline">f</span> whose slope is at most 1 everywhere. The function <span class="math inline">f</span>, called the <strong>critic</strong>, is a neural network trained to give high values to real data and low values to generated samples; the constraint on its slope, enforced for example by penalizing its gradient, prevents it from separating the two sets infinitely sharply. The generator is trained to minimize the resulting estimate of the distance. As the Wasserstein distance decreases smoothly when the generated samples get closer to the data, even without overlap, the generator receives useful gradients throughout training, which made GANs much more stable.</p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>Optimal transport offers an alternative to the KL divergence for comparing distributions, based on the geometry of the space rather than on the values of the densities:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">KL divergence</th>
+<th style="text-align: left;">Wasserstein distance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Compares</td>
+<td style="text-align: left;">the densities, point by point</td>
+<td style="text-align: left;">the positions of the mass</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Requires</td>
+<td style="text-align: left;">densities (or samples of one, density of the other)</td>
+<td style="text-align: left;">samples of both and a cost</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Symmetric</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">yes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Without overlap</td>
+<td style="text-align: left;">infinite or constant</td>
+<td style="text-align: left;">finite, grows with the distance</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Normal distributions</td>
+<td style="text-align: left;">distance between means in units of <span class="math inline">\sigma</span></td>
+<td style="text-align: left;">distance between means in units of the space</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Computation</td>
+<td style="text-align: left;">Monte Carlo average</td>
+<td style="text-align: left;">assignment, Sinkhorn, or dual (critic)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Also provides</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">transport maps, couplings and straight paths</td>
+</tr>
+</tbody>
+</table>
+<p>Beyond being a distance, optimal transport provides <strong>paths</strong> between distributions: maps, couplings and velocity fields, which move the mass as little as possible. Learning such velocity fields directly is the idea of <strong>flow matching</strong>, presented in the next chapter, where optimal couplings between noise and data samples (<a href="#fig-otcoupling" class="quarto-xref">Figure&nbsp;<span>19.2</span></a>) will make the learned trajectories straighter, and sampling faster.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Arjovsky2017" class="csl-entry" role="listitem">
+Arjovsky, M., Chintala, S., and Bottou, L. (2017). Wasserstein <span>GAN</span>. <em>arXiv:1701.07875 [cs, stat]</em>. Available at: <a href="https://arxiv.org/abs/1701.07875">https://arxiv.org/abs/1701.07875</a>.
+</div>
+<div id="ref-Benamou2000" class="csl-entry" role="listitem">
+Benamou, J.-D., and Brenier, Y. (2000). A computational fluid mechanics solution to the <span>Monge-Kantorovich</span> mass transfer problem. <em>Numerische Mathematik</em> 84, 375–393. doi:<a href="https://doi.org/10.1007/s002110050002">10.1007/s002110050002</a>.
+</div>
+<div id="ref-Bortoli2023" class="csl-entry" role="listitem">
+Bortoli, V. D., Thornton, J., Heng, J., and Doucet, A. (2023). Diffusion <span>Schrödinger Bridge</span> with <span>Applications</span> to <span>Score-Based Generative Modeling</span>. doi:<a href="https://doi.org/10.48550/arXiv.2106.01357">10.48550/arXiv.2106.01357</a>.
+</div>
+<div id="ref-Cuturi2013" class="csl-entry" role="listitem">
+Cuturi, M. (2013). Sinkhorn <span>Distances</span>: <span>Lightspeed Computation</span> of <span>Optimal Transport</span>. in <em>Advances in <span>Neural Information Processing Systems</span></em> (Curran Associates, Inc.).
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../../src/generative/2-ConditionalDiffusion.html" class="pagination-link" aria-label="Conditional and latent diffusion">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Conditional and latent diffusion</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../src/generative/4-FlowMatching.html" class="pagination-link" aria-label="Flow matching">
+        <span class="nav-page-text"><span class="chapter-title">Flow matching</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p><a href="http://creativecommons.org/licenses/by-nc-sa/4.0">Creative Commons BY-NC-SA 4.0</a>. Author <a href="mailto:julien.vitay@gmail.com">Julien Vitay</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -303,6 +303,37 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Deep generative models</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/1-Diffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Denoising diffusion models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/2-ConditionalDiffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Conditional and latent diffusion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/3-OptimalTransport.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Optimal transport</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/generative/4-FlowMatching.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Flow matching</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../src/references.html" class="sidebar-item-text sidebar-link">
@@ -523,7 +554,11 @@ Figure&nbsp;2.3: The cross-entropy measures the overlap between two probability 
 <p><span class="math display">
     \text{KL}(p || q) \neq \text{KL}(q || p)
 </span></p>
-<p>The two directions behave very differently when they are minimized, as we will see in <a href="../statisticalml/2-KL.html#sec-forwardreverse" class="quarto-xref"><span>Forward vs.&nbsp;reverse KL</span></a>. Other divergences to measure the similarity between two distributions are symmetric, such as the <a href="https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence">Jensen-Shannon divergence</a>.</p>
+<p>The two directions behave very differently when they are minimized, as we will see in <a href="../statisticalml/2-KL.html#sec-forwardreverse" class="quarto-xref"><span>Forward vs.&nbsp;reverse KL</span></a>. Other divergences are symmetric. The <strong>Jensen-Shannon divergence</strong> compares both distributions to their average <span class="math inline">m = \frac{1}{2} (p + q)</span>:</p>
+<p><span class="math display">
+    \text{JS}(p, q) = \dfrac{1}{2} \, \text{KL}(p || m) + \dfrac{1}{2} \, \text{KL}(q || m)
+</span></p>
+<p>It is symmetric, <span class="math inline">\text{JS}(p, q) = \text{JS}(q, p)</span>, and always finite, even when <span class="math inline">q(x) = 0</span> where <span class="math inline">p(x) &gt; 0</span>, as the average <span class="math inline">m</span> is positive wherever one of the two distributions is. It is zero when the distributions are equal, and at most <span class="math inline">\log 2</span>, a value reached when they do not overlap at all.</p>
 <p>Refer to <a href="https://towardsdatascience.com/entropy-cross-entropy-and-kl-divergence-explained-b09cdae917a" class="uri">https://towardsdatascience.com/entropy-cross-entropy-and-kl-divergence-explained-b09cdae917a</a> for nice visual explanations of the cross-entropy and KL divergence.</p>
 
 
