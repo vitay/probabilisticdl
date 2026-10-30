@@ -1,93 +1,53 @@
 # Learning paradigms {#sec-paradigms}
 
-We can think of three main paradigms in machine learning.
+Machine learning is usually divided into supervised, unsupervised and self-supervised learning, according to the kind of data available. From the probabilistic point of view of this book, the distinction is simpler: all these paradigms learn a probability distribution, and they only differ by **which** distribution is learned. This chapter reviews the main paradigms from this point of view (@fig-paradigms), before the next chapters show how they are all trained in the same way.
 
-## Discriminative learning (supervised learning, classification, regression)
+![Learning paradigms as probabilistic models: in each case, a neural network $f_\theta$ outputs (the parameters of) a probability distribution, or a sample of it. (a) Classification: the distribution of the class given the input. (b) Density estimation: the likelihood of a sample. (c) Generation: a new sample, obtained by transforming noise. (d) Autoregressive modeling: the distribution of the next element of a sequence given the previous ones. Icons: [Twemoji](https://github.com/jdecked/twemoji), CC-BY 4.0.](../img/learning-paradigms.png){#fig-paradigms}
 
-In discriminative learning, we try to model a **conditional probability** mapping a probability distribution $X$ into a probability distribution $Y$:
+## Discriminative models: $p_\theta(y | x)$
 
-$$
-    x \sim X, y\sim Y: p(y | x)
-$$
+In **supervised learning**, the training data are pairs $(x_i, y_i)$ of an input and a target, for example an image and the name of the object it represents. They are samples of an unknown joint distribution $p(x, y)$. A **discriminative** model does not try to model the inputs: it learns the **conditional distribution** $p(y | x)$ of the target given the input. A neural network takes $x$ as input and outputs the parameters of a distribution $p_\theta(y | x)$ over the possible targets (@fig-paradigms, a).
 
-We create a neural network $p_\theta(y | x)$ whose goal is to approximate the data distribution by taking an input $x$ and returning a parameterization of the distribution of $y$.
+The family of distributions depends on the nature of the targets:
 
-```{mermaid}
-flowchart LR
-    x --> f --> y
-    x(("<i>x</i>"))
-    f["<i>f</i><sub>θ</sub>"]
-    y(("<i>p</i><sub>θ</sub>(<i>y</i> | <i>x</i>)"))
-```
+* If the targets are **discrete**, for example classes, the network outputs a categorical distribution through a softmax layer: this is **classification** (@sec-softmax).
+* If the targets are **continuous**, the simplest choice is a normal distribution whose mean is predicted by the network, with a fixed variance: maximizing its likelihood is the same as minimizing the mean square error, which is classical **regression**. The network can also predict the variance, to estimate how uncertain each prediction is.
+* If the conditional distribution has several modes, as in the inverse problems of @sec-introduction, a single normal distribution is not enough, and the network can output a mixture of normal distributions: this is a **mixture density network** (@sec-mdn).
 
-If $Y$ is a **discrete** (categorical) distribution, we are doing a **classification**. We just need to model $Y$ using a Gibbs / Boltzmann distribution (i.e. a softmax layer) and we are good.
+In all cases, the prediction is a distribution: the most probable class or the mean of the normal distribution are only summaries of it.
 
-If $Y$ is **continuous** and Gaussian, but we only care about its expectation ($\mathbb{E}[Y|X]$), we are performing **regression**. If we also want its variance, it is Bayesian regression.
+## Generative models: $p_\theta(x)$
 
-If $Y$ is **continuous** and we want its distribution (of an unknown family) for uncertainty estimation, we need to use mixtures of Gaussians like in **Mixture Density Networks** (MDN, see @sec-mdn).
+In **unsupervised learning**, there are no targets: the training data are only samples $x_i$ of an unknown distribution $p(x)$, for example a collection of images. A **generative** model learns this distribution itself, $p_\theta(x) \approx p(x)$. Two different abilities are expected from such a model, which are not always provided by the same methods:
 
-## Generative modeling (unsupervised learning)
+* **Density estimation** consists in evaluating the likelihood $p_\theta(x)$ of a sample (@fig-paradigms, b). It tells how typical a sample is of the data: a new sample with a very low likelihood is unusual, which is the basis of **anomaly detection**.
+* **Generation** consists in sampling new data from $p_\theta(x)$ (@fig-paradigms, c). In most modern methods, a network transforms a sample $z$ of a simple distribution, typically the standard normal distribution, into a sample $x$ of the learned distribution. The decoder of a variational autoencoder (@sec-vae), diffusion models (@sec-diffusion) and flow matching models (@sec-flowmatching) all work this way.
 
-In unsupervised learning, we only get samples $x$ of an unknown distribution $X$:
+Some models provide both abilities, but many only provide one of them easily: diffusion models generate excellent samples, but computing the likelihood of a sample is expensive, while some density models are easy to evaluate but very difficult to sample. This distinction explains many of the design choices of the generative models of this book.
 
-$$
-    x \sim X: p(x)
-$$
+## Autoregressive models
 
-In **density estimation**, we want to train a neural network to predict the **likelihood** of a sample $x$.
-
-```{mermaid}
-flowchart LR
-    x --> f --> y
-    x(("<i>x</i>"))
-    f["<i>f</i><sub>θ</sub>"]
-    y(("<i>p</i><sub>θ</sub>(<i>x</i>)"))
-```
-
-This is vanilla **maximum likelihood estimation** (MLE, @sec-mle). This can be useful for **anomaly detection**: if the predicted likelihood of a new sample is below a threshold, it might be an anomaly.
-
-**Generative modeling** is quite different. We want to generate a **new sample** from the data distribution (e.g. generate new images of cats). In most methods we want to learn a mapping between a simple known distribution (typically the standard normal distribution) and the data distribution. A sample $z$ from the "latent" prior distribution should be transformed into a sample $x$ of the (approximated) data distribution.
-
-```{mermaid}
-flowchart LR
-    x --> f --> y
-    x(("<i>z</i> ~ 𝒩(0, 1)"))
-    f["<i>f</i><sub>θ</sub>"]
-    y(("<i>x</i> ~ <i>p</i><sub>θ</sub>(<i>x</i>)"))
-```
-
-This is what the decoder of a VAE (variational inference, @sec-variationalinference), the generator of a GAN, or a diffusion model does.
-
-## Autoregressive modeling (self-supervised learning)
-
-Finally, autoregressive models predict part of the sample based on the rest. For temporal sequences, it is often **next item prediction**:
+Sequences, such as texts, sounds or time series, can be modeled one element at a time. The **chain rule** of probabilities decomposes the distribution of a whole sequence $x = (x_1, x_2, \ldots, x_T)$ into a product of conditional distributions, each element depending on all the previous ones:
 
 $$
-    p(x_{t+1} | x_t, x_{t-1}, \ldots, x_0)
+    p(x_1, x_2, \ldots, x_T) = p(x_1) \, p(x_2 | x_1) \, p(x_3 | x_1, x_2) \ldots = \prod_{t=1}^{T} p(x_t | x_1, \ldots, x_{t-1})
 $$
 
-Transformers for language modeling learn the **categorical probability distribution** of the next token (classification over thousands of vocabulary tokens) given the history (aka prompt).
+An **autoregressive** model learns each of these conditional distributions with the same network, which predicts the next element given the previous ones (@fig-paradigms, d). Each factor is a discriminative problem, a classification when the elements are discrete, but the product is a generative model of the whole sequence, which provides both abilities:
 
-```{mermaid}
-flowchart LR
-    x --> f --> y
-    x(("<i>x</i><sub>0</sub>, …, <i>x</i><sub>t-1</sub>, <i>x</i><sub>t</sub>"))
-    f["LLM"]
-    y(("<i>x</i><sub>t+1</sub>"))
-```
+* the **likelihood** of a sequence is the product of the predicted probabilities of its elements;
+* a new sequence is **generated** one element at a time, each one being sampled from the prediction and appended to the input of the next step (ancestral sampling, @sec-simplesampling).
 
-There also exist autoregressive vision models, where the next pixel is predicted depending on the others (PixelCNN).
+Large language models are autoregressive models of text: given the beginning of a text, a transformer outputs a softmax distribution over a vocabulary of tens of thousands of tokens, and text is generated by sampling one token at a time. Autoregressive models also exist for images, predicting each pixel from the previous ones, and for sound.
 
-Masked learning (predict part of the sample given the rest) somehow fits in this category.
+As the targets of an autoregressive model are taken from the data themselves, without any human annotation, this paradigm is also called **self-supervised learning**. A related family of self-supervised methods, **masked modeling**, hides part of the data and trains a network to predict it from the rest, for example missing words in a sentence or missing patches in an image.
 
 ## Summary
 
-In virtually all machine learning paradigms, we learn a parameterized probability distribution $p_\theta(x)$ (whatever the meaning of $x$) and want to make it close to the data distribution $p(x)$.
+| Paradigm | Learned distribution | Training data | Examples |
+|:---|:---|:---|:---|
+| Discriminative (supervised) | $p_\theta(y \mid x)$ | pairs $(x_i, y_i)$ | classification, regression, MDN |
+| Generative (unsupervised) | $p_\theta(x)$ | samples $x_i$ | VAE, diffusion models, flow matching |
+| Autoregressive (self-supervised) | $\prod_t p_\theta(x_t \mid x_{<t})$ | sequences | language models |
 
-The only way to do that is to minimize the KL divergence between the two distributions:
-
-$$
-    \theta^* = \text{argmin}_\theta \; \text{KL}(p(x) || p_\theta(x))
-$$
-
-However, we generally do not know the explicit form of $p(x)$: we only have access to samples $x_i$ from which we need to approximate the KL.
+Whatever the paradigm, learning consists in making a parameterized distribution $p_\theta$ as close as possible to an unknown data distribution $p$, of which we only have samples. The next chapter shows that the natural measure of closeness, the KL divergence, can be minimized with samples only, and that minimizing it is the same as maximizing the likelihood of the data.
