@@ -24,6 +24,7 @@ book:
 
   chapters:
     - index.qmd
+    - src/introduction.qmd
     - part: "**Basics**"
       chapters:
         - src/basics/1-InformationTheory.qmd
