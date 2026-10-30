@@ -47,7 +47,10 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5c1318cf63eba56dbef7ba16bc7d56f5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-af1da4bb2192535958fe56112dabcf43.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-cbd9ed26555d85b248ce1d2018b64c7d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -76,9 +79,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
-<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
-<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
-<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
   <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -336,9 +336,9 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#discriminative-learning-supervised-learning-classification-regression" id="toc-discriminative-learning-supervised-learning-classification-regression" class="nav-link active" data-scroll-target="#discriminative-learning-supervised-learning-classification-regression">Discriminative learning (supervised learning, classification, regression)</a></li>
-  <li><a href="#generative-modeling-unsupervised-learning" id="toc-generative-modeling-unsupervised-learning" class="nav-link" data-scroll-target="#generative-modeling-unsupervised-learning">Generative modeling (unsupervised learning)</a></li>
-  <li><a href="#autoregressive-modeling-self-supervised-learning" id="toc-autoregressive-modeling-self-supervised-learning" class="nav-link" data-scroll-target="#autoregressive-modeling-self-supervised-learning">Autoregressive modeling (self-supervised learning)</a></li>
+  <li><a href="#discriminative-models-p_thetay-x" id="toc-discriminative-models-p_thetay-x" class="nav-link active" data-scroll-target="#discriminative-models-p_thetay-x">Discriminative models: <span class="math inline">p_\theta(y | x)</span></a></li>
+  <li><a href="#generative-models-p_thetax" id="toc-generative-models-p_thetax" class="nav-link" data-scroll-target="#generative-models-p_thetax">Generative models: <span class="math inline">p_\theta(x)</span></a></li>
+  <li><a href="#autoregressive-models" id="toc-autoregressive-models" class="nav-link" data-scroll-target="#autoregressive-models">Autoregressive models</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   </ul>
 </nav>
@@ -365,111 +365,90 @@ window.Quarto = {
 </header>
 
 
-<p>We can think of three main paradigms in machine learning.</p>
-<section id="discriminative-learning-supervised-learning-classification-regression" class="level2">
-<h2 class="anchored" data-anchor-id="discriminative-learning-supervised-learning-classification-regression">Discriminative learning (supervised learning, classification, regression)</h2>
-<p>In discriminative learning, we try to model a <strong>conditional probability</strong> mapping a probability distribution <span class="math inline">X</span> into a probability distribution <span class="math inline">Y</span>:</p>
-<p><span class="math display">
-    x \sim X, y\sim Y: p(y | x)
-</span></p>
-<p>We create a neural network <span class="math inline">p_\theta(y | x)</span> whose goal is to approximate the data distribution by taking an input <span class="math inline">x</span> and returning a parameterization of the distribution of <span class="math inline">y</span>.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    x --&gt; f --&gt; y
-    x(("&lt;i&gt;x&lt;/i&gt;"))
-    f["&lt;i&gt;f&lt;/i&gt;&lt;sub&gt;θ&lt;/sub&gt;"]
-    y(("&lt;i&gt;p&lt;/i&gt;&lt;sub&gt;θ&lt;/sub&gt;(&lt;i&gt;y&lt;/i&gt; | &lt;i&gt;x&lt;/i&gt;)"))
-</pre>
+<p>Machine learning is usually divided into supervised, unsupervised and self-supervised learning, according to the kind of data available. From the probabilistic point of view of this book, the distinction is simpler: all these paradigms learn a probability distribution, and they only differ by <strong>which</strong> distribution is learned. This chapter reviews the main paradigms from this point of view (<a href="#fig-paradigms" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>), before the next chapters show how they are all trained in the same way.</p>
+<div id="fig-paradigms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-paradigms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/learning-paradigms.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;6.1: Learning paradigms as probabilistic models: in each case, a neural network f_\theta outputs (the parameters of) a probability distribution, or a sample of it. (a) Classification: the distribution of the class given the input. (b) Density estimation: the likelihood of a sample. (c) Generation: a new sample, obtained by transforming noise. (d) Autoregressive modeling: the distribution of the next element of a sequence given the previous ones. Icons: Twemoji, CC-BY 4.0."><img src="../img/learning-paradigms.png" class="img-fluid figure-img"></a>
 </div>
-<p></p></figure><p></p>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-paradigms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Learning paradigms as probabilistic models: in each case, a neural network <span class="math inline">f_\theta</span> outputs (the parameters of) a probability distribution, or a sample of it. (a) Classification: the distribution of the class given the input. (b) Density estimation: the likelihood of a sample. (c) Generation: a new sample, obtained by transforming noise. (d) Autoregressive modeling: the distribution of the next element of a sequence given the previous ones. Icons: <a href="https://github.com/jdecked/twemoji">Twemoji</a>, CC-BY 4.0.
+</figcaption>
+</figure>
 </div>
-</div>
-</div>
-<p>If <span class="math inline">Y</span> is a <strong>discrete</strong> (categorical) distribution, we are doing a <strong>classification</strong>. We just need to model <span class="math inline">Y</span> using a Gibbs / Boltzmann distribution (i.e.&nbsp;a softmax layer) and we are good.</p>
-<p>If <span class="math inline">Y</span> is <strong>continuous</strong> and Gaussian, but we only care about its expectation (<span class="math inline">\mathbb{E}[Y|X]</span>), we are performing <strong>regression</strong>. If we also want its variance, it is Bayesian regression.</p>
-<p>If <span class="math inline">Y</span> is <strong>continuous</strong> and we want its distribution (of an unknown family) for uncertainty estimation, we need to use mixtures of Gaussians like in <strong>Mixture Density Networks</strong> (MDN, see <a href="4-MDN.html" class="quarto-xref"><span>Mixture density networks for continuous distributions</span></a>).</p>
+<section id="discriminative-models-p_thetay-x" class="level2">
+<h2 class="anchored" data-anchor-id="discriminative-models-p_thetay-x">Discriminative models: <span class="math inline">p_\theta(y | x)</span></h2>
+<p>In <strong>supervised learning</strong>, the training data are pairs <span class="math inline">(x_i, y_i)</span> of an input and a target, for example an image and the name of the object it represents. They are samples of an unknown joint distribution <span class="math inline">p(x, y)</span>. A <strong>discriminative</strong> model does not try to model the inputs: it learns the <strong>conditional distribution</strong> <span class="math inline">p(y | x)</span> of the target given the input. A neural network takes <span class="math inline">x</span> as input and outputs the parameters of a distribution <span class="math inline">p_\theta(y | x)</span> over the possible targets (<a href="#fig-paradigms" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, a).</p>
+<p>The family of distributions depends on the nature of the targets:</p>
+<ul>
+<li>If the targets are <strong>discrete</strong>, for example classes, the network outputs a categorical distribution through a softmax layer: this is <strong>classification</strong> (<a href="3-Softmax.html" class="quarto-xref"><span>Softmax classifier for discrete distributions</span></a>).</li>
+<li>If the targets are <strong>continuous</strong>, the simplest choice is a normal distribution whose mean is predicted by the network, with a fixed variance: maximizing its likelihood is the same as minimizing the mean square error, which is classical <strong>regression</strong>. The network can also predict the variance, to estimate how uncertain each prediction is.</li>
+<li>If the conditional distribution has several modes, as in the inverse problems of <a href="../introduction.html" class="quarto-xref"><span>Introduction</span></a>, a single normal distribution is not enough, and the network can output a mixture of normal distributions: this is a <strong>mixture density network</strong> (<a href="4-MDN.html" class="quarto-xref"><span>Mixture density networks for continuous distributions</span></a>).</li>
+</ul>
+<p>In all cases, the prediction is a distribution: the most probable class or the mean of the normal distribution are only summaries of it.</p>
 </section>
-<section id="generative-modeling-unsupervised-learning" class="level2">
-<h2 class="anchored" data-anchor-id="generative-modeling-unsupervised-learning">Generative modeling (unsupervised learning)</h2>
-<p>In unsupervised learning, we only get samples <span class="math inline">x</span> of an unknown distribution <span class="math inline">X</span>:</p>
-<p><span class="math display">
-    x \sim X: p(x)
-</span></p>
-<p>In <strong>density estimation</strong>, we want to train a neural network to predict the <strong>likelihood</strong> of a sample <span class="math inline">x</span>.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    x --&gt; f --&gt; y
-    x(("&lt;i&gt;x&lt;/i&gt;"))
-    f["&lt;i&gt;f&lt;/i&gt;&lt;sub&gt;θ&lt;/sub&gt;"]
-    y(("&lt;i&gt;p&lt;/i&gt;&lt;sub&gt;θ&lt;/sub&gt;(&lt;i&gt;x&lt;/i&gt;)"))
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
-<p>This is vanilla <strong>maximum likelihood estimation</strong> (MLE, <a href="../basics/2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>). This can be useful for <strong>anomaly detection</strong>: if the predicted likelihood of a new sample is below a threshold, it might be an anomaly.</p>
-<p><strong>Generative modeling</strong> is quite different. We want to generate a <strong>new sample</strong> from the data distribution (e.g.&nbsp;generate new images of cats). In most methods we want to learn a mapping between a simple known distribution (typically the standard normal distribution) and the data distribution. A sample <span class="math inline">z</span> from the “latent” prior distribution should be transformed into a sample <span class="math inline">x</span> of the (approximated) data distribution.</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    x --&gt; f --&gt; y
-    x(("&lt;i&gt;z&lt;/i&gt; ~ 𝒩(0, 1)"))
-    f["&lt;i&gt;f&lt;/i&gt;&lt;sub&gt;θ&lt;/sub&gt;"]
-    y(("&lt;i&gt;x&lt;/i&gt; ~ &lt;i&gt;p&lt;/i&gt;&lt;sub&gt;θ&lt;/sub&gt;(&lt;i&gt;x&lt;/i&gt;)"))
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
-<p>This is what the decoder of a VAE (variational inference, <a href="../variationalinference/2-VariationalInference.html" class="quarto-xref"><span>Variational inference</span></a>), the generator of a GAN, or a diffusion model does.</p>
+<section id="generative-models-p_thetax" class="level2">
+<h2 class="anchored" data-anchor-id="generative-models-p_thetax">Generative models: <span class="math inline">p_\theta(x)</span></h2>
+<p>In <strong>unsupervised learning</strong>, there are no targets: the training data are only samples <span class="math inline">x_i</span> of an unknown distribution <span class="math inline">p(x)</span>, for example a collection of images. A <strong>generative</strong> model learns this distribution itself, <span class="math inline">p_\theta(x) \approx p(x)</span>. Two different abilities are expected from such a model, which are not always provided by the same methods:</p>
+<ul>
+<li><strong>Density estimation</strong> consists in evaluating the likelihood <span class="math inline">p_\theta(x)</span> of a sample (<a href="#fig-paradigms" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, b). It tells how typical a sample is of the data: a new sample with a very low likelihood is unusual, which is the basis of <strong>anomaly detection</strong>.</li>
+<li><strong>Generation</strong> consists in sampling new data from <span class="math inline">p_\theta(x)</span> (<a href="#fig-paradigms" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, c). In most modern methods, a network transforms a sample <span class="math inline">z</span> of a simple distribution, typically the standard normal distribution, into a sample <span class="math inline">x</span> of the learned distribution. The decoder of a variational autoencoder (<a href="../variationalinference/3-VAE.html" class="quarto-xref"><span>Variational autoencoders</span></a>), diffusion models (<a href="../generative/1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>) and flow matching models (<a href="../generative/4-FlowMatching.html" class="quarto-xref"><span>Flow matching</span></a>) all work this way.</li>
+</ul>
+<p>Some models provide both abilities, but many only provide one of them easily: diffusion models generate excellent samples, but computing the likelihood of a sample is expensive, while some density models are easy to evaluate but very difficult to sample. This distinction explains many of the design choices of the generative models of this book.</p>
 </section>
-<section id="autoregressive-modeling-self-supervised-learning" class="level2">
-<h2 class="anchored" data-anchor-id="autoregressive-modeling-self-supervised-learning">Autoregressive modeling (self-supervised learning)</h2>
-<p>Finally, autoregressive models predict part of the sample based on the rest. For temporal sequences, it is often <strong>next item prediction</strong>:</p>
+<section id="autoregressive-models" class="level2">
+<h2 class="anchored" data-anchor-id="autoregressive-models">Autoregressive models</h2>
+<p>Sequences, such as texts, sounds or time series, can be modeled one element at a time. The <strong>chain rule</strong> of probabilities decomposes the distribution of a whole sequence <span class="math inline">x = (x_1, x_2, \ldots, x_T)</span> into a product of conditional distributions, each element depending on all the previous ones:</p>
 <p><span class="math display">
-    p(x_{t+1} | x_t, x_{t-1}, \ldots, x_0)
+    p(x_1, x_2, \ldots, x_T) = p(x_1) \, p(x_2 | x_1) \, p(x_3 | x_1, x_2) \ldots = \prod_{t=1}^{T} p(x_t | x_1, \ldots, x_{t-1})
 </span></p>
-<p>Transformers for language modeling learn the <strong>categorical probability distribution</strong> of the next token (classification over thousands of vocabulary tokens) given the history (aka prompt).</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-    x --&gt; f --&gt; y
-    x(("&lt;i&gt;x&lt;/i&gt;&lt;sub&gt;0&lt;/sub&gt;, …, &lt;i&gt;x&lt;/i&gt;&lt;sub&gt;t-1&lt;/sub&gt;, &lt;i&gt;x&lt;/i&gt;&lt;sub&gt;t&lt;/sub&gt;"))
-    f["LLM"]
-    y(("&lt;i&gt;x&lt;/i&gt;&lt;sub&gt;t+1&lt;/sub&gt;"))
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
-<p>There also exist autoregressive vision models, where the next pixel is predicted depending on the others (PixelCNN).</p>
-<p>Masked learning (predict part of the sample given the rest) somehow fits in this category.</p>
+<p>An <strong>autoregressive</strong> model learns each of these conditional distributions with the same network, which predicts the next element given the previous ones (<a href="#fig-paradigms" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, d). Each factor is a discriminative problem, a classification when the elements are discrete, but the product is a generative model of the whole sequence, which provides both abilities:</p>
+<ul>
+<li>the <strong>likelihood</strong> of a sequence is the product of the predicted probabilities of its elements;</li>
+<li>a new sequence is <strong>generated</strong> one element at a time, each one being sampled from the prediction and appended to the input of the next step (ancestral sampling, <a href="../sampling/1-MonteCarlo.html#sec-simplesampling" class="quarto-xref"><span>Sampling from simple distributions</span></a>).</li>
+</ul>
+<p>Large language models are autoregressive models of text: given the beginning of a text, a transformer outputs a softmax distribution over a vocabulary of tens of thousands of tokens, and text is generated by sampling one token at a time. Autoregressive models also exist for images, predicting each pixel from the previous ones, and for sound.</p>
+<p>As the targets of an autoregressive model are taken from the data themselves, without any human annotation, this paradigm is also called <strong>self-supervised learning</strong>. A related family of self-supervised methods, <strong>masked modeling</strong>, hides part of the data and trains a network to predict it from the rest, for example missing words in a sentence or missing patches in an image.</p>
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>In virtually all machine learning paradigms, we learn a parameterized probability distribution <span class="math inline">p_\theta(x)</span> (whatever the meaning of <span class="math inline">x</span>) and want to make it close to the data distribution <span class="math inline">p(x)</span>.</p>
-<p>The only way to do that is to minimize the KL divergence between the two distributions:</p>
-<p><span class="math display">
-    \theta^* = \text{argmin}_\theta \; \text{KL}(p(x) || p_\theta(x))
-</span></p>
-<p>However, we generally do not know the explicit form of <span class="math inline">p(x)</span>: we only have access to samples <span class="math inline">x_i</span> from which we need to approximate the KL.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Paradigm</th>
+<th style="text-align: left;">Learned distribution</th>
+<th style="text-align: left;">Training data</th>
+<th style="text-align: left;">Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Discriminative (supervised)</td>
+<td style="text-align: left;"><span class="math inline">p_\theta(y \mid x)</span></td>
+<td style="text-align: left;">pairs <span class="math inline">(x_i, y_i)</span></td>
+<td style="text-align: left;">classification, regression, MDN</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Generative (unsupervised)</td>
+<td style="text-align: left;"><span class="math inline">p_\theta(x)</span></td>
+<td style="text-align: left;">samples <span class="math inline">x_i</span></td>
+<td style="text-align: left;">VAE, diffusion models, flow matching</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Autoregressive (self-supervised)</td>
+<td style="text-align: left;"><span class="math inline">\prod_t p_\theta(x_t \mid x_{&lt;t})</span></td>
+<td style="text-align: left;">sequences</td>
+<td style="text-align: left;">language models</td>
+</tr>
+</tbody>
+</table>
+<p>Whatever the paradigm, learning consists in making a parameterized distribution <span class="math inline">p_\theta</span> as close as possible to an unknown data distribution <span class="math inline">p</span>, of which we only have samples. The next chapter shows that the natural measure of closeness, the KL divergence, can be minimized with samples only, and that minimizing it is the same as maximizing the likelihood of the data.</p>
 
 
 </section>
@@ -901,6 +880,38 @@ window.Quarto = {
     </div>
   </div>
 </footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
