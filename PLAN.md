@@ -28,9 +28,9 @@ For every new chapter:
 
 ## Current and planned structure
 
-### Preface — `index.qmd` [x]
+### Preface — `index.qmd` [~]
 
-Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), license.
+Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), license. To revise: the preface only mentions Parts I, II and IV; a more engaging introduction (why probabilistic rather than deterministic deep learning, applications) and the book title are under discussion.
 
 ### Part I — Basics (`src/basics/`)
 
@@ -61,10 +61,10 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 - [x] **4. Gradient estimators** `{#sec-gradientestimators}` — the gradient of an expectation, reparameterization (pathwise) estimator, score-function estimator (log-derivative trick, two scores, baselines; figure `gradient-estimators.png`), application to reinforcement learning `{#sec-reinforcementlearning}` (figures `rl-agent.png`, `policy-search.svg` from the Deep RL book; REINFORCE, PPO, RLHF), summary table.
 - [x] **5. Tighter and weighted bounds** `{#sec-tighterbounds}` — IWAE `{#sec-iwae}` (short, no figure) [@Burda2016], $\beta$-VAE `{#sec-betavae}` (disentanglement, figure `betavae-results.png` [@Higgins2016], posterior collapse, KL annealing), summary of Part IV (transition to diffusion as hierarchical VAEs).
 
-### Part V — Deep generative models — planned
+### Part V — Deep generative models (`src/generative/`)
 
-- [ ] Normalizing flows — change of variables, exact likelihood.
-- [ ] Energy-based models and score matching.
+- [ ] Normalizing flows — change of variables, exact likelihood; continuous normalizing flows already introduced in @sec-flowmatching.
+- [ ] Energy-based models — score matching is now covered in @sec-diffusion (denoising score matching, Tweedie); a possible short chapter on energy-based models alone (unnormalized densities $e^{-E_\theta(x)}$, training with MCMC samples / contrastive divergence), or drop.
 - [x] ★ **1. Denoising diffusion models** `{#sec-diffusion}` and **2. Conditional and latent diffusion** `{#sec-conditionaldiffusion}` — written (detailed plan below, "Chapter plan: Diffusion models"). Notes: port `~/Documents/Obsidian/Notes/Machine Learning/Diffusion/` (~850 lines; its images `langevin.gif`, `kerneldensityestimation.png`, `manifold.png` are in the Obsidian `Inference/img/` folder); hierarchical-VAE derivation of @Luo2022a.
     - Planned paragraph: **diffusion and flow matching in the forward / reverse KL dichotomy** (link to @sec-forwardreverse).
         - Rule of thumb: an expectation over the **data** is mass-covering (MLE, VAE, diffusion, flow matching); over the **model's own samples** it is mode-seeking (VI, mode collapse of GAN generators).
@@ -76,7 +76,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 - [x] **3. Optimal transport** `{#sec-ot}` — written (detailed plan below, "Chapter plan: Optimal transport"); Jensen-Shannon defined in @sec-kl.
 - [x] **4. Flow matching** `{#sec-flowmatching}` — written (detailed plan below, "Chapter plan: Flow matching"). Original entry: after optimal transport: continuous normalizing flows, velocity field regression on conditional paths [@Lipman2023], link to the probability-flow ODE of the diffusion chapter, OT couplings / rectified flows (straighter paths, fewer sampling steps). Detailed outline to write when we get there.
     - (The draft text moved from the OT chapter is now in section 6 of the flow matching chapter.)
-- [ ] GANs as divergence minimization (f-divergences).
+- [ ] GANs as divergence minimization (f-divergences) — groundwork in place: Jensen-Shannon defined in @sec-kl, Wasserstein GANs in @sec-ot.
 
 ### Part VI — Uncertainty and Bayesian deep learning — optional
 
