@@ -184,6 +184,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -398,10 +403,10 @@ window.Quarto = {
 <div id="fig-mve" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mve-network.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;8.1: Mean-variance estimation network. Source: @Sluijterman2024"><img src="../img/mve-network.jpg" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/mve-network.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;9.1: Mean-variance estimation network. Source: @Sluijterman2024"><img src="../img/mve-network.jpg" class="img-fluid figure-img" style="width:70.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8.1: Mean-variance estimation network. Source: <span class="citation" data-cites="Sluijterman2024">Sluijterman et al. (<a href="../references.html#ref-Sluijterman2024" role="doc-biblioref">2024</a>)</span>
+Figure&nbsp;9.1: Mean-variance estimation network. Source: <span class="citation" data-cites="Sluijterman2024">Sluijterman et al. (<a href="../references.html#ref-Sluijterman2024" role="doc-biblioref">2024</a>)</span>
 </figcaption>
 </figure>
 </div>
@@ -430,21 +435,21 @@ Figure&nbsp;8.1: Mean-variance estimation network. Source: <span class="citation
 <div id="fig-multimodal" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-multimodal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/multimodal-distribution.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;8.2: Unimodal vs.&nbsp;multimodal distributions. Source: https://medium.com/analytics-vidhya/learning-from-multimodal-target-mixture-density-network-94891d4e357e"><img src="../img/multimodal-distribution.png" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/multimodal-distribution.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;9.2: Unimodal vs.&nbsp;multimodal distributions. Source: https://medium.com/analytics-vidhya/learning-from-multimodal-target-mixture-density-network-94891d4e357e"><img src="../img/multimodal-distribution.png" class="img-fluid figure-img" style="width:70.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-multimodal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8.2: Unimodal vs.&nbsp;multimodal distributions. Source: <a href="https://medium.com/analytics-vidhya/learning-from-multimodal-target-mixture-density-network-94891d4e357e" class="uri">https://medium.com/analytics-vidhya/learning-from-multimodal-target-mixture-density-network-94891d4e357e</a>
+Figure&nbsp;9.2: Unimodal vs.&nbsp;multimodal distributions. Source: <a href="https://medium.com/analytics-vidhya/learning-from-multimodal-target-mixture-density-network-94891d4e357e" class="uri">https://medium.com/analytics-vidhya/learning-from-multimodal-target-mixture-density-network-94891d4e357e</a>
 </figcaption>
 </figure>
 </div>
-<p>In <a href="https://github.com/dusenberrymw/mixture-density-networks/blob/master/mixture_density_networks.ipynb" class="uri">https://github.com/dusenberrymw/mixture-density-networks/blob/master/mixture_density_networks.ipynb</a>, they take a nice example to understand why it is important. As seen on the left of <a href="#fig-mdninverse" class="quarto-xref">Figure&nbsp;<span>8.3</span></a>, it is very easy to do a non-linear regression <span class="math inline">y = f_\theta(x)</span> on this data.</p>
+<p>In <a href="https://github.com/dusenberrymw/mixture-density-networks/blob/master/mixture_density_networks.ipynb" class="uri">https://github.com/dusenberrymw/mixture-density-networks/blob/master/mixture_density_networks.ipynb</a>, they take a nice example to understand why it is important. As seen on the left of <a href="#fig-mdninverse" class="quarto-xref">Figure&nbsp;<span>9.3</span></a>, it is very easy to do a non-linear regression <span class="math inline">y = f_\theta(x)</span> on this data.</p>
 <div id="fig-mdninverse" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mdninverse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mdn-inverse-regression.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;8.3: Left: the forward model y = f_\theta(x) is easy to regress. Right: the inverse model x = f_\theta(y) is not, as one value of y corresponds to several values of x. Source: https://github.com/dusenberrymw/mixture-density-networks"><img src="../img/mdn-inverse-regression.png" class="img-fluid figure-img"></a>
+<a href="../img/mdn-inverse-regression.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;9.3: Left: the forward model y = f_\theta(x) is easy to regress. Right: the inverse model x = f_\theta(y) is not, as one value of y corresponds to several values of x. Source: https://github.com/dusenberrymw/mixture-density-networks"><img src="../img/mdn-inverse-regression.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mdninverse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8.3: Left: the forward model <span class="math inline">y = f_\theta(x)</span> is easy to regress. Right: the inverse model <span class="math inline">x = f_\theta(y)</span> is not, as one value of <span class="math inline">y</span> corresponds to several values of <span class="math inline">x</span>. Source: <a href="https://github.com/dusenberrymw/mixture-density-networks" class="uri">https://github.com/dusenberrymw/mixture-density-networks</a>
+Figure&nbsp;9.3: Left: the forward model <span class="math inline">y = f_\theta(x)</span> is easy to regress. Right: the inverse model <span class="math inline">x = f_\theta(y)</span> is not, as one value of <span class="math inline">y</span> corresponds to several values of <span class="math inline">x</span>. Source: <a href="https://github.com/dusenberrymw/mixture-density-networks" class="uri">https://github.com/dusenberrymw/mixture-density-networks</a>
 </figcaption>
 </figure>
 </div>
@@ -452,10 +457,10 @@ Figure&nbsp;8.3: Left: the forward model <span class="math inline">y = f_\theta(
 <div id="fig-halfmoons" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-halfmoons-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mdn-halfmoons-pdf.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;8.4: Half-moons dataset (left) and the multimodal density of its y-coordinate (right)."><img src="../img/mdn-halfmoons-pdf.png" class="img-fluid figure-img"></a>
+<a href="../img/mdn-halfmoons-pdf.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;9.4: Half-moons dataset (left) and the multimodal density of its y-coordinate (right)."><img src="../img/mdn-halfmoons-pdf.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-halfmoons-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8.4: Half-moons dataset (left) and the multimodal density of its y-coordinate (right).
+Figure&nbsp;9.4: Half-moons dataset (left) and the multimodal density of its y-coordinate (right).
 </figcaption>
 </figure>
 </div>
@@ -480,10 +485,10 @@ Figure&nbsp;8.4: Half-moons dataset (left) and the multimodal density of its y-c
 <div id="fig-mdn" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mdn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mdn-architecture.webp" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;8.5: Architecture of a mixture density network. Source: https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20"><img src="../img/mdn-architecture.webp" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/mdn-architecture.webp" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;9.5: Architecture of a mixture density network. Source: https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20"><img src="../img/mdn-architecture.webp" class="img-fluid figure-img" style="width:70.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mdn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8.5: Architecture of a mixture density network. Source: <a href="https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20" class="uri">https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20</a>
+Figure&nbsp;9.5: Architecture of a mixture density network. Source: <a href="https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20" class="uri">https://medium.com/towards-data-science/predicting-the-unpredictable-905f634acc20</a>
 </figcaption>
 </figure>
 </div>
@@ -496,10 +501,10 @@ Figure&nbsp;8.5: Architecture of a mixture density network. Source: <a href="htt
 <div id="fig-mdnposterior" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mdnposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mdn-posterior-density.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;8.6: Left: posterior density learned by a MDN. Right: means of the components, their size indicating their mixing weight. Source: https://gpflow.readthedocs.io/en/v1.5.1-docs/notebooks/tailor/mixture_density_network.html"><img src="../img/mdn-posterior-density.png" class="img-fluid figure-img"></a>
+<a href="../img/mdn-posterior-density.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;9.6: Left: posterior density learned by a MDN. Right: means of the components, their size indicating their mixing weight. Source: https://gpflow.readthedocs.io/en/v1.5.1-docs/notebooks/tailor/mixture_density_network.html"><img src="../img/mdn-posterior-density.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mdnposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8.6: Left: posterior density learned by a MDN. Right: means of the components, their size indicating their mixing weight. Source: <a href="https://gpflow.readthedocs.io/en/v1.5.1-docs/notebooks/tailor/mixture_density_network.html" class="uri">https://gpflow.readthedocs.io/en/v1.5.1-docs/notebooks/tailor/mixture_density_network.html</a>
+Figure&nbsp;9.6: Left: posterior density learned by a MDN. Right: means of the components, their size indicating their mixing weight. Source: <a href="https://gpflow.readthedocs.io/en/v1.5.1-docs/notebooks/tailor/mixture_density_network.html" class="uri">https://gpflow.readthedocs.io/en/v1.5.1-docs/notebooks/tailor/mixture_density_network.html</a>
 </figcaption>
 </figure>
 </div>
@@ -508,14 +513,14 @@ Figure&nbsp;8.6: Left: posterior density learned by a MDN. Right: means of the c
 <li>sample a component <span class="math inline">k</span> using the softmax mixing weights <span class="math inline">\alpha_k(\mathbf{x})</span>.</li>
 <li>sample the corresponding normal distribution <span class="math inline">\mathcal{N}(\mu_k(\mathbf{x}), \sigma_k(\mathbf{x}) \cdot I)</span>.</li>
 </ol>
-<p><a href="#fig-mdnsampling" class="quarto-xref">Figure&nbsp;<span>8.7</span></a> shows an example with sampling from two components on the half-moons.</p>
+<p><a href="#fig-mdnsampling" class="quarto-xref">Figure&nbsp;<span>9.7</span></a> shows an example with sampling from two components on the half-moons.</p>
 <div id="fig-mdnsampling" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mdnsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mdn-halfmoons-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;8.7: Sampling from a two-component MDN on the half-moons. Source: https://medium.com/@dave.cote.msc/made-easy-mixture-density-network-for-multivariate-regression-49e576721b3"><img src="../img/mdn-halfmoons-sampling.png" class="img-fluid figure-img" style="width:60.0%"></a>
+<a href="../img/mdn-halfmoons-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;9.7: Sampling from a two-component MDN on the half-moons. Source: https://medium.com/@dave.cote.msc/made-easy-mixture-density-network-for-multivariate-regression-49e576721b3"><img src="../img/mdn-halfmoons-sampling.png" class="img-fluid figure-img" style="width:60.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mdnsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8.7: Sampling from a two-component MDN on the half-moons. Source: <a href="https://medium.com/@dave.cote.msc/made-easy-mixture-density-network-for-multivariate-regression-49e576721b3" class="uri">https://medium.com/@dave.cote.msc/made-easy-mixture-density-network-for-multivariate-regression-49e576721b3</a>
+Figure&nbsp;9.7: Sampling from a two-component MDN on the half-moons. Source: <a href="https://medium.com/@dave.cote.msc/made-easy-mixture-density-network-for-multivariate-regression-49e576721b3" class="uri">https://medium.com/@dave.cote.msc/made-easy-mixture-density-network-for-multivariate-regression-49e576721b3</a>
 </figcaption>
 </figure>
 </div>

@@ -184,6 +184,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -454,14 +459,14 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p>A sunny day is followed by another sunny day with probability 0.7, by a cloudy day with probability 0.2, and by a rainy day with probability 0.1. The left part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>10.1</span></a> represents the same chain as a graph.</p>
+<p>A sunny day is followed by another sunny day with probability 0.7, by a cloudy day with probability 0.2, and by a rainy day with probability 0.1. The left part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>11.1</span></a> represents the same chain as a graph.</p>
 <div id="fig-markovchain" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-markovchain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/markov-chain.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;10.1: A Markov chain with three states. Left: transition probabilities. Middle: the distribution p_t(x) of the state at step t converges to the same stationary distribution, whether the chain starts on a sunny (solid lines) or a rainy day (dashed lines). Right: fraction of the time spent in each state by a single long chain, which converges to the stationary distribution (dotted lines)."><img src="../img/markov-chain.png" class="img-fluid figure-img"></a>
+<a href="../img/markov-chain.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;11.1: A Markov chain with three states. Left: transition probabilities. Middle: the distribution p_t(x) of the state at step t converges to the same stationary distribution, whether the chain starts on a sunny (solid lines) or a rainy day (dashed lines). Right: fraction of the time spent in each state by a single long chain, which converges to the stationary distribution (dotted lines)."><img src="../img/markov-chain.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-markovchain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.1: A Markov chain with three states. Left: transition probabilities. Middle: the distribution <span class="math inline">p_t(x)</span> of the state at step <span class="math inline">t</span> converges to the same stationary distribution, whether the chain starts on a sunny (solid lines) or a rainy day (dashed lines). Right: fraction of the time spent in each state by a single long chain, which converges to the stationary distribution (dotted lines).
+Figure&nbsp;11.1: A Markov chain with three states. Left: transition probabilities. Middle: the distribution <span class="math inline">p_t(x)</span> of the state at step <span class="math inline">t</span> converges to the same stationary distribution, whether the chain starts on a sunny (solid lines) or a rainy day (dashed lines). Right: fraction of the time spent in each state by a single long chain, which converges to the stationary distribution (dotted lines).
 </figcaption>
 </figure>
 </div>
@@ -484,7 +489,7 @@ Figure&nbsp;10.1: A Markov chain with three states. Left: transition probabiliti
 </section>
 <section id="stationary-distribution" class="level3">
 <h3 class="anchored" data-anchor-id="stationary-distribution">Stationary distribution</h3>
-<p>The middle part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>10.1</span></a> shows that the distribution converges towards fixed values, around <span class="math inline">(0.46, 0.31, 0.23)</span>, and that these values are the same if we start on a rainy day instead. Once the chain has reached this distribution, applying the transition kernel does not change it anymore. Such a distribution <span class="math inline">p(x)</span> is called a <strong>stationary distribution</strong> of the chain:</p>
+<p>The middle part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>11.1</span></a> shows that the distribution converges towards fixed values, around <span class="math inline">(0.46, 0.31, 0.23)</span>, and that these values are the same if we start on a rainy day instead. Once the chain has reached this distribution, applying the transition kernel does not change it anymore. Such a distribution <span class="math inline">p(x)</span> is called a <strong>stationary distribution</strong> of the chain:</p>
 <p><span class="math display">
     p(x') = \sum_x T(x' | x) \, p(x)
 </span></p>
@@ -502,7 +507,7 @@ Figure&nbsp;10.1: A Markov chain with three states. Left: transition probabiliti
 </section>
 <section id="time-averages" class="level3">
 <h3 class="anchored" data-anchor-id="time-averages">Time averages</h3>
-<p>The middle part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>10.1</span></a> describes many independent runs of the chain. What happens with a <strong>single</strong> run? The right part of the figure shows the fraction of the days spent in each state by one long chain: it also converges to the stationary distribution. A single chain that runs long enough visits each state a fraction of the time equal to its stationary probability.</p>
+<p>The middle part of <a href="#fig-markovchain" class="quarto-xref">Figure&nbsp;<span>11.1</span></a> describes many independent runs of the chain. What happens with a <strong>single</strong> run? The right part of the figure shows the fraction of the days spent in each state by one long chain: it also converges to the stationary distribution. A single chain that runs long enough visits each state a fraction of the time equal to its stationary probability.</p>
 <p>More generally, the average of any function <span class="math inline">f</span> over the states visited by the chain converges to its expectation under the stationary distribution:</p>
 <p><span class="math display">
     \dfrac{1}{N} \, \sum_{t=1}^N f(x_t) \rightarrow \mathbb{E}_{x \sim p(x)} [f(x)] \qquad \text{when } N \rightarrow \infty
@@ -664,14 +669,14 @@ Figure&nbsp;10.1: A Markov chain with three states. Left: transition probabiliti
 </section>
 <section id="example" class="level3">
 <h3 class="anchored" data-anchor-id="example">Example</h3>
-<p><a href="#fig-metropolishastings" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> applies random-walk Metropolis to the bimodal target of <a href="1-MonteCarlo.html#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, with the step size <span class="math inline">s = 1</span> and the initial state <span class="math inline">x_0 = 0</span>. Only the unnormalized target <span class="math inline">\tilde{p}(x)</span> (with <span class="math inline">Z = 3</span>) is used.</p>
+<p><a href="#fig-metropolishastings" class="quarto-xref">Figure&nbsp;<span>11.2</span></a> applies random-walk Metropolis to the bimodal target of <a href="1-MonteCarlo.html#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>, with the step size <span class="math inline">s = 1</span> and the initial state <span class="math inline">x_0 = 0</span>. Only the unnormalized target <span class="math inline">\tilde{p}(x)</span> (with <span class="math inline">Z = 3</span>) is used.</p>
 <div id="fig-metropolishastings" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-metropolishastings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/metropolis-hastings.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;10.2: Random-walk Metropolis on the bimodal target of Figure&nbsp;fig-rejectionsampling, with the proposal q(x'|x) = \mathcal{N}(x, 1). Left: the first 200 steps of the chain. Each rejected candidate (crosses) leaves the chain at the same position, creating a flat segment. Right: the histogram of a chain of 10000 steps matches the target."><img src="../img/metropolis-hastings.png" class="img-fluid figure-img"></a>
+<a href="../img/metropolis-hastings.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;11.2: Random-walk Metropolis on the bimodal target of Figure&nbsp;fig-rejectionsampling, with the proposal q(x'|x) = \mathcal{N}(x, 1). Left: the first 200 steps of the chain. Each rejected candidate (crosses) leaves the chain at the same position, creating a flat segment. Right: the histogram of a chain of 10000 steps matches the target."><img src="../img/metropolis-hastings.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-metropolishastings-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.2: Random-walk Metropolis on the bimodal target of <a href="1-MonteCarlo.html#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, with the proposal <span class="math inline">q(x'|x) = \mathcal{N}(x, 1)</span>. Left: the first 200 steps of the chain. Each rejected candidate (crosses) leaves the chain at the same position, creating a flat segment. Right: the histogram of a chain of 10000 steps matches the target.
+Figure&nbsp;11.2: Random-walk Metropolis on the bimodal target of <a href="1-MonteCarlo.html#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>, with the proposal <span class="math inline">q(x'|x) = \mathcal{N}(x, 1)</span>. Left: the first 200 steps of the chain. Each rejected candidate (crosses) leaves the chain at the same position, creating a flat segment. Right: the histogram of a chain of 10000 steps matches the target.
 </figcaption>
 </figure>
 </div>
@@ -687,14 +692,14 @@ Figure&nbsp;10.2: Random-walk Metropolis on the bimodal target of <a href="1-Mon
 </section>
 <section id="sec-mcmcpractice" class="level2">
 <h2 class="anchored" data-anchor-id="sec-mcmcpractice">Using MCMC in practice</h2>
-<p>Metropolis-Hastings is guaranteed to produce samples of <span class="math inline">p(x)</span> <strong>in the limit</strong> of infinitely long chains. With a finite chain, the quality of the estimates depends on choices that the algorithm leaves open: the step size of the proposal, the initial state, and the number of steps. This section discusses them on the bimodal target, with three different step sizes (<a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>).</p>
+<p>Metropolis-Hastings is guaranteed to produce samples of <span class="math inline">p(x)</span> <strong>in the limit</strong> of infinitely long chains. With a finite chain, the quality of the estimates depends on choices that the algorithm leaves open: the step size of the proposal, the initial state, and the number of steps. This section discusses them on the bimodal target, with three different step sizes (<a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>11.3</span></a>).</p>
 <div id="fig-metropolisstepsize" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-metropolisstepsize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/metropolis-stepsize.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;10.3: Random-walk Metropolis on the bimodal target with three step sizes, all chains starting in the tail at x_0 = 8. Left: first 1000 steps of the chain, the first 500 being discarded as burn-in (shaded). Middle: histogram of the chain after burn-in (9500 steps) against the target. Right: autocorrelation \rho_k of the chain after burn-in, as a function of the lag k."><img src="../img/metropolis-stepsize.png" class="img-fluid figure-img"></a>
+<a href="../img/metropolis-stepsize.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;11.3: Random-walk Metropolis on the bimodal target with three step sizes, all chains starting in the tail at x_0 = 8. Left: first 1000 steps of the chain, the first 500 being discarded as burn-in (shaded). Middle: histogram of the chain after burn-in (9500 steps) against the target. Right: autocorrelation \rho_k of the chain after burn-in, as a function of the lag k."><img src="../img/metropolis-stepsize.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-metropolisstepsize-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.3: Random-walk Metropolis on the bimodal target with three step sizes, all chains starting in the tail at <span class="math inline">x_0 = 8</span>. Left: first 1000 steps of the chain, the first 500 being discarded as burn-in (shaded). Middle: histogram of the chain after burn-in (9500 steps) against the target. Right: autocorrelation <span class="math inline">\rho_k</span> of the chain after burn-in, as a function of the lag <span class="math inline">k</span>.
+Figure&nbsp;11.3: Random-walk Metropolis on the bimodal target with three step sizes, all chains starting in the tail at <span class="math inline">x_0 = 8</span>. Left: first 1000 steps of the chain, the first 500 being discarded as burn-in (shaded). Middle: histogram of the chain after burn-in (9500 steps) against the target. Right: autocorrelation <span class="math inline">\rho_k</span> of the chain after burn-in, as a function of the lag <span class="math inline">k</span>.
 </figcaption>
 </figure>
 </div>
@@ -707,18 +712,18 @@ Figure&nbsp;10.3: Random-walk Metropolis on the bimodal target with three step s
 <li><strong>Good</strong> (<span class="math inline">s = 3</span>, middle row): the candidates are far enough to explore the distribution quickly, and close enough to be accepted reasonably often (42%). The chain jumps between the two modes all the time, and its histogram matches the target.</li>
 </ul>
 <p>A high acceptance rate is therefore <strong>not</strong> a sign of a good sampler: it is often the sign of a too small step size. The usual rule of thumb is to tune the step size so that the acceptance rate is between 25% and 50%. In high dimensions, the optimal acceptance rate of random-walk Metropolis approaches 23% <span class="citation" data-cites="Roberts1997">(<a href="../references.html#ref-Roberts1997" role="doc-biblioref">Roberts et al., 1997</a>)</span>. In practice, the step size is adapted during the burn-in period (see below) until the acceptance rate falls into this range.</p>
-<p>Note that the step size <span class="math inline">s = 1</span> used in <a href="#fig-metropolishastings" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> was a bit too small: its acceptance rate is higher (65%), but it produces about four times fewer effective samples than <span class="math inline">s = 3</span> (in the sense defined below).</p>
+<p>Note that the step size <span class="math inline">s = 1</span> used in <a href="#fig-metropolishastings" class="quarto-xref">Figure&nbsp;<span>11.2</span></a> was a bit too small: its acceptance rate is higher (65%), but it produces about four times fewer effective samples than <span class="math inline">s = 3</span> (in the sense defined below).</p>
 </section>
 <section id="burn-in" class="level3">
 <h3 class="anchored" data-anchor-id="burn-in">Burn-in</h3>
-<p>The chain starts from an arbitrary initial state <span class="math inline">x_0</span>, often far from the regions of high probability: in <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>, all chains start at <span class="math inline">x_0 = 8</span>, deep in the tail of the target. The first states of the chain depend on this initial state, not on the target: the distribution <span class="math inline">p_t</span> of the chain has not converged to its stationary distribution yet (<a href="#sec-markovchains" class="quarto-xref"><span>Markov chains</span></a>).</p>
+<p>The chain starts from an arbitrary initial state <span class="math inline">x_0</span>, often far from the regions of high probability: in <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>11.3</span></a>, all chains start at <span class="math inline">x_0 = 8</span>, deep in the tail of the target. The first states of the chain depend on this initial state, not on the target: the distribution <span class="math inline">p_t</span> of the chain has not converged to its stationary distribution yet (<a href="#sec-markovchains" class="quarto-xref"><span>Markov chains</span></a>).</p>
 <p>These first samples are therefore discarded: this is the <strong>burn-in</strong> (or warm-up) period. Its required length depends on how fast the chain converges. With the good step size, the chain reaches the target in a couple of steps; with the too small one, it needs hundreds of steps just to walk down from <span class="math inline">x_0 = 8</span> to the region of high probability. In practice, the burn-in length is chosen by looking at the trace: the chain should have “forgotten” its initial state, i.e.&nbsp;fluctuate around a stable level. Discarding a few hundred or thousand steps is common.</p>
 </section>
 <section id="correlated-samples" class="level3">
 <h3 class="anchored" data-anchor-id="correlated-samples">Correlated samples</h3>
 <p>After burn-in, the samples of the chain follow the target, but they are not independent: each state is close to the previous one, or even equal to it when a candidate is rejected. Two successive samples therefore carry partly the same information, and a chain of <span class="math inline">N</span> steps is worth less than <span class="math inline">N</span> independent samples.</p>
-<p>The right column of <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a> measures this dependence with the <strong>autocorrelation</strong> of the chain: how similar two states <span class="math inline">k</span> steps apart are, on a scale from 1 (identical) to 0 (unrelated). With the good step size, the similarity fades within a few steps. With the too large step size, it takes almost a hundred steps, as the chain repeats the same state for tens of steps. With the too small one, two states 200 steps apart are still strongly related.</p>
-<p>The <strong>effective sample size</strong> (ESS) of the chain summarizes this: it is the number of independent samples that would give an estimate of the same precision. It has the same meaning as the effective sample size of importance sampling (<a href="1-MonteCarlo.html#sec-importance" class="quarto-xref"><span>Importance sampling</span></a>). In <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>, the 9500 samples kept after burn-in are worth about 1600 independent samples with the good step size, 190 with the too large one, and only 8 with the too small one. The ESS is the number to look at when comparing samplers: a sampler that is twice as slow per step but produces three times more effective samples is the better one.</p>
+<p>The right column of <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>11.3</span></a> measures this dependence with the <strong>autocorrelation</strong> of the chain: how similar two states <span class="math inline">k</span> steps apart are, on a scale from 1 (identical) to 0 (unrelated). With the good step size, the similarity fades within a few steps. With the too large step size, it takes almost a hundred steps, as the chain repeats the same state for tens of steps. With the too small one, two states 200 steps apart are still strongly related.</p>
+<p>The <strong>effective sample size</strong> (ESS) of the chain summarizes this: it is the number of independent samples that would give an estimate of the same precision. It has the same meaning as the effective sample size of importance sampling (<a href="1-MonteCarlo.html#sec-importance" class="quarto-xref"><span>Importance sampling</span></a>). In <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>11.3</span></a>, the 9500 samples kept after burn-in are worth about 1600 independent samples with the good step size, 190 with the too large one, and only 8 with the too small one. The ESS is the number to look at when comparing samplers: a sampler that is twice as slow per step but produces three times more effective samples is the better one.</p>
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -743,7 +748,7 @@ Figure&nbsp;10.3: Random-walk Metropolis on the bimodal target with three step s
 <p><span class="math display">
     \text{ESS} = \dfrac{N}{1 + 2 \, \sum_{k=1}^\infty \rho_k}
 </span></p>
-<p>In practice, the autocorrelations are estimated from the chain itself, and the sum is truncated when they become negligible (in <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>10.3</span></a>, at the first negative value).</p>
+<p>In practice, the autocorrelations are estimated from the chain itself, and the sum is truncated when they become negligible (in <a href="#fig-metropolisstepsize" class="quarto-xref">Figure&nbsp;<span>11.3</span></a>, at the first negative value).</p>
 </div>
 </div>
 </div>
@@ -808,14 +813,14 @@ Figure&nbsp;10.3: Random-walk Metropolis on the bimodal target with three step s
 <p><span class="math display">
     p(x_1 | x_2) = \mathcal{N}(\rho \, x_2, \sqrt{1 - \rho^2}) \qquad p(x_2 | x_1) = \mathcal{N}(\rho \, x_1, \sqrt{1 - \rho^2})
 </span></p>
-<p>Each update moves the chain parallel to one axis: horizontally when <span class="math inline">x_1</span> is updated, vertically when <span class="math inline">x_2</span> is. <a href="#fig-gibbssampling" class="quarto-xref">Figure&nbsp;<span>10.4</span></a> shows the path of the chain in two cases.</p>
+<p>Each update moves the chain parallel to one axis: horizontally when <span class="math inline">x_1</span> is updated, vertically when <span class="math inline">x_2</span> is. <a href="#fig-gibbssampling" class="quarto-xref">Figure&nbsp;<span>11.4</span></a> shows the path of the chain in two cases.</p>
 <div id="fig-gibbssampling" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-gibbssampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/gibbs-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;10.4: Gibbs sampling of a bivariate normal distribution with unit variances, starting from (-3, -3), for 30 sweeps. The blue ellipses delimit 1, 2 and 3 standard deviations. Each update moves the chain parallel to one axis. Left: uncorrelated coordinates. Right: strongly correlated coordinates."><img src="../img/gibbs-sampling.png" class="img-fluid figure-img"></a>
+<a href="../img/gibbs-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;11.4: Gibbs sampling of a bivariate normal distribution with unit variances, starting from (-3, -3), for 30 sweeps. The blue ellipses delimit 1, 2 and 3 standard deviations. Each update moves the chain parallel to one axis. Left: uncorrelated coordinates. Right: strongly correlated coordinates."><img src="../img/gibbs-sampling.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gibbssampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.4: Gibbs sampling of a bivariate normal distribution with unit variances, starting from <span class="math inline">(-3, -3)</span>, for 30 sweeps. The blue ellipses delimit 1, 2 and 3 standard deviations. Each update moves the chain parallel to one axis. Left: uncorrelated coordinates. Right: strongly correlated coordinates.
+Figure&nbsp;11.4: Gibbs sampling of a bivariate normal distribution with unit variances, starting from <span class="math inline">(-3, -3)</span>, for 30 sweeps. The blue ellipses delimit 1, 2 and 3 standard deviations. Each update moves the chain parallel to one axis. Left: uncorrelated coordinates. Right: strongly correlated coordinates.
 </figcaption>
 </figure>
 </div>
@@ -836,14 +841,14 @@ Figure&nbsp;10.4: Gibbs sampling of a bivariate normal distribution with unit va
 <p>This is all Metropolis-Hastings needs: the evidence <span class="math inline">p(X)</span> is never computed. With only two parameters, we could still normalize the posterior numerically on a grid, but the same code would work with hundreds of parameters, where no grid is possible (<a href="1-MonteCarlo.html#sec-curse" class="quarto-xref"><span>Numerical integration does not scale</span></a>).</p>
 <p>We use random-walk Metropolis in the two-dimensional space of the parameters, with the proposal <span class="math inline">\mathcal{N}((\mu, \sigma), 0.7)</span> (the same step size in both directions), during 20000 steps after a burn-in of 1000 steps. Candidates with a negative standard deviation have a probability of zero under the prior: they are simply always rejected.</p>
 <p>One practical detail matters: the likelihood is a product of <span class="math inline">N</span> densities, which quickly becomes too small to be represented by floating-point numbers. The acceptance test is therefore computed in the log domain, by comparing <span class="math inline">\log u</span> with the difference <span class="math inline">\log \tilde{p}(\mu', \sigma' | X) - \log \tilde{p}(\mu, \sigma | X)</span>, where the log-likelihood is a sum instead of a product, as in <a href="../basics/2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>.</p>
-<p>The left part of <a href="#fig-mcmcposterior" class="quarto-xref">Figure&nbsp;<span>10.5</span></a> shows the samples of the chain. Instead of a single point estimate, we get the whole posterior distribution of the parameters, and in particular how uncertain they are: with 20 data points, the mean is somewhere between about 1.8 and 3.5, and the standard deviation between 1.3 and 2.6. Any other quantity is a simple Monte Carlo average over the chain: the posterior mean of a parameter is the average of its samples, the probability that <span class="math inline">\mu &gt; 3</span> is the fraction of the samples where this is true, and so on.</p>
+<p>The left part of <a href="#fig-mcmcposterior" class="quarto-xref">Figure&nbsp;<span>11.5</span></a> shows the samples of the chain. Instead of a single point estimate, we get the whole posterior distribution of the parameters, and in particular how uncertain they are: with 20 data points, the mean is somewhere between about 1.8 and 3.5, and the standard deviation between 1.3 and 2.6. Any other quantity is a simple Monte Carlo average over the chain: the posterior mean of a parameter is the average of its samples, the probability that <span class="math inline">\mu &gt; 3</span> is the fraction of the samples where this is true, and so on.</p>
 <div id="fig-mcmcposterior" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mcmcposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mcmc-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;10.5: Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior p(\mu, \sigma | X) (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities \mathcal{N}(\mu_t, \sigma_t) of all the samples of the chain (a few of them in green)."><img src="../img/mcmc-posterior.png" class="img-fluid figure-img"></a>
+<a href="../img/mcmc-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;11.5: Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior p(\mu, \sigma | X) (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities \mathcal{N}(\mu_t, \sigma_t) of all the samples of the chain (a few of them in green)."><img src="../img/mcmc-posterior.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mcmcposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10.5: Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior <span class="math inline">p(\mu, \sigma | X)</span> (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities <span class="math inline">\mathcal{N}(\mu_t, \sigma_t)</span> of all the samples of the chain (a few of them in green).
+Figure&nbsp;11.5: Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior <span class="math inline">p(\mu, \sigma | X)</span> (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities <span class="math inline">\mathcal{N}(\mu_t, \sigma_t)</span> of all the samples of the chain (a few of them in green).
 </figcaption>
 </figure>
 </div>
@@ -855,7 +860,7 @@ Figure&nbsp;10.5: Bayesian estimation of the mean and standard deviation of a no
 <p><span class="math display">
     p(x | X) \approx \dfrac{1}{T} \, \sum_{t=1}^T \mathcal{N}(x ; \mu_t, \sigma_t)
 </span></p>
-<p>The right part of <a href="#fig-mcmcposterior" class="quarto-xref">Figure&nbsp;<span>10.5</span></a> shows the result. Each sample of the chain is a plausible normal distribution for the data; their average is broader than each of them, as it also takes into account our uncertainty about the parameters. With more data, the posterior would become narrower, and the predictive distribution would get closer to a single normal distribution.</p>
+<p>The right part of <a href="#fig-mcmcposterior" class="quarto-xref">Figure&nbsp;<span>11.5</span></a> shows the result. Each sample of the chain is a plausible normal distribution for the data; their average is broader than each of them, as it also takes into account our uncertainty about the parameters. With more data, the posterior would become narrower, and the predictive distribution would get closer to a single normal distribution.</p>
 <p>This example is small, but it contains the whole workflow of Bayesian inference with MCMC: write down the unnormalized posterior (likelihood times prior), sample it with a Markov chain, and compute any quantity of interest as an average over the chain.</p>
 </section>
 <section id="sec-mcmclimits" class="level2">

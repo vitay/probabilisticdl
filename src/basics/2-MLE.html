@@ -165,6 +165,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -367,14 +372,14 @@ window.Quarto = {
 <div id="fig-mlenormalfits" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mlenormalfits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/mle-normal-fits.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;3.1: Normal distributions with different parameters \mu and \sigma explain the data with different likelihoods."><img src="../img/mle-normal-fits.png" class="img-fluid figure-img" style="width:60.0%"></a>
+<a href="../img/mle-normal-fits.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;4.1: Normal distributions with different parameters \mu and \sigma explain the data with different likelihoods."><img src="../img/mle-normal-fits.png" class="img-fluid figure-img" style="width:60.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mlenormalfits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.1: Normal distributions with different parameters <span class="math inline">\mu</span> and <span class="math inline">\sigma</span> explain the data with different likelihoods.
+Figure&nbsp;4.1: Normal distributions with different parameters <span class="math inline">\mu</span> and <span class="math inline">\sigma</span> explain the data with different likelihoods.
 </figcaption>
 </figure>
 </div>
-<p>The problem is to find the values of <span class="math inline">\mu</span> and <span class="math inline">\sigma</span> which best explain the observations <span class="math inline">\{x_i\}_{i=1}^N</span>. Said otherwise: among all possible normal distributions with different values for <span class="math inline">\mu</span> and <span class="math inline">\sigma</span>, which one is the most likely origin of the samples <span class="math inline">\{x_i\}_{i=1}^N</span>? In <a href="#fig-mlenormalfits" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>, the orange normal distribution fits the data better than the green one. But how do we find its parameters?</p>
+<p>The problem is to find the values of <span class="math inline">\mu</span> and <span class="math inline">\sigma</span> which best explain the observations <span class="math inline">\{x_i\}_{i=1}^N</span>. Said otherwise: among all possible normal distributions with different values for <span class="math inline">\mu</span> and <span class="math inline">\sigma</span>, which one is the most likely origin of the samples <span class="math inline">\{x_i\}_{i=1}^N</span>? In <a href="#fig-mlenormalfits" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>, the orange normal distribution fits the data better than the green one. But how do we find its parameters?</p>
 <p>The idea of MLE is to maximize the joint density function for all observations <span class="math inline">p_\theta(X)</span>, i.e.&nbsp;the joint probability of observing the <span class="math inline">N</span> samples <span class="math inline">x_i</span> given the current value of the parameters <span class="math inline">\theta</span>. This function is also called the <strong>likelihood function</strong> <span class="math inline">L(\theta; X)</span> (or simply <span class="math inline">L(\theta)</span>), i.e.&nbsp;the likelihood that the parameters <span class="math inline">\theta</span> explain the data <span class="math inline">X</span>:</p>
 <p><span class="math display">
     L(\theta)  = p_\theta( X) = p_\theta( x_1, x_2, \ldots, x_N)

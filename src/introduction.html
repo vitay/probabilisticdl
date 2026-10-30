@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Introduction – Probabilistic deep learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../src/basics/1-InformationTheory.html" rel="next">
+<link href="../index.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-5c1318cf63eba56dbef7ba16bc7d56f5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-af1da4bb2192535958fe56112dabcf43.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span id="sec-introduction" class="quarto-section-identifier"><span class="chapter-title">Introduction</span></span></h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Probabilistic deep learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/introduction.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Basics</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/basics/1-InformationTheory.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Information theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/basics/2-MLE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Maximum likelihood estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/basics/3-Bayesian.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Bayesian estimation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Statistical machine learning</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/statisticalml/1-Paradigms.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Learning paradigms</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/statisticalml/2-KL.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Kullback-Leibler divergence in machine learning</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/statisticalml/3-Softmax.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Softmax classifier for discrete distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/statisticalml/4-MDN.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Mixture density networks for continuous distributions</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Sampling methods</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/sampling/1-MonteCarlo.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Monte Carlo and importance sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/sampling/2-MCMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/sampling/3-HMC.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Langevin dynamics and Hamiltonian Monte Carlo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Variational inference</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/variationalinference/1-LatentVariables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Latent variable models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/variationalinference/2-VariationalInference.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational inference</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/variationalinference/3-VAE.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Variational autoencoders</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/variationalinference/4-GradientEstimators.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Gradient estimators</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/variationalinference/5-TighterBounds.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Tighter and weighted bounds</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text"><strong>Deep generative models</strong></span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/generative/1-Diffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Denoising diffusion models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/generative/2-ConditionalDiffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Conditional and latent diffusion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/generative/3-OptimalTransport.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Optimal transport</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/generative/4-FlowMatching.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Flow matching</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../src/references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#one-answer-or-many" id="toc-one-answer-or-many" class="nav-link active" data-scroll-target="#one-answer-or-many">One answer, or many?</a></li>
+  <li><a href="#distributions-everywhere" id="toc-distributions-everywhere" class="nav-link" data-scroll-target="#distributions-everywhere">Distributions everywhere</a></li>
+  <li><a href="#the-common-thread" id="toc-the-common-thread" class="nav-link" data-scroll-target="#the-common-thread">The common thread</a></li>
+  <li><a href="#a-map-of-the-book" id="toc-a-map-of-the-book" class="nav-link" data-scroll-target="#a-map-of-the-book">A map of the book</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span id="sec-introduction" class="quarto-section-identifier"><span class="chapter-title">Introduction</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="one-answer-or-many" class="level2">
+<h2 class="anchored" data-anchor-id="one-answer-or-many">One answer, or many?</h2>
+<p>Most of deep learning is taught as the art of learning functions: a neural network takes an input <span class="math inline">x</span>, such as an image, and produces an output <span class="math inline">y</span>, such as the name of the object it contains, and it is trained to make its outputs as close as possible to the targets of a training set, typically by minimizing the mean square error between them. This view is very successful, but it hides an assumption: that for each input, there is <strong>a single right answer</strong>.</p>
+<p>Many problems do not have a single answer. A blurry photograph is compatible with many sharp images; the weather in two weeks is compatible with many different situations; a sentence can be continued in many ways; a sketch can be turned into many paintings. What does a network trained with the mean square error do in such cases? It predicts the <strong>average</strong> of all the possible answers, as the average is the prediction that minimizes the squared error. When the possible answers are close to each other, the average is a good summary. When they are very different, the average is often not a possible answer at all: the average of a cat and a dog is not an animal, the average of two possible trajectories of a storm goes between them, and the average of two branches of a curve lies where there is no data (<a href="#fig-introaverage" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, left).</p>
+<div id="fig-introaverage" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-introaverage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/intro-average.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;2.1: A problem with two possible answers for each input (y = \pm \sqrt{x}, plus noise). Left: a network trained with the mean square error predicts the average of the two answers, a line between the two branches where there is no data at all. Right: a probabilistic model represents the distribution p(y | x) of the possible answers; its samples are all plausible."><img src="img/intro-average.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-introaverage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.1: A problem with two possible answers for each input (<span class="math inline">y = \pm \sqrt{x}</span>, plus noise). Left: a network trained with the mean square error predicts the average of the two answers, a line between the two branches where there is no data at all. Right: a probabilistic model represents the distribution <span class="math inline">p(y | x)</span> of the possible answers; its samples are all plausible.
+</figcaption>
+</figure>
+</div>
+<p>A <strong>probabilistic</strong> model does not predict a single answer, but a <strong>distribution</strong> of answers <span class="math inline">p(y | x)</span>, or, without inputs, the distribution <span class="math inline">p(x)</span> of the data itself (<a href="#fig-introaverage" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, right). This changes everything:</p>
+<ul>
+<li>the distribution can be <strong>sampled</strong>, to generate as many plausible answers as we want, all different and all realistic;</li>
+<li>it tells <strong>how uncertain</strong> the model is: a narrow distribution means a confident prediction, a broad or multimodal one means that several answers are possible;</li>
+<li>it can be <strong>combined</strong> with other sources of information, such as measurements or prior knowledge, through Bayes’ rule.</li>
+</ul>
+<p>This book is about the tools needed to build, train and use such probabilistic models with neural networks.</p>
+</section>
+<section id="distributions-everywhere" class="level2">
+<h2 class="anchored" data-anchor-id="distributions-everywhere">Distributions everywhere</h2>
+<p>Probability distributions are at the heart of the most impressive applications of deep learning of the last years, often hidden behind the interface.</p>
+<p><strong>Generating text and images.</strong> A large language model is a probabilistic model of text: given the beginning of a sentence, it outputs a probability distribution over the next token, the output of a softmax classifier (<a href="statisticalml/3-Softmax.html" class="quarto-xref"><span>Softmax classifier for discrete distributions</span></a>), and generates text by sampling one token at a time <span class="citation" data-cites="Brown2020">(<a href="references.html#ref-Brown2020" role="doc-biblioref">Brown et al., 2020</a>)</span>. Image generators sample high-dimensional distributions over images, conditioned on a text description: they are diffusion models and flow matching models (<a href="generative/1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>, <a href="generative/4-FlowMatching.html" class="quarto-xref"><span>Flow matching</span></a>), often working in the latent space of an autoencoder <span class="citation" data-cites="Ramesh2022 Esser2024">(<a href="references.html#ref-Esser2024" role="doc-biblioref">Esser et al., 2024</a>; <a href="references.html#ref-Ramesh2022" role="doc-biblioref">Ramesh et al., 2022</a>)</span>. In both cases, generating means sampling, and there is no single right output.</p>
+<p><strong>Inverse problems.</strong> Many measurement devices only give an incomplete or noisy view of what we want to observe: a medical scanner measures a few frequencies of an image, a camera takes a blurry or partially hidden picture. Reconstructing the image is an <strong>inverse problem</strong> with many solutions (<a href="variationalinference/1-LatentVariables.html#sec-inverseproblems" class="quarto-xref"><span>Inverse problems</span></a>). A generative model of plausible images acts as a prior, which selects the solutions consistent with both the measurements and what images usually look like, and quantifies how uncertain the reconstruction is <span class="citation" data-cites="Song2022a">(<a href="references.html#ref-Song2022a" role="doc-biblioref">Song et al., 2022</a>)</span>.</p>
+<p><strong>Weather forecasting and data assimilation.</strong> Deep networks now forecast the weather as well as the numerical models of national weather services, at a fraction of the computational cost <span class="citation" data-cites="Lam2023 Bi2023">(<a href="references.html#ref-Bi2023" role="doc-biblioref">Bi et al., 2023</a>; <a href="references.html#ref-Lam2023" role="doc-biblioref">Lam et al., 2023</a>)</span>. Trained with the mean square error, deterministic forecasts become increasingly blurry at long lead times: they predict the average of all possible future weathers, in which storms are smeared out. Probabilistic models instead generate an <strong>ensemble</strong> of sharp, plausible forecasts, whose spread tells how predictable the weather is <span class="citation" data-cites="Price2025">(<a href="references.html#ref-Price2025" role="doc-biblioref">Price et al., 2025</a>)</span> (<a href="#fig-gencast" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>). The same holds for the ocean: <a href="#fig-oceancurrents" class="quarto-xref">Figure&nbsp;<span>2.3</span></a> shows forecasts of ocean surface currents sampled from a conditional diffusion model. Before forecasting, the current state of the atmosphere or of the ocean must itself be estimated from sparse, noisy satellite and in-situ observations: this is <strong>data assimilation</strong>, an inverse problem over time whose answer is a posterior distribution over the possible states. Generative models are increasingly used to sample this posterior <span class="citation" data-cites="Rozet2023 Huang2024b Andrae2025 Martin2025">(<a href="references.html#ref-Andrae2025" role="doc-biblioref">Andrae et al., 2025</a>; <a href="references.html#ref-Huang2024b" role="doc-biblioref">Huang et al., 2024</a>; <a href="references.html#ref-Martin2025" role="doc-biblioref">Martin et al., 2025</a>; <a href="references.html#ref-Rozet2023" role="doc-biblioref">Rozet and Louppe, 2023</a>)</span>.</p>
+<div id="fig-gencast" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gencast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/gencast.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2.2: Forecasts of specific humidity for the landfall of Typhoon Hagibis in Japan, compared to the analysis (a). One day ahead, the samples of the diffusion-based ensemble model GenCast (b-d), their average (e) and the deterministic model GraphCast (f) are all close to the analysis. Fifteen days ahead, each GenCast sample is still a sharp, plausible weather situation (h-j), whereas the ensemble mean (k) and the deterministic forecast (l) are blurry averages of the possible futures. Source: @Price2024"><img src="img/gencast.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gencast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.2: Forecasts of specific humidity for the landfall of Typhoon Hagibis in Japan, compared to the analysis (a). One day ahead, the samples of the diffusion-based ensemble model GenCast (b-d), their average (e) and the deterministic model GraphCast (f) are all close to the analysis. Fifteen days ahead, each GenCast sample is still a sharp, plausible weather situation (h-j), whereas the ensemble mean (k) and the deterministic forecast (l) are blurry averages of the possible futures. Source: <span class="citation" data-cites="Price2024">Price et al. (<a href="references.html#ref-Price2024" role="doc-biblioref">2024</a>)</span>
+</figcaption>
+</figure>
+</div>
+<div id="fig-oceancurrents" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-oceancurrents-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/ocean-currents-forecast.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;2.3: Forecast of ocean surface currents with a conditional diffusion model (left), compared to the ground truth (right), over the following days. Source: eOdyn"><img src="img/ocean-currents-forecast.gif" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-oceancurrents-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.3: Forecast of ocean surface currents with a conditional diffusion model (left), compared to the ground truth (right), over the following days. Source: eOdyn
+</figcaption>
+</figure>
+</div>
+<p><strong>Science.</strong> Predicting the three-dimensional structure of a complex of proteins, DNA and small molecules from their sequences means predicting the positions of all their atoms. AlphaFold 3 does so with a <strong>diffusion module</strong>, which generates these positions from noise, conditioned on the sequences, and can be sampled several times to explore alternative structures <span class="citation" data-cites="Abramson2024">(<a href="references.html#ref-Abramson2024" role="doc-biblioref">Abramson et al., 2024</a>)</span> (<a href="#fig-alphafold3" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>). More generally, the parameters of scientific models are rarely known exactly, and Bayesian inference gives their posterior distribution given the observations (<a href="basics/3-Bayesian.html" class="quarto-xref"><span>Bayesian estimation</span></a>).</p>
+<div id="fig-alphafold3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-alphafold3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/alphafold3.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;2.4: Architecture of AlphaFold 3: after processing the input sequences, a diffusion module generates the 3D structure of the molecular complex from a cloud of random atom positions, through iterated denoising steps (right). Source: @Abramson2024, CC-BY 4.0."><img src="img/alphafold3.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alphafold3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.4: Architecture of AlphaFold 3: after processing the input sequences, a diffusion module generates the 3D structure of the molecular complex from a cloud of random atom positions, through iterated denoising steps (right). Source: <span class="citation" data-cites="Abramson2024">Abramson et al. (<a href="references.html#ref-Abramson2024" role="doc-biblioref">2024</a>)</span>, CC-BY 4.0.
+</figcaption>
+</figure>
+</div>
+<p><strong>Decisions.</strong> An agent learning by trial and error explores its environment with a stochastic <strong>policy</strong>, a distribution over its actions, which reinforcement learning shapes towards the actions with the best outcomes (<a href="variationalinference/4-GradientEstimators.html#sec-reinforcementlearning" class="quarto-xref"><span>Application: reinforcement learning</span></a>). Language models are fine-tuned in the same way from human feedback, the generated texts being the actions <span class="citation" data-cites="Ouyang2022">(<a href="references.html#ref-Ouyang2022" role="doc-biblioref">Ouyang et al., 2022</a>)</span>. Robots can even generate their motor commands with a diffusion model conditioned on what they see <span class="citation" data-cites="Chi2023">(<a href="references.html#ref-Chi2023" role="doc-biblioref">Chi et al., 2023</a>)</span>.</p>
+</section>
+<section id="the-common-thread" class="level2">
+<h2 class="anchored" data-anchor-id="the-common-thread">The common thread</h2>
+<p>These applications look very different, but they rely on the same few ideas, which give this book its structure. The data, whether images, sentences or weather situations, are samples of an unknown distribution <span class="math inline">p(x)</span>, of which we only know a training set. A model is a <strong>parameterized distribution</strong> <span class="math inline">p_\theta(x)</span>, typically defined by a neural network with parameters <span class="math inline">\theta</span>, and learning consists in making <span class="math inline">p_\theta(x)</span> as close as possible to <span class="math inline">p(x)</span> (<a href="#fig-commonthread" class="quarto-xref">Figure&nbsp;<span>2.5</span></a>). Closeness is measured by a <strong>divergence</strong> between the two distributions, most of the time the Kullback-Leibler divergence (<a href="basics/1-InformationTheory.html#sec-kl" class="quarto-xref"><span>Kullback-Leibler divergence</span></a>): minimizing it is the same as maximizing the likelihood of the data under the model (<a href="basics/2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>), and this principle covers classification, regression, generative modeling and much more.</p>
+<div id="fig-commonthread" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-commonthread-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/common-thread.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;2.5: Learning a distribution. The data distribution p(x), for example of images of dogs and cats, is unknown: we only know samples of it, the training set. A parameterized model p_\theta(x) is trained to be as close as possible to it, by minimizing a divergence between the two. Icons: Twemoji, CC-BY 4.0."><img src="img/common-thread.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-commonthread-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.5: Learning a distribution. The data distribution <span class="math inline">p(x)</span>, for example of images of dogs and cats, is unknown: we only know samples of it, the training set. A parameterized model <span class="math inline">p_\theta(x)</span> is trained to be as close as possible to it, by minimizing a divergence between the two. Icons: <a href="https://github.com/jdecked/twemoji">Twemoji</a>, CC-BY 4.0.
+</figcaption>
+</figure>
+</div>
+<p>The difficulty is that almost everything we want to compute with distributions involves <strong>integrals</strong>: expectations, normalization constants, marginals over latent variables, posteriors. In high dimensions, these integrals are intractable. Two families of methods make them tractable, and they form the two central parts of this book:</p>
+<ul>
+<li><strong>Sampling</strong> replaces integrals by averages over samples: Monte Carlo methods, Markov chain Monte Carlo, Langevin dynamics.</li>
+<li><strong>Optimization</strong> replaces an intractable distribution by the closest member of a tractable family: variational inference, and the variational autoencoders built on it.</li>
+</ul>
+<p>The most recent generative models, diffusion models and flow matching, combine both: they are trained by optimizing a variational bound, they learn the gradient of the log-density that Langevin dynamics uses to sample, and they move samples along the paths of optimal transport.</p>
+</section>
+<section id="a-map-of-the-book" class="level2">
+<h2 class="anchored" data-anchor-id="a-map-of-the-book">A map of the book</h2>
+<p>The book is organized in five parts:</p>
+<ul>
+<li><strong>Basics</strong> introduces the probabilistic vocabulary used everywhere else: entropy, cross-entropy and the KL divergence, maximum likelihood estimation, and Bayesian estimation.</li>
+<li><strong>Statistical machine learning</strong> shows that classical neural networks are probabilistic models in disguise: the softmax classifier, regression with uncertainty and mixture density networks, and the choice of divergence.</li>
+<li><strong>Sampling methods</strong> presents the methods that compute expectations with samples: Monte Carlo and importance sampling, Markov chain Monte Carlo, and the gradient-based samplers, Langevin dynamics and Hamiltonian Monte Carlo.</li>
+<li><strong>Variational inference</strong> presents the alternative, optimization: latent variable models, the evidence lower bound, variational autoencoders, and the estimation of gradients of expectations, with an application to reinforcement learning.</li>
+<li><strong>Deep generative models</strong> brings everything together: diffusion models, their conditional and latent versions behind modern image generators, optimal transport, and flow matching.</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    A["&lt;b&gt;Basics&lt;/b&gt;&lt;br&gt;entropy, KL, likelihood"] --&gt; B["&lt;b&gt;Statistical ML&lt;/b&gt;&lt;br&gt;softmax, MDN"]
+    A --&gt; C["&lt;b&gt;Sampling&lt;/b&gt;&lt;br&gt;Monte Carlo, MCMC, Langevin"]
+    A --&gt; D["&lt;b&gt;Variational inference&lt;/b&gt;&lt;br&gt;ELBO, VAE"]
+    C --&gt; E["&lt;b&gt;Deep generative models&lt;/b&gt;&lt;br&gt;diffusion, OT, flow matching"]
+    D --&gt; E
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>The parts are meant to be read in order, but readers mainly interested in generative models can take a shorter path: the KL divergence and maximum likelihood (<a href="basics/1-InformationTheory.html" class="quarto-xref"><span>Information theory</span></a>, <a href="basics/2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>), the score and Langevin dynamics (<a href="sampling/3-HMC.html#sec-score" class="quarto-xref"><span>The score</span></a>, <a href="sampling/3-HMC.html#sec-langevin" class="quarto-xref"><span>Langevin dynamics</span></a>), latent variable models, the ELBO and VAEs (<a href="variationalinference/1-LatentVariables.html" class="quarto-xref"><span>Latent variable models</span></a>, <a href="variationalinference/2-VariationalInference.html" class="quarto-xref"><span>Variational inference</span></a>, <a href="variationalinference/3-VAE.html" class="quarto-xref"><span>Variational autoencoders</span></a>), and then directly the diffusion models of <a href="generative/1-Diffusion.html" class="quarto-xref"><span>Denoising diffusion models</span></a>.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Abramson2024" class="csl-entry" role="listitem">
+Abramson, J., Adler, J., Dunger, J., Evans, R., Green, T., Pritzel, A., et al. (2024). Accurate structure prediction of biomolecular interactions with <span>AlphaFold</span> 3. <em>Nature</em> 630, 493–500. doi:<a href="https://doi.org/10.1038/s41586-024-07487-w">10.1038/s41586-024-07487-w</a>.
+</div>
+<div id="ref-Andrae2025" class="csl-entry" role="listitem">
+Andrae, M., Wikingsson, E., Takao, S., Landelius, T., and Lindsten, F. (2025). <span>DAISI</span>: <span>Data Assimilation</span> with <span>Inverse Sampling</span> using <span>Stochastic Interpolants</span>.
+</div>
+<div id="ref-Bi2023" class="csl-entry" role="listitem">
+Bi, K., Xie, L., Zhang, H., Chen, X., Gu, X., and Tian, Q. (2023). Accurate medium-range global weather forecasting with <span>3D</span> neural networks. <em>Nature</em> 619, 533–538. doi:<a href="https://doi.org/10.1038/s41586-023-06185-3">10.1038/s41586-023-06185-3</a>.
+</div>
+<div id="ref-Brown2020" class="csl-entry" role="listitem">
+Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., et al. (2020). Language <span>Models</span> are <span>Few-Shot Learners</span>. <em>arXiv:2005.14165 [cs]</em>. Available at: <a href="https://arxiv.org/abs/2005.14165">https://arxiv.org/abs/2005.14165</a> [Accessed December 23, 2020].
+</div>
+<div id="ref-Chi2023" class="csl-entry" role="listitem">
+Chi, C., Xu, Z., Feng, S., Cousineau, E., Du, Y., Burchfiel, B., et al. (2023). Diffusion <span>Policy</span>: <span>Visuomotor Policy Learning</span> via <span>Action Diffusion</span>. <em>arXiv.org</em>.
+</div>
+<div id="ref-Esser2024" class="csl-entry" role="listitem">
+Esser, P., Kulal, S., Blattmann, A., Entezari, R., Müller, J., Saini, H., et al. (2024). Scaling <span>Rectified Flow Transformers</span> for <span>High-Resolution Image Synthesis</span>. doi:<a href="https://doi.org/10.48550/arXiv.2403.03206">10.48550/arXiv.2403.03206</a>.
+</div>
+<div id="ref-Huang2024b" class="csl-entry" role="listitem">
+Huang, L., Gianinazzi, L., Yu, Y., Dueben, P. D., and Hoefler, T. (2024). <span>DiffDA</span>: A <span>Diffusion Model</span> for <span>Weather</span>-scale <span>Data Assimilation</span>. doi:<a href="https://doi.org/10.48550/arXiv.2401.05932">10.48550/arXiv.2401.05932</a>.
+</div>
+<div id="ref-Lam2023" class="csl-entry" role="listitem">
+Lam, R., Sanchez-Gonzalez, A., Willson, M., Wirnsberger, P., Fortunato, M., Alet, F., et al. (2023). <span>GraphCast</span>: <span>Learning</span> skillful medium-range global weather forecasting. doi:<a href="https://doi.org/10.48550/arXiv.2212.12794">10.48550/arXiv.2212.12794</a>.
+</div>
+<div id="ref-Martin2025" class="csl-entry" role="listitem">
+Martin, S. A., Manucharyan, G. E., and Klein, P. (2025). Generative <span>Data Assimilation</span> for <span>Surface Ocean State Estimation From Multi</span>-<span>Modal Satellite Observations</span>. doi:<a href="https://doi.org/10.1029/2025MS005063">10.1029/2025MS005063</a>.
+</div>
+<div id="ref-Ouyang2022" class="csl-entry" role="listitem">
+Ouyang, L., Wu, J., Jiang, X., Almeida, D., Wainwright, C. L., Mishkin, P., et al. (2022). Training language models to follow instructions with human feedback. doi:<a href="https://doi.org/10.48550/arXiv.2203.02155">10.48550/arXiv.2203.02155</a>.
+</div>
+<div id="ref-Price2024" class="csl-entry" role="listitem">
+Price, I., Sanchez-Gonzalez, A., Alet, F., Andersson, T. R., El-Kadi, A., Masters, D., et al. (2024). <span>GenCast</span>: <span>Diffusion</span>-based ensemble forecasting for medium-range weather. doi:<a href="https://doi.org/10.48550/arXiv.2312.15796">10.48550/arXiv.2312.15796</a>.
+</div>
+<div id="ref-Price2025" class="csl-entry" role="listitem">
+Price, I., Sanchez-Gonzalez, A., Alet, F., Andersson, T. R., El-Kadi, A., Masters, D., et al. (2025). Probabilistic weather forecasting with machine learning. <em>Nature</em> 637, 84–90. doi:<a href="https://doi.org/10.1038/s41586-024-08252-9">10.1038/s41586-024-08252-9</a>.
+</div>
+<div id="ref-Ramesh2022" class="csl-entry" role="listitem">
+Ramesh, A., Dhariwal, P., Nichol, A., Chu, C., and Chen, M. (2022). Hierarchical <span>Text-Conditional Image Generation</span> with <span>CLIP Latents</span>. doi:<a href="https://doi.org/10.48550/arXiv.2204.06125">10.48550/arXiv.2204.06125</a>.
+</div>
+<div id="ref-Rozet2023" class="csl-entry" role="listitem">
+Rozet, F., and Louppe, G. (2023). Score-based <span>Data Assimilation</span>. doi:<a href="https://doi.org/10.48550/arXiv.2306.10574">10.48550/arXiv.2306.10574</a>.
+</div>
+<div id="ref-Song2022a" class="csl-entry" role="listitem">
+Song, Y., Shen, L., Xing, L., and Ermon, S. (2022). Solving <span>Inverse Problems</span> in <span>Medical Imaging</span> with <span>Score-Based Generative Models</span>. doi:<a href="https://doi.org/10.48550/arXiv.2111.08005">10.48550/arXiv.2111.08005</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../index.html" class="pagination-link" aria-label="Preface">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Preface</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../src/basics/1-InformationTheory.html" class="pagination-link" aria-label="Information theory">
+        <span class="nav-page-text"><span class="chapter-title">Information theory</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p><a href="http://creativecommons.org/licenses/by-nc-sa/4.0">Creative Commons BY-NC-SA 4.0</a>. Author <a href="mailto:julien.vitay@gmail.com">Julien Vitay</a></p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

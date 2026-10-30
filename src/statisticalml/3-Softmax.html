@@ -165,6 +165,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -386,14 +391,14 @@ window.Quarto = {
 <p><span class="math display">
     y_k = \mathcal{S}(\mathbf{z})_k = \dfrac{\exp z_k}{\sum_{l=1}^K \exp z_l}
 </span></p>
-<p>The exponential makes all elements positive, and the denominator normalizes them so that they sum to one (<a href="#fig-softmax" class="quarto-xref">Figure&nbsp;<span>7.1</span></a>). The output <span class="math inline">\mathbf{y}</span> of the network is the model distribution <span class="math inline">p_\theta(\mathbf{t} | \mathbf{x})</span>: its element <span class="math inline">y_k</span> is the predicted probability of the class <span class="math inline">k</span>.</p>
+<p>The exponential makes all elements positive, and the denominator normalizes them so that they sum to one (<a href="#fig-softmax" class="quarto-xref">Figure&nbsp;<span>8.1</span></a>). The output <span class="math inline">\mathbf{y}</span> of the network is the model distribution <span class="math inline">p_\theta(\mathbf{t} | \mathbf{x})</span>: its element <span class="math inline">y_k</span> is the predicted probability of the class <span class="math inline">k</span>.</p>
 <div id="fig-softmax" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-softmax-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/softmax-transformation.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;7.1: The softmax function transforms logits into a categorical probability distribution."><img src="../img/softmax-transformation.png" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/softmax-transformation.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;8.1: The softmax function transforms logits into a categorical probability distribution."><img src="../img/softmax-transformation.png" class="img-fluid figure-img" style="width:70.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-softmax-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7.1: The softmax function transforms logits into a categorical probability distribution.
+Figure&nbsp;8.1: The softmax function transforms logits into a categorical probability distribution.
 </figcaption>
 </figure>
 </div>

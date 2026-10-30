@@ -184,6 +184,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -555,14 +560,14 @@ window.Quarto = {
 <li>In the forward KL, the log-ratio is weighted by the target <span class="math inline">p(x)</span>. The penalty is very large where <span class="math inline">p(x) &gt; 0</span> but <span class="math inline">q(x) \approx 0</span>, as <span class="math inline">- \log q(x)</span> explodes, while regions where <span class="math inline">p(x) \approx 0</span> do not count at all. The approximation must put mass <strong>everywhere the target has mass</strong>, even if this means putting mass where the target has none: the forward KL is <strong>mass-covering</strong>.</li>
 <li>In the reverse KL, the log-ratio is weighted by the approximation <span class="math inline">q(x)</span>. The penalty is very large where <span class="math inline">q(x) &gt; 0</span> but <span class="math inline">p(x) \approx 0</span>, while regions where <span class="math inline">q(x) \approx 0</span> do not count at all. The approximation must <strong>avoid the regions where the target is small</strong>, even if this means ignoring whole parts of the target: the reverse KL is <strong>mode-seeking</strong>.</li>
 </ul>
-<p><a href="#fig-forwardreversekl" class="quarto-xref">Figure&nbsp;<span>6.1</span></a> illustrates the difference by fitting a single normal distribution <span class="math inline">q(x) = \mathcal{N}(\mu, \sigma)</span> to a bimodal target. With the forward KL, the best normal distribution covers both modes: it is broad, and puts most of its mass in the valley between the modes, where the target has almost none. For a normal approximation, the optimum of the forward KL simply matches the mean and the variance of the target. With the reverse KL, the normal distribution settles on <strong>one</strong> of the modes and ignores the other: there are two local optima, and which one is found depends on the initialization of the parameters.</p>
+<p><a href="#fig-forwardreversekl" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> illustrates the difference by fitting a single normal distribution <span class="math inline">q(x) = \mathcal{N}(\mu, \sigma)</span> to a bimodal target. With the forward KL, the best normal distribution covers both modes: it is broad, and puts most of its mass in the valley between the modes, where the target has almost none. For a normal approximation, the optimum of the forward KL simply matches the mean and the variance of the target. With the reverse KL, the normal distribution settles on <strong>one</strong> of the modes and ignores the other: there are two local optima, and which one is found depends on the initialization of the parameters.</p>
 <div id="fig-forwardreversekl" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-forwardreversekl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/forward-reverse-kl.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;6.1: Fitting a normal distribution q(x) to a bimodal target p(x). Left: the forward KL gives a broad distribution covering both modes. Right: the reverse KL has two local optima, each covering one mode only. The target has the weights and widths of the target of sec-montecarlo, with modes further apart."><img src="../img/forward-reverse-kl.png" class="img-fluid figure-img"></a>
+<a href="../img/forward-reverse-kl.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;7.1: Fitting a normal distribution q(x) to a bimodal target p(x). Left: the forward KL gives a broad distribution covering both modes. Right: the reverse KL has two local optima, each covering one mode only. The target has the weights and widths of the target of sec-montecarlo, with modes further apart."><img src="../img/forward-reverse-kl.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-forwardreversekl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.1: Fitting a normal distribution <span class="math inline">q(x)</span> to a bimodal target <span class="math inline">p(x)</span>. Left: the forward KL gives a broad distribution covering both modes. Right: the reverse KL has two local optima, each covering one mode only. The target has the weights and widths of the target of <a href="../sampling/1-MonteCarlo.html" class="quarto-xref"><span>Monte Carlo and importance sampling</span></a>, with modes further apart.
+Figure&nbsp;7.1: Fitting a normal distribution <span class="math inline">q(x)</span> to a bimodal target <span class="math inline">p(x)</span>. Left: the forward KL gives a broad distribution covering both modes. Right: the reverse KL has two local optima, each covering one mode only. The target has the weights and widths of the target of <a href="../sampling/1-MonteCarlo.html" class="quarto-xref"><span>Monte Carlo and importance sampling</span></a>, with modes further apart.
 </figcaption>
 </figure>
 </div>

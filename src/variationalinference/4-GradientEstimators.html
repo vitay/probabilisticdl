@@ -184,6 +184,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -474,14 +479,14 @@ window.Quarto = {
 </section>
 <section id="variance-and-baselines" class="level3">
 <h3 class="anchored" data-anchor-id="variance-and-baselines">Variance and baselines</h3>
-<p>The price to pay is a much higher variance. <a href="#fig-gradientestimators" class="quarto-xref">Figure&nbsp;<span>15.1</span></a> compares the single-sample estimates of the two estimators on a simple example, the gradient of <span class="math inline">\mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[(z - 2)^2 + 10]</span> with respect to <span class="math inline">\mu</span>. Both estimators are unbiased, but the estimates of the score-function estimator are spread over a very wide range: about half of them even point in the wrong direction. The reparameterization estimator uses the slope of <span class="math inline">f</span> at each sample, while the score-function estimator only uses its value, and must infer the direction of improvement from the comparison of many samples.</p>
+<p>The price to pay is a much higher variance. <a href="#fig-gradientestimators" class="quarto-xref">Figure&nbsp;<span>16.1</span></a> compares the single-sample estimates of the two estimators on a simple example, the gradient of <span class="math inline">\mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[(z - 2)^2 + 10]</span> with respect to <span class="math inline">\mu</span>. Both estimators are unbiased, but the estimates of the score-function estimator are spread over a very wide range: about half of them even point in the wrong direction. The reparameterization estimator uses the slope of <span class="math inline">f</span> at each sample, while the score-function estimator only uses its value, and must infer the direction of improvement from the comparison of many samples.</p>
 <div id="fig-gradientestimators" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-gradientestimators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/gradient-estimators.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;15.1: Distribution of single-sample estimates of the gradient of \mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[(z - 2)^2 + 10] with respect to \mu, at \mu = 0, for the three estimators. All are unbiased (their mean is the true gradient), but their variances are very different."><img src="../img/gradient-estimators.png" class="img-fluid figure-img"></a>
+<a href="../img/gradient-estimators.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;16.1: Distribution of single-sample estimates of the gradient of \mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[(z - 2)^2 + 10] with respect to \mu, at \mu = 0, for the three estimators. All are unbiased (their mean is the true gradient), but their variances are very different."><img src="../img/gradient-estimators.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gradientestimators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.1: Distribution of single-sample estimates of the gradient of <span class="math inline">\mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[(z - 2)^2 + 10]</span> with respect to <span class="math inline">\mu</span>, at <span class="math inline">\mu = 0</span>, for the three estimators. All are unbiased (their mean is the true gradient), but their variances are very different.
+Figure&nbsp;16.1: Distribution of single-sample estimates of the gradient of <span class="math inline">\mathbb{E}_{z \sim \mathcal{N}(\mu, 1)}[(z - 2)^2 + 10]</span> with respect to <span class="math inline">\mu</span>, at <span class="math inline">\mu = 0</span>, for the three estimators. All are unbiased (their mean is the true gradient), but their variances are very different.
 </figcaption>
 </figure>
 </div>
@@ -493,14 +498,14 @@ Figure&nbsp;15.1: Distribution of single-sample estimates of the gradient of <sp
 <p><span class="math display">
     \nabla_\phi \, \mathbb{E}_{z \sim q_\phi(z)} [f(z)] = \mathbb{E}_{z \sim q_\phi(z)} [(f(z) - b) \, \nabla_\phi \log q_\phi(z)]
 </span></p>
-<p>but a well-chosen <strong>baseline</strong> <span class="math inline">b</span> can reduce its variance a lot. A natural choice is the average value of <span class="math inline">f</span>, <span class="math inline">b \approx \mathbb{E}_{z \sim q_\phi}[f(z)]</span>, estimated for example with a running average: each sample is then only reinforced if it is <strong>better than average</strong>, and penalized otherwise. In <a href="#fig-gradientestimators" class="quarto-xref">Figure&nbsp;<span>15.1</span></a>, the baseline removes the effect of the offset and reduces the spread of the estimates a lot, although the reparameterization estimator remains much more precise. Baselines, and more elaborate control variates, are essential to make the score-function estimator usable in practice.</p>
+<p>but a well-chosen <strong>baseline</strong> <span class="math inline">b</span> can reduce its variance a lot. A natural choice is the average value of <span class="math inline">f</span>, <span class="math inline">b \approx \mathbb{E}_{z \sim q_\phi}[f(z)]</span>, estimated for example with a running average: each sample is then only reinforced if it is <strong>better than average</strong>, and penalized otherwise. In <a href="#fig-gradientestimators" class="quarto-xref">Figure&nbsp;<span>16.1</span></a>, the baseline removes the effect of the offset and reduces the spread of the estimates a lot, although the reparameterization estimator remains much more precise. Baselines, and more elaborate control variates, are essential to make the score-function estimator usable in practice.</p>
 </section>
 </section>
 <section id="sec-reinforcementlearning" class="level2">
 <h2 class="anchored" data-anchor-id="sec-reinforcementlearning">Application: reinforcement learning</h2>
 <section id="the-reinforcement-learning-problem" class="level3">
 <h3 class="anchored" data-anchor-id="the-reinforcement-learning-problem">The reinforcement learning problem</h3>
-<p>In supervised learning, a teacher provides the correct answer for each input. In <strong>reinforcement learning</strong> (RL), there is no teacher: an <strong>agent</strong> learns by trial and error, by interacting with an <strong>environment</strong> and observing the consequences of its actions <span class="citation" data-cites="Sutton1998">(<a href="../references.html#ref-Sutton1998" role="doc-biblioref">Sutton and Barto, 1998</a>)</span>. At each time step <span class="math inline">t</span> (<a href="#fig-rlagent" class="quarto-xref">Figure&nbsp;<span>15.2</span></a>):</p>
+<p>In supervised learning, a teacher provides the correct answer for each input. In <strong>reinforcement learning</strong> (RL), there is no teacher: an <strong>agent</strong> learns by trial and error, by interacting with an <strong>environment</strong> and observing the consequences of its actions <span class="citation" data-cites="Sutton1998">(<a href="../references.html#ref-Sutton1998" role="doc-biblioref">Sutton and Barto, 1998</a>)</span>. At each time step <span class="math inline">t</span> (<a href="#fig-rlagent" class="quarto-xref">Figure&nbsp;<span>16.2</span></a>):</p>
 <ol type="1">
 <li>the agent observes the <strong>state</strong> <span class="math inline">s_t</span> of the environment (the position of the pieces in a game, the joint angles of a robot, the beginning of a conversation…);</li>
 <li>it chooses an <strong>action</strong> <span class="math inline">a_t</span> (a move, a motor command, the next word…);</li>
@@ -509,10 +514,10 @@ Figure&nbsp;15.1: Distribution of single-sample estimates of the gradient of <sp
 <div id="fig-rlagent" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-rlagent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/rl-agent.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;15.2: Interaction between an agent and its environment: the agent observes a state, takes an action, and receives a reward and a new state."><img src="../img/rl-agent.png" class="img-fluid figure-img" style="width:60.0%"></a>
+<a href="../img/rl-agent.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;16.2: Interaction between an agent and its environment: the agent observes a state, takes an action, and receives a reward and a new state."><img src="../img/rl-agent.png" class="img-fluid figure-img" style="width:60.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rlagent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.2: Interaction between an agent and its environment: the agent observes a state, takes an action, and receives a reward and a new state.
+Figure&nbsp;16.2: Interaction between an agent and its environment: the agent observes a state, takes an action, and receives a reward and a new state.
 </figcaption>
 </figure>
 </div>
@@ -529,17 +534,17 @@ Figure&nbsp;15.2: Interaction between an agent and its environment: the agent ob
 <p><span class="math display">
     \rho_\theta(\tau) = p(s_0) \, \prod_{t=0}^{T} \pi_\theta(a_t | s_t) \, p(s_{t+1} | s_t, a_t)
 </span></p>
-<p>where <span class="math inline">p(s_0)</span> is the distribution of the initial states and <span class="math inline">p(s_{t+1} | s_t, a_t)</span> the unknown dynamics of the environment. Only the policy depends on the parameters <span class="math inline">\theta</span>. The objective of the agent is to find the parameters whose trajectories have the highest return on average (<a href="#fig-policysearch" class="quarto-xref">Figure&nbsp;<span>15.3</span></a>):</p>
+<p>where <span class="math inline">p(s_0)</span> is the distribution of the initial states and <span class="math inline">p(s_{t+1} | s_t, a_t)</span> the unknown dynamics of the environment. Only the policy depends on the parameters <span class="math inline">\theta</span>. The objective of the agent is to find the parameters whose trajectories have the highest return on average (<a href="#fig-policysearch" class="quarto-xref">Figure&nbsp;<span>16.3</span></a>):</p>
 <p><span class="math display">
     \mathcal{J}(\theta) = \mathbb{E}_{\tau \sim \rho_\theta(\tau)} [R(\tau)]
 </span></p>
 <div id="fig-policysearch" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-policysearch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/policy-search.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;15.3: The policy should only generate trajectories associated with a high return."><img src="../img/policy-search.svg" class="img-fluid figure-img" style="width:60.0%"></a>
+<a href="../img/policy-search.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;16.3: The policy should only generate trajectories associated with a high return."><img src="../img/policy-search.svg" class="img-fluid figure-img" style="width:60.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-policysearch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15.3: The policy should only generate trajectories associated with a high return.
+Figure&nbsp;16.3: The policy should only generate trajectories associated with a high return.
 </figcaption>
 </figure>
 </div>
@@ -566,7 +571,7 @@ Figure&nbsp;15.3: The policy should only generate trajectories associated with a
 <li>update the parameters with the estimate of the policy gradient: <span class="math inline">\theta \leftarrow \theta + \eta \, R(\tau) \, \sum_t \nabla_\theta \log \pi_\theta(a_t | s_t)</span>, averaged over the trajectories.</li>
 </ol>
 <p>The interpretation is the one of the score-function estimator: all the actions taken during a trajectory with a high return become more likely, all the actions of a trajectory with a low return less likely. This is learning by trial and error, written as gradient ascent.</p>
-<p>As expected from <a href="#fig-gradientestimators" class="quarto-xref">Figure&nbsp;<span>15.1</span></a>, the variance of this estimator is very high: the return of a trajectory depends on many random actions and transitions, and a single good or bad outcome is attributed to all the actions of the trajectory. The tools of the previous section apply directly. A <strong>baseline</strong>, typically the average return, ensures that only the trajectories that are better than average are reinforced; actor-critic methods learn this baseline with a second neural network. Each action can also be credited only with the rewards that come <strong>after</strong> it, as it cannot have influenced the past ones.</p>
+<p>As expected from <a href="#fig-gradientestimators" class="quarto-xref">Figure&nbsp;<span>16.1</span></a>, the variance of this estimator is very high: the return of a trajectory depends on many random actions and transitions, and a single good or bad outcome is attributed to all the actions of the trajectory. The tools of the previous section apply directly. A <strong>baseline</strong>, typically the average return, ensures that only the trajectories that are better than average are reinforced; actor-critic methods learn this baseline with a second neural network. Each action can also be credited only with the rewards that come <strong>after</strong> it, as it cannot have influenced the past ones.</p>
 <p>These ideas, called <strong>policy gradient</strong> methods, are at the heart of modern reinforcement learning. PPO <span class="citation" data-cites="Schulman2017a">(<a href="../references.html#ref-Schulman2017a" role="doc-biblioref">Schulman et al., 2017</a>)</span> reuses the trajectories of previous versions of the policy with importance sampling, the importance weights being clipped to keep the updates stable (<a href="../sampling/1-MonteCarlo.html#sec-importance" class="quarto-xref"><span>Importance sampling</span></a>). The same algorithm is used to fine-tune large language models from human feedback <span class="citation" data-cites="Ouyang2022">(<a href="../references.html#ref-Ouyang2022" role="doc-biblioref">Ouyang et al., 2022</a>)</span>: the language model is the policy, the tokens it generates are discrete actions, and the reward is given by a model trained to predict human preferences. As tokens are discrete, the score-function estimator is the only option.</p>
 </section>
 </section>

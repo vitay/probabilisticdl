@@ -184,6 +184,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -472,7 +477,7 @@ window.Quarto = {
 <p><span class="math display">
     M^d
 </span></p>
-<p>evaluations of the function (<a href="#fig-cursedimensionality" class="quarto-xref">Figure&nbsp;<span>9.1</span></a>). With <span class="math inline">M=100</span> points per dimension:</p>
+<p>evaluations of the function (<a href="#fig-cursedimensionality" class="quarto-xref">Figure&nbsp;<span>10.1</span></a>). With <span class="math inline">M=100</span> points per dimension:</p>
 <ul>
 <li><span class="math inline">d = 1</span>: 100 evaluations.</li>
 <li><span class="math inline">d = 10</span>: <span class="math inline">10^{20}</span> evaluations, already out of reach.</li>
@@ -481,10 +486,10 @@ window.Quarto = {
 <div id="fig-cursedimensionality" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-cursedimensionality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/curse-of-dimensionality.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;9.1: A regular grid with M = 10 points per dimension needs 10 points in one dimension, 100 in two dimensions and 1000 in three dimensions. Source: https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html"><img src="../img/curse-of-dimensionality.png" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/curse-of-dimensionality.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;10.1: A regular grid with M = 10 points per dimension needs 10 points in one dimension, 100 in two dimensions and 1000 in three dimensions. Source: https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html"><img src="../img/curse-of-dimensionality.png" class="img-fluid figure-img" style="width:70.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cursedimensionality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.1: A regular grid with <span class="math inline">M = 10</span> points per dimension needs 10 points in one dimension, 100 in two dimensions and 1000 in three dimensions. Source: <a href="https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html" class="uri">https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html</a>
+Figure&nbsp;10.1: A regular grid with <span class="math inline">M = 10</span> points per dimension needs 10 points in one dimension, 100 in two dimensions and 1000 in three dimensions. Source: <a href="https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html" class="uri">https://dibyaghosh.com/blog/probability/highdimensionalgeometry.html</a>
 </figcaption>
 </figure>
 </div>
@@ -522,14 +527,14 @@ Figure&nbsp;9.1: A regular grid with <span class="math inline">M = 10</span> poi
 <div id="fig-montecarlopi" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-montecarlopi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/montecarlo-pi.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;9.2: Monte Carlo estimate of \pi with N = 100, 1000 and 10000 points sampled uniformly in the square. The proportion of points inside the circle approximates \pi / 4."><img src="../img/montecarlo-pi.png" class="img-fluid figure-img"></a>
+<a href="../img/montecarlo-pi.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;10.2: Monte Carlo estimate of \pi with N = 100, 1000 and 10000 points sampled uniformly in the square. The proportion of points inside the circle approximates \pi / 4."><img src="../img/montecarlo-pi.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-montecarlopi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.2: Monte Carlo estimate of <span class="math inline">\pi</span> with <span class="math inline">N = 100</span>, 1000 and 10000 points sampled uniformly in the square. The proportion of points inside the circle approximates <span class="math inline">\pi / 4</span>.
+Figure&nbsp;10.2: Monte Carlo estimate of <span class="math inline">\pi</span> with <span class="math inline">N = 100</span>, 1000 and 10000 points sampled uniformly in the square. The proportion of points inside the circle approximates <span class="math inline">\pi / 4</span>.
 </figcaption>
 </figure>
 </div>
-<p>As seen on <a href="#fig-montecarlopi" class="quarto-xref">Figure&nbsp;<span>9.2</span></a>, the estimate gets closer to <span class="math inline">\pi = 3.14159\ldots</span> when the number of samples increases, but rather slowly: with 10000 samples, the error is still around <span class="math inline">0.003</span>. How fast the estimate converges is the topic of the next section.</p>
+<p>As seen on <a href="#fig-montecarlopi" class="quarto-xref">Figure&nbsp;<span>10.2</span></a>, the estimate gets closer to <span class="math inline">\pi = 3.14159\ldots</span> when the number of samples increases, but rather slowly: with 10000 samples, the error is still around <span class="math inline">0.003</span>. How fast the estimate converges is the topic of the next section.</p>
 </div>
 </div>
 <p>We already used this approximation several times without discussing it: to estimate the cross-entropy between the data and a model (<a href="../statisticalml/2-KL.html" class="quarto-xref"><span>Kullback-Leibler divergence in machine learning</span></a>), or to replace the expectations of a loss function by an average over a minibatch of training data. This chapter looks at it more closely. It requires two things:</p>
@@ -554,7 +559,7 @@ Figure&nbsp;9.2: Monte Carlo estimate of <span class="math inline">\pi</span> wi
 <p><span class="math display">
     \hat{f}_N = \dfrac{1}{N} \, \sum_{i=1}^N f(x_i)
 </span></p>
-<p>It is important to realize that <span class="math inline">\hat{f}_N</span> is itself a <strong>random variable</strong>: if we draw another set of <span class="math inline">N</span> samples, we obtain a different value. In the example of <span class="math inline">\pi</span>, each panel of <a href="#fig-montecarlopi" class="quarto-xref">Figure&nbsp;<span>9.2</span></a> gave a different estimate, and repeating the experiment with other random points would give yet other values. The questions we need to answer are therefore statistical:</p>
+<p>It is important to realize that <span class="math inline">\hat{f}_N</span> is itself a <strong>random variable</strong>: if we draw another set of <span class="math inline">N</span> samples, we obtain a different value. In the example of <span class="math inline">\pi</span>, each panel of <a href="#fig-montecarlopi" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> gave a different estimate, and repeating the experiment with other random points would give yet other values. The questions we need to answer are therefore statistical:</p>
 <ol type="1">
 <li>Is <span class="math inline">\hat{f}_N</span> correct <strong>on average</strong>, i.e.&nbsp;is its expectation equal to the quantity we want?</li>
 <li>How far from the true value is a <strong>single</strong> estimate likely to be, i.e.&nbsp;what is its variance?</li>
@@ -632,18 +637,18 @@ Figure&nbsp;9.2: Monte Carlo estimate of <span class="math inline">\pi</span> wi
 <p><span class="math display">
     \dfrac{\sigma_f}{\sqrt{N}} \approx \dfrac{1.64}{\sqrt{N}}
 </span></p>
-<p>With <span class="math inline">N = 10000</span> samples, the standard error is about <span class="math inline">0.016</span>: the error of <span class="math inline">0.003</span> we obtained in <a href="#fig-montecarlopi" class="quarto-xref">Figure&nbsp;<span>9.2</span></a> was actually on the lucky side. To get 6 correct decimals, we would need an error around <span class="math inline">10^{-6}</span>, i.e.&nbsp;<span class="math inline">N \approx 2.7 \times 10^{12}</span> samples…</p>
+<p>With <span class="math inline">N = 10000</span> samples, the standard error is about <span class="math inline">0.016</span>: the error of <span class="math inline">0.003</span> we obtained in <a href="#fig-montecarlopi" class="quarto-xref">Figure&nbsp;<span>10.2</span></a> was actually on the lucky side. To get 6 correct decimals, we would need an error around <span class="math inline">10^{-6}</span>, i.e.&nbsp;<span class="math inline">N \approx 2.7 \times 10^{12}</span> samples…</p>
 <div id="fig-montecarloconvergence" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-montecarloconvergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/montecarlo-convergence.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;9.3: Left: five independent runs of the Monte Carlo estimate of \pi as a function of the number of samples N (log-scale). The gray band shows one standard error \sigma_f / \sqrt{N} around \pi. Right: root mean square error of the estimate over 200 runs (log-log scale), compared to the theoretical standard error."><img src="../img/montecarlo-convergence.png" class="img-fluid figure-img"></a>
+<a href="../img/montecarlo-convergence.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;10.3: Left: five independent runs of the Monte Carlo estimate of \pi as a function of the number of samples N (log-scale). The gray band shows one standard error \sigma_f / \sqrt{N} around \pi. Right: root mean square error of the estimate over 200 runs (log-log scale), compared to the theoretical standard error."><img src="../img/montecarlo-convergence.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-montecarloconvergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.3: Left: five independent runs of the Monte Carlo estimate of <span class="math inline">\pi</span> as a function of the number of samples <span class="math inline">N</span> (log-scale). The gray band shows one standard error <span class="math inline">\sigma_f / \sqrt{N}</span> around <span class="math inline">\pi</span>. Right: root mean square error of the estimate over 200 runs (log-log scale), compared to the theoretical standard error.
+Figure&nbsp;10.3: Left: five independent runs of the Monte Carlo estimate of <span class="math inline">\pi</span> as a function of the number of samples <span class="math inline">N</span> (log-scale). The gray band shows one standard error <span class="math inline">\sigma_f / \sqrt{N}</span> around <span class="math inline">\pi</span>. Right: root mean square error of the estimate over 200 runs (log-log scale), compared to the theoretical standard error.
 </figcaption>
 </figure>
 </div>
-<p><a href="#fig-montecarloconvergence" class="quarto-xref">Figure&nbsp;<span>9.3</span></a> shows both aspects. On the left, each run fluctuates a lot for small <span class="math inline">N</span>, then all runs converge towards <span class="math inline">\pi</span>, staying most of the time within one or two standard errors. On the right, the measured error on a log-log scale is a straight line of slope <span class="math inline">-1/2</span>, exactly following the theoretical <span class="math inline">1.64 / \sqrt{N}</span>.</p>
+<p><a href="#fig-montecarloconvergence" class="quarto-xref">Figure&nbsp;<span>10.3</span></a> shows both aspects. On the left, each run fluctuates a lot for small <span class="math inline">N</span>, then all runs converge towards <span class="math inline">\pi</span>, staying most of the time within one or two standard errors. On the right, the measured error on a log-log scale is a straight line of slope <span class="math inline">-1/2</span>, exactly following the theoretical <span class="math inline">1.64 / \sqrt{N}</span>.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
@@ -664,7 +669,7 @@ Figure&nbsp;9.3: Left: five independent runs of the Monte Carlo estimate of <spa
 <p><span class="math display">
     \text{KL}(p || q) \approx \dfrac{1}{N} \, \sum_{i=1}^N - \log \dfrac{q(x_i)}{p(x_i)} \qquad \text{with} \qquad x_i \sim p(x)
 </span></p>
-<p>In words: take samples from <span class="math inline">p</span>, and average the log-ratio of their likelihoods under <span class="math inline">p</span> and <span class="math inline">q</span> (<a href="../basics/1-InformationTheory.html#fig-crossentropy" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>). Note that individual terms of the sum can be negative (for samples where <span class="math inline">q(x_i) &gt; p(x_i)</span>), even though the KL itself is always positive: only the average is guaranteed to be correct. With few samples, the estimate can even be negative.</p>
+<p>In words: take samples from <span class="math inline">p</span>, and average the log-ratio of their likelihoods under <span class="math inline">p</span> and <span class="math inline">q</span> (<a href="../basics/1-InformationTheory.html#fig-crossentropy" class="quarto-xref">Figure&nbsp;<span>3.3</span></a>). Note that individual terms of the sum can be negative (for samples where <span class="math inline">q(x_i) &gt; p(x_i)</span>), even though the KL itself is always positive: only the average is guaranteed to be correct. With few samples, the estimate can even be negative.</p>
 </div>
 </div>
 </section>
@@ -722,14 +727,14 @@ Figure&nbsp;9.3: Left: five independent runs of the Monte Carlo estimate of <spa
 <p><span class="math display">
     x = F^{-1}(u) = - \dfrac{1}{\lambda} \, \log(1 - u)
 </span></p>
-<p><a href="#fig-inversetransform" class="quarto-xref">Figure&nbsp;<span>9.4</span></a> illustrates the method. On the left, ten evenly spaced values of <span class="math inline">u</span> are mapped through the inverse CDF: near <span class="math inline">x = 0</span>, where the CDF is steep, they give closely packed values of <span class="math inline">x</span>; in the tail of the distribution, where the CDF is flat, they give widely spread values. On the right, the histogram of 10000 samples obtained this way matches the pdf of the exponential distribution.</p>
+<p><a href="#fig-inversetransform" class="quarto-xref">Figure&nbsp;<span>10.4</span></a> illustrates the method. On the left, ten evenly spaced values of <span class="math inline">u</span> are mapped through the inverse CDF: near <span class="math inline">x = 0</span>, where the CDF is steep, they give closely packed values of <span class="math inline">x</span>; in the tail of the distribution, where the CDF is flat, they give widely spread values. On the right, the histogram of 10000 samples obtained this way matches the pdf of the exponential distribution.</p>
 <div id="fig-inversetransform" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-inversetransform-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/inverse-transform.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;9.4: Inverse transform sampling of the exponential distribution with \lambda = 1. Left: evenly spaced values of u on the y-axis are mapped to x = F^{-1}(u) on the x-axis through the CDF. Right: histogram of 10000 samples compared to the pdf."><img src="../img/inverse-transform.png" class="img-fluid figure-img"></a>
+<a href="../img/inverse-transform.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;10.4: Inverse transform sampling of the exponential distribution with \lambda = 1. Left: evenly spaced values of u on the y-axis are mapped to x = F^{-1}(u) on the x-axis through the CDF. Right: histogram of 10000 samples compared to the pdf."><img src="../img/inverse-transform.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-inversetransform-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.4: Inverse transform sampling of the exponential distribution with <span class="math inline">\lambda = 1</span>. Left: evenly spaced values of <span class="math inline">u</span> on the y-axis are mapped to <span class="math inline">x = F^{-1}(u)</span> on the x-axis through the CDF. Right: histogram of 10000 samples compared to the pdf.
+Figure&nbsp;10.4: Inverse transform sampling of the exponential distribution with <span class="math inline">\lambda = 1</span>. Left: evenly spaced values of <span class="math inline">u</span> on the y-axis are mapped to <span class="math inline">x = F^{-1}(u)</span> on the x-axis through the CDF. Right: histogram of 10000 samples compared to the pdf.
 </figcaption>
 </figure>
 </div>
@@ -816,14 +821,14 @@ Figure&nbsp;9.4: Inverse transform sampling of the exponential distribution with
 <li><strong>accept</strong> <span class="math inline">x</span> if <span class="math inline">u \leq \dfrac{\tilde{p}(x)}{M \, q(x)}</span>, otherwise <strong>reject</strong> it and start again.</li>
 </ol>
 <p>The accepted samples are samples of <span class="math inline">p(x)</span>.</p>
-<p>The method has a simple geometric interpretation (<a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, left). The pair <span class="math inline">(x, u \, M \, q(x))</span> is a point drawn uniformly <strong>under the curve</strong> of the envelope: <span class="math inline">x</span> is distributed according to <span class="math inline">q(x)</span>, and its height is uniform between 0 and <span class="math inline">M \, q(x)</span>. The point is accepted if it also lies under the curve of the target <span class="math inline">\tilde{p}(x)</span>. The accepted points are therefore uniformly distributed under <span class="math inline">\tilde{p}(x)</span>, and their <span class="math inline">x</span>-coordinates follow <span class="math inline">p(x)</span>: there are more accepted points where <span class="math inline">\tilde{p}(x)</span> is high.</p>
+<p>The method has a simple geometric interpretation (<a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>, left). The pair <span class="math inline">(x, u \, M \, q(x))</span> is a point drawn uniformly <strong>under the curve</strong> of the envelope: <span class="math inline">x</span> is distributed according to <span class="math inline">q(x)</span>, and its height is uniform between 0 and <span class="math inline">M \, q(x)</span>. The point is accepted if it also lies under the curve of the target <span class="math inline">\tilde{p}(x)</span>. The accepted points are therefore uniformly distributed under <span class="math inline">\tilde{p}(x)</span>, and their <span class="math inline">x</span>-coordinates follow <span class="math inline">p(x)</span>: there are more accepted points where <span class="math inline">\tilde{p}(x)</span> is high.</p>
 <div id="fig-rejectionsampling" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-rejectionsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/rejection-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;9.5: Rejection sampling of an unnormalized bimodal target \tilde{p}(x) (with Z=3) using the proposal q(x) = \mathcal{N}(0, 2) and M \approx 8.2. Left: each proposal x \sim q(x) is drawn at the height u \, M \, q(x); it is accepted if it falls under the target. Right: the histogram of the accepted samples matches the normalized target."><img src="../img/rejection-sampling.png" class="img-fluid figure-img"></a>
+<a href="../img/rejection-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;10.5: Rejection sampling of an unnormalized bimodal target \tilde{p}(x) (with Z=3) using the proposal q(x) = \mathcal{N}(0, 2) and M \approx 8.2. Left: each proposal x \sim q(x) is drawn at the height u \, M \, q(x); it is accepted if it falls under the target. Right: the histogram of the accepted samples matches the normalized target."><img src="../img/rejection-sampling.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rejectionsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.5: Rejection sampling of an unnormalized bimodal target <span class="math inline">\tilde{p}(x)</span> (with <span class="math inline">Z=3</span>) using the proposal <span class="math inline">q(x) = \mathcal{N}(0, 2)</span> and <span class="math inline">M \approx 8.2</span>. Left: each proposal <span class="math inline">x \sim q(x)</span> is drawn at the height <span class="math inline">u \, M \, q(x)</span>; it is accepted if it falls under the target. Right: the histogram of the accepted samples matches the normalized target.
+Figure&nbsp;10.5: Rejection sampling of an unnormalized bimodal target <span class="math inline">\tilde{p}(x)</span> (with <span class="math inline">Z=3</span>) using the proposal <span class="math inline">q(x) = \mathcal{N}(0, 2)</span> and <span class="math inline">M \approx 8.2</span>. Left: each proposal <span class="math inline">x \sim q(x)</span> is drawn at the height <span class="math inline">u \, M \, q(x)</span>; it is accepted if it falls under the target. Right: the histogram of the accepted samples matches the normalized target.
 </figcaption>
 </figure>
 </div>
@@ -862,13 +867,13 @@ Figure&nbsp;9.5: Rejection sampling of an unnormalized bimodal target <span clas
 <p><span class="math display">
     P(\text{accept}) = \dfrac{Z}{M}
 </span></p>
-<p>which is the ratio between the area under the target and the area under the envelope. All the rejected samples are wasted computations: on average, we need <span class="math inline">M / Z</span> proposals to obtain one accepted sample. In <a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, about 37% of the proposals are accepted, as predicted.</p>
+<p>which is the ratio between the area under the target and the area under the envelope. All the rejected samples are wasted computations: on average, we need <span class="math inline">M / Z</span> proposals to obtain one accepted sample. In <a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>, about 37% of the proposals are accepted, as predicted.</p>
 <p>The efficiency of rejection sampling therefore depends entirely on how well the envelope fits the target:</p>
 <ul>
 <li><span class="math inline">M</span> should be as small as possible, i.e.&nbsp;the smallest value such that <span class="math inline">\tilde{p}(x) \leq M \, q(x)</span> everywhere. Finding it requires knowing the maximum of <span class="math inline">\tilde{p}(x) / q(x)</span>, which is not always possible. If <span class="math inline">M</span> is chosen too small, the condition is violated somewhere and the samples do not follow <span class="math inline">p(x)</span> anymore, without any warning.</li>
 <li>The proposal <span class="math inline">q(x)</span> should have the same shape as the target. In particular, its tails must be at least as heavy as the tails of the target: if <span class="math inline">q(x)</span> decreases faster than <span class="math inline">\tilde{p}(x)</span> when <span class="math inline">x \rightarrow \infty</span>, no constant <span class="math inline">M</span> can satisfy the condition.</li>
 </ul>
-<p>In <a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>, most of the rejections happen between the two modes and in the tails, where the proposal puts mass that the target does not have.</p>
+<p>In <a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>, most of the rejections happen between the two modes and in the tails, where the proposal puts mass that the target does not have.</p>
 </section>
 <section id="failure-in-high-dimensions" class="level3">
 <h3 class="anchored" data-anchor-id="failure-in-high-dimensions">Failure in high dimensions</h3>
@@ -897,15 +902,15 @@ Figure&nbsp;9.5: Rejection sampling of an unnormalized bimodal target <span clas
 <section id="principle-1" class="level3">
 <h3 class="anchored" data-anchor-id="principle-1">Principle</h3>
 <p>Rejection sampling throws away most of its proposals. <strong>Importance sampling</strong> takes a different approach: it keeps all the samples drawn from the proposal <span class="math inline">q(x)</span>, but corrects for the fact that they do not come from the target <span class="math inline">p(x)</span> by giving each of them a <strong>weight</strong>.</p>
-<p>Let’s first see the idea on <a href="#fig-importancesamplingprinciple" class="quarto-xref">Figure&nbsp;<span>9.6</span></a>. We want the mean <span class="math inline">\mathbb{E}_p[x]</span> of the target <span class="math inline">p(x)</span>, but we can only sample from the proposal <span class="math inline">q(x)</span>. If we simply average samples from <span class="math inline">q(x)</span> (left), we obtain an estimate of the mean of <span class="math inline">q(x)</span>, not of <span class="math inline">p(x)</span>: most samples fall in a region where the target is negligible, and they pull the average towards the wrong value. Samples from <span class="math inline">q</span> alone tell us nothing about <span class="math inline">p</span>.</p>
+<p>Let’s first see the idea on <a href="#fig-importancesamplingprinciple" class="quarto-xref">Figure&nbsp;<span>10.6</span></a>. We want the mean <span class="math inline">\mathbb{E}_p[x]</span> of the target <span class="math inline">p(x)</span>, but we can only sample from the proposal <span class="math inline">q(x)</span>. If we simply average samples from <span class="math inline">q(x)</span> (left), we obtain an estimate of the mean of <span class="math inline">q(x)</span>, not of <span class="math inline">p(x)</span>: most samples fall in a region where the target is negligible, and they pull the average towards the wrong value. Samples from <span class="math inline">q</span> alone tell us nothing about <span class="math inline">p</span>.</p>
 <p>The solution is to give more <strong>importance</strong> to the samples that are likely under the target than to the ones that are not (right). A sample at <span class="math inline">x = -2</span> is frequent under <span class="math inline">q(x)</span> but nearly impossible under <span class="math inline">p(x)</span>: it should count very little in the average. A sample at <span class="math inline">x = 2</span> is rare under <span class="math inline">q(x)</span> but likely under <span class="math inline">p(x)</span>: it should count a lot, as it stands for all the samples of <span class="math inline">p(x)</span> that <span class="math inline">q(x)</span> fails to produce. With the right weights, the weighted average of the same samples estimates the mean of <span class="math inline">p(x)</span>.</p>
 <div id="fig-importancesamplingprinciple" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-importancesamplingprinciple-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/importance-sampling-principle.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;9.6: Principle of importance sampling. The same 30 samples are drawn from the proposal q(x) in both panels. Left: their plain average estimates the mean of the proposal, not of the target. Right: when each sample is weighted by w(x) = p(x) / q(x) (marker area proportional to the weight), the weighted average (self-normalized, see below) estimates the mean of the target."><img src="../img/importance-sampling-principle.png" class="img-fluid figure-img"></a>
+<a href="../img/importance-sampling-principle.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;10.6: Principle of importance sampling. The same 30 samples are drawn from the proposal q(x) in both panels. Left: their plain average estimates the mean of the proposal, not of the target. Right: when each sample is weighted by w(x) = p(x) / q(x) (marker area proportional to the weight), the weighted average (self-normalized, see below) estimates the mean of the target."><img src="../img/importance-sampling-principle.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-importancesamplingprinciple-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.6: Principle of importance sampling. The same 30 samples are drawn from the proposal <span class="math inline">q(x)</span> in both panels. Left: their plain average estimates the mean of the proposal, not of the target. Right: when each sample is weighted by <span class="math inline">w(x) = p(x) / q(x)</span> (marker area proportional to the weight), the weighted average (self-normalized, see below) estimates the mean of the target.
+Figure&nbsp;10.6: Principle of importance sampling. The same 30 samples are drawn from the proposal <span class="math inline">q(x)</span> in both panels. Left: their plain average estimates the mean of the proposal, not of the target. Right: when each sample is weighted by <span class="math inline">w(x) = p(x) / q(x)</span> (marker area proportional to the weight), the weighted average (self-normalized, see below) estimates the mean of the target.
 </figcaption>
 </figure>
 </div>
@@ -931,7 +936,7 @@ Figure&nbsp;9.6: Principle of importance sampling. The same 30 samples are drawn
 <p><span class="math display">
     \hat{f}_N^\text{IS} = \dfrac{1}{N} \, \sum_{i=1}^N w(x_i) \, f(x_i) \qquad \text{with} \qquad x_i \sim q(x)
 </span></p>
-<p>The weights correct for the mismatch between the two distributions, as on <a href="#fig-importancesamplingprinciple" class="quarto-xref">Figure&nbsp;<span>9.6</span></a>. A sample in a region where the proposal is too generous (<span class="math inline">q(x) &gt; p(x)</span>) appears more often than it should under <span class="math inline">p(x)</span>, so its weight is smaller than 1. A sample in a region the proposal neglects (<span class="math inline">q(x) &lt; p(x)</span>) appears too rarely, so its weight is larger than 1.</p>
+<p>The weights correct for the mismatch between the two distributions, as on <a href="#fig-importancesamplingprinciple" class="quarto-xref">Figure&nbsp;<span>10.6</span></a>. A sample in a region where the proposal is too generous (<span class="math inline">q(x) &gt; p(x)</span>) appears more often than it should under <span class="math inline">p(x)</span>, so its weight is smaller than 1. A sample in a region the proposal neglects (<span class="math inline">q(x) &lt; p(x)</span>) appears too rarely, so its weight is larger than 1.</p>
 <p>As a plain Monte Carlo estimator of <span class="math inline">\mathbb{E}_q[w f]</span>, the importance sampling estimator inherits the properties of <a href="#sec-mcestimator" class="quarto-xref"><span>The Monte Carlo estimator</span></a>: it is <strong>unbiased</strong>, and its variance is:</p>
 <p><span class="math display">
     \text{Var}(\hat{f}_N^\text{IS}) = \dfrac{\sigma_\text{IS}^2}{N} \qquad \text{with} \qquad \sigma_\text{IS}^2 = \text{Var}_{x \sim q(x)} (w(x) \, f(x))
@@ -944,7 +949,7 @@ Figure&nbsp;9.6: Principle of importance sampling. The same 30 samples are drawn
 <li>When the proposal is <strong>close to the target</strong>, all the weights are close to 1: every sample counts roughly the same, and importance sampling behaves like plain Monte Carlo sampling from <span class="math inline">p(x)</span>.</li>
 <li>When the proposal is <strong>much smaller than the target</strong> in some region, the samples from that region are rare but receive huge weights. The estimate then depends on whether, and how many, such samples happen to be drawn.</li>
 </ul>
-<p>A good proposal should therefore be as close as possible to the target and, as for rejection sampling, have tails at least as heavy as the target, so that no region of the target is neglected. A proposal that is too narrow produces two kinds of failures, illustrated on <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>9.7</span></a> with the bimodal target of <a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>9.5</span></a>:</p>
+<p>A good proposal should therefore be as close as possible to the target and, as for rejection sampling, have tails at least as heavy as the target, so that no region of the target is neglected. A proposal that is too narrow produces two kinds of failures, illustrated on <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>10.7</span></a> with the bimodal target of <a href="#fig-rejectionsampling" class="quarto-xref">Figure&nbsp;<span>10.5</span></a>:</p>
 <ul>
 <li>Most of the time, <strong>no sample</strong> falls in the regions neglected by the proposal (run A, the second mode). The weights look perfectly reasonable, but the estimate ignores a part of the distribution and is wrong.</li>
 <li>Occasionally, a sample falls in such a region and receives a <strong>huge weight</strong>, as <span class="math inline">q(x) \ll p(x)</span> there (run B). This single sample then dominates the estimate.</li>
@@ -953,10 +958,10 @@ Figure&nbsp;9.6: Principle of importance sampling. The same 30 samples are drawn
 <div id="fig-importancesampling" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-importancesampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/importance-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;9.7: Self-normalized importance sampling of the bimodal target with N = 50 samples. Top: target, proposal and samples. Bottom: normalized weights of the samples (note the different scales). Left: a broad proposal covering both modes gives balanced weights and a good estimate of \mathbb{E}_p[x] = -0.3. Middle and right: two runs of the same proposal centered on the first mode, too narrow to cover the second one. In run A, no sample reaches the second mode: the weights are nearly uniform, but the estimate is wrong. In run B, one sample reaches the second mode and receives 74% of the total weight."><img src="../img/importance-sampling.png" class="img-fluid figure-img"></a>
+<a href="../img/importance-sampling.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;10.7: Self-normalized importance sampling of the bimodal target with N = 50 samples. Top: target, proposal and samples. Bottom: normalized weights of the samples (note the different scales). Left: a broad proposal covering both modes gives balanced weights and a good estimate of \mathbb{E}_p[x] = -0.3. Middle and right: two runs of the same proposal centered on the first mode, too narrow to cover the second one. In run A, no sample reaches the second mode: the weights are nearly uniform, but the estimate is wrong. In run B, one sample reaches the second mode and receives 74% of the total weight."><img src="../img/importance-sampling.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-importancesampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9.7: Self-normalized importance sampling of the bimodal target with <span class="math inline">N = 50</span> samples. Top: target, proposal and samples. Bottom: normalized weights of the samples (note the different scales). Left: a broad proposal covering both modes gives balanced weights and a good estimate of <span class="math inline">\mathbb{E}_p[x] = -0.3</span>. Middle and right: two runs of the same proposal centered on the first mode, too narrow to cover the second one. In run A, no sample reaches the second mode: the weights are nearly uniform, but the estimate is wrong. In run B, one sample reaches the second mode and receives 74% of the total weight.
+Figure&nbsp;10.7: Self-normalized importance sampling of the bimodal target with <span class="math inline">N = 50</span> samples. Top: target, proposal and samples. Bottom: normalized weights of the samples (note the different scales). Left: a broad proposal covering both modes gives balanced weights and a good estimate of <span class="math inline">\mathbb{E}_p[x] = -0.3</span>. Middle and right: two runs of the same proposal centered on the first mode, too narrow to cover the second one. In run A, no sample reaches the second mode: the weights are nearly uniform, but the estimate is wrong. In run B, one sample reaches the second mode and receives 74% of the total weight.
 </figcaption>
 </figure>
 </div>
@@ -971,7 +976,7 @@ Figure&nbsp;9.7: Self-normalized importance sampling of the bimodal target with 
 <p><span class="math display">
     \mathbb{E}_{x \sim p(x)} [f(x)] \approx \sum_{i=1}^N \bar{w}_i \, f(x_i)
 </span></p>
-<p>The unknown constant <span class="math inline">Z</span> multiplies all the weights by the same amount (<span class="math inline">\tilde{w}_i = Z \, w(x_i)</span>), so it disappears in the normalization. This <strong>self-normalized importance sampling</strong> estimator is the one used in <a href="#fig-importancesamplingprinciple" class="quarto-xref">Figure&nbsp;<span>9.6</span></a> and <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>9.7</span></a>. It is slightly biased for a finite number of samples, but the bias vanishes when <span class="math inline">N</span> increases.</p>
+<p>The unknown constant <span class="math inline">Z</span> multiplies all the weights by the same amount (<span class="math inline">\tilde{w}_i = Z \, w(x_i)</span>), so it disappears in the normalization. This <strong>self-normalized importance sampling</strong> estimator is the one used in <a href="#fig-importancesamplingprinciple" class="quarto-xref">Figure&nbsp;<span>10.6</span></a> and <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>10.7</span></a>. It is slightly biased for a finite number of samples, but the bias vanishes when <span class="math inline">N</span> increases.</p>
 <p>As a by-product, the average of the unnormalized weights is an estimate of the normalization constant itself, as <span class="math inline">\mathbb{E}_{x \sim q(x)}[\tilde{w}(x)] = \int_x \tilde{p}(x) \, dx = Z</span>:</p>
 <p><span class="math display">
     Z \approx \dfrac{1}{N} \, \sum_{i=1}^N \tilde{w}_i
@@ -984,7 +989,7 @@ Figure&nbsp;9.7: Self-normalized importance sampling of the bimodal target with 
 <p><span class="math display">
     \text{ESS} = \dfrac{(\sum_{i=1}^N \tilde{w}_i)^2}{\sum_{i=1}^N \tilde{w}_i^2} = \dfrac{1}{\sum_{i=1}^N \bar{w}_i^2}
 </span></p>
-<p>It is equal to <span class="math inline">N</span> when the weights are uniform and to 1 when a single sample carries all the weight. It can be interpreted as the number of samples from <span class="math inline">p(x)</span> that would give an estimate of similar quality. In <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>9.7</span></a>, the broad proposal has an ESS of 34 out of 50 samples, while run B relies on fewer than 2 effective samples.</p>
+<p>It is equal to <span class="math inline">N</span> when the weights are uniform and to 1 when a single sample carries all the weight. It can be interpreted as the number of samples from <span class="math inline">p(x)</span> that would give an estimate of similar quality. In <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>10.7</span></a>, the broad proposal has an ESS of 34 out of 50 samples, while run B relies on fewer than 2 effective samples.</p>
 <div class="callout callout-style-default callout-warning no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -995,7 +1000,7 @@ Figure&nbsp;9.7: Self-normalized importance sampling of the bimodal target with 
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>In run A of <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>9.7</span></a>, the ESS is 46 out of 50, better than with the good proposal, although the estimate is completely wrong. The ESS only measures how balanced the weights of the <strong>obtained</strong> samples are: it cannot detect regions of the target that the proposal never visits. A high ESS is necessary for a good estimate, but not sufficient.</p>
+<p>In run A of <a href="#fig-importancesampling" class="quarto-xref">Figure&nbsp;<span>10.7</span></a>, the ESS is 46 out of 50, better than with the good proposal, although the estimate is completely wrong. The ESS only measures how balanced the weights of the <strong>obtained</strong> samples are: it cannot detect regions of the target that the proposal never visits. A high ESS is necessary for a good estimate, but not sufficient.</p>
 </div>
 </div>
 <p>Importance sampling is one of the most widely used tools of machine learning. In reinforcement learning, it allows to reuse samples collected with an older version of the policy to estimate quantities under the current one, as in the ubiquitous PPO algorithm <span class="citation" data-cites="Schulman2017a">(<a href="../references.html#ref-Schulman2017a" role="doc-biblioref">Schulman et al., 2017</a>)</span>, used in robotics and in the alignment of large language models such as ChatGPT <span class="citation" data-cites="Ouyang2022">(<a href="../references.html#ref-Ouyang2022" role="doc-biblioref">Ouyang et al., 2022</a>)</span>. Following the lesson of this section, PPO clips the importance weights to stay close to 1, so that the new policy never moves too far from the one that collected the samples. Importance-weighted autoencoders tighten the ELBO with several weighted samples of the encoder, and particle filters track hidden states over time with sequences of weighted samples: both will be presented in later chapters.</p>

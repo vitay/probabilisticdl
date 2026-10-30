@@ -184,6 +184,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -391,10 +396,10 @@ window.Quarto = {
 <div id="fig-vaegraphicalmodel" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-vaegraphicalmodel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/vae-graphical-model.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;13.1: Graphical model of a VAE. Source: https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html"><img src="../img/vae-graphical-model.png" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/vae-graphical-model.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;14.1: Graphical model of a VAE. Source: https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html"><img src="../img/vae-graphical-model.png" class="img-fluid figure-img" style="width:70.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vaegraphicalmodel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13.1: Graphical model of a VAE. Source: <a href="https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html" class="uri">https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html</a>
+Figure&nbsp;14.1: Graphical model of a VAE. Source: <a href="https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html" class="uri">https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html</a>
 </figcaption>
 </figure>
 </div>
@@ -453,7 +458,7 @@ Figure&nbsp;13.1: Graphical model of a VAE. Source: <a href="https://lilianweng.
 </section>
 <section id="sec-elbo" class="level2">
 <h2 class="anchored" data-anchor-id="sec-elbo">Why maximizing the ELBO works</h2>
-<p>Variational inference trains the encoder and the decoder together by maximizing the ELBO with respect to both <span class="math inline">\phi</span> and <span class="math inline">\theta</span>. Many presentations stop at “the ELBO is a lower bound, so maximizing it maximizes the evidence”, but a lower bound can increase while the quantity above it stays where it is. The decomposition <span class="math inline">\log p_\theta(x) = \text{ELBO}(\theta, \phi) + \text{KL}(q_\phi(z|x) || p_\theta(z | x))</span> shows what actually happens <span class="citation" data-cites="Luo2022a">(<a href="../references.html#ref-Luo2022a" role="doc-biblioref">Luo, 2022</a>)</span>. Let’s look at the two sets of parameters separately (<a href="#fig-elbogap" class="quarto-xref">Figure&nbsp;<span>13.2</span></a>):</p>
+<p>Variational inference trains the encoder and the decoder together by maximizing the ELBO with respect to both <span class="math inline">\phi</span> and <span class="math inline">\theta</span>. Many presentations stop at “the ELBO is a lower bound, so maximizing it maximizes the evidence”, but a lower bound can increase while the quantity above it stays where it is. The decomposition <span class="math inline">\log p_\theta(x) = \text{ELBO}(\theta, \phi) + \text{KL}(q_\phi(z|x) || p_\theta(z | x))</span> shows what actually happens <span class="citation" data-cites="Luo2022a">(<a href="../references.html#ref-Luo2022a" role="doc-biblioref">Luo, 2022</a>)</span>. Let’s look at the two sets of parameters separately (<a href="#fig-elbogap" class="quarto-xref">Figure&nbsp;<span>14.2</span></a>):</p>
 <p><strong>The encoder</strong> (<span class="math inline">\phi</span>). The log-evidence <span class="math inline">\log p_\theta(x)</span> does not depend on <span class="math inline">\phi</span>, so its gradient with respect to <span class="math inline">\phi</span> is zero:</p>
 <p><span class="math display">
     \underbrace{\nabla_\phi \, \log \, p_\theta(x)}_{ = 0} = \underbrace{\nabla_\phi \, \text{ELBO}(\theta, \phi)}_{\text{maximized}} + \underbrace{\nabla_\phi \,  \text{KL}( q_\phi(z|x) || p_\theta(z|x))}_{\text{minimized}}
@@ -463,10 +468,10 @@ Figure&nbsp;13.1: Graphical model of a VAE. Source: <a href="https://lilianweng.
 <div id="fig-elbogap" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-elbogap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/elbo-gap.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;13.2: Schematic of ELBO maximization. The log-evidence (black lines) is the sum of the ELBO (blue) and of the gap, the KL divergence between the encoder and the true posterior (orange). Updating the encoder leaves the log-evidence unchanged and closes the gap; updating the decoder raises the ELBO and the log-evidence. In practice, both are updated at the same time by gradient ascent; the steps are separated here for clarity."><img src="../img/elbo-gap.png" class="img-fluid figure-img"></a>
+<a href="../img/elbo-gap.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;14.2: Schematic of ELBO maximization. The log-evidence (black lines) is the sum of the ELBO (blue) and of the gap, the KL divergence between the encoder and the true posterior (orange). Updating the encoder leaves the log-evidence unchanged and closes the gap; updating the decoder raises the ELBO and the log-evidence. In practice, both are updated at the same time by gradient ascent; the steps are separated here for clarity."><img src="../img/elbo-gap.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-elbogap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13.2: Schematic of ELBO maximization. The log-evidence (black lines) is the sum of the ELBO (blue) and of the gap, the KL divergence between the encoder and the true posterior (orange). Updating the encoder leaves the log-evidence unchanged and closes the gap; updating the decoder raises the ELBO and the log-evidence. In practice, both are updated at the same time by gradient ascent; the steps are separated here for clarity.
+Figure&nbsp;14.2: Schematic of ELBO maximization. The log-evidence (black lines) is the sum of the ELBO (blue) and of the gap, the KL divergence between the encoder and the true posterior (orange). Updating the encoder leaves the log-evidence unchanged and closes the gap; updating the decoder raises the ELBO and the log-evidence. In practice, both are updated at the same time by gradient ascent; the steps are separated here for clarity.
 </figcaption>
 </figure>
 </div>

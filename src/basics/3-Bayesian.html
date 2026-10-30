@@ -184,6 +184,11 @@ window.Quarto = {
   <a href="../../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Preface</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../src/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -400,10 +405,10 @@ window.Quarto = {
 <div id="fig-clt" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-clt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/central-limit-theorem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;4.1: Illustration of the central limit theorem. Source: https://en.wikipedia.org/wiki/Central_limit_theorem"><img src="../img/central-limit-theorem.png" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/central-limit-theorem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;5.1: Illustration of the central limit theorem. Source: https://en.wikipedia.org/wiki/Central_limit_theorem"><img src="../img/central-limit-theorem.png" class="img-fluid figure-img" style="width:70.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.1: Illustration of the central limit theorem. Source: <a href="https://en.wikipedia.org/wiki/Central_limit_theorem" class="uri">https://en.wikipedia.org/wiki/Central_limit_theorem</a>
+Figure&nbsp;5.1: Illustration of the central limit theorem. Source: <a href="https://en.wikipedia.org/wiki/Central_limit_theorem" class="uri">https://en.wikipedia.org/wiki/Central_limit_theorem</a>
 </figcaption>
 </figure>
 </div>
@@ -484,14 +489,14 @@ Figure&nbsp;4.1: Illustration of the central limit theorem. Source: <a href="htt
 <li>When the prior is <strong>very uncertain</strong> (<span class="math inline">\sigma_0 \rightarrow \infty</span>), the prior becomes uniform and we also recover MLE.</li>
 <li>When the prior is <strong>very certain</strong> (<span class="math inline">\sigma_0 \rightarrow 0</span>), the estimate sticks to <span class="math inline">\mu_0</span>, whatever the data says.</li>
 </ul>
-<p><a href="#fig-mapposterior" class="quarto-xref">Figure&nbsp;<span>4.2</span></a> illustrates this with a prior <span class="math inline">\mathcal{N}(0, 1)</span> and data sampled from <span class="math inline">\mathcal{N}(3, 2)</span>. With a single sample, the posterior stays close to the prior. As more samples are observed, the likelihood becomes sharper and pulls the posterior towards the empirical mean <span class="math inline">\bar{x}</span>, while the prior loses its influence.</p>
+<p><a href="#fig-mapposterior" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> illustrates this with a prior <span class="math inline">\mathcal{N}(0, 1)</span> and data sampled from <span class="math inline">\mathcal{N}(3, 2)</span>. With a single sample, the posterior stays close to the prior. As more samples are observed, the likelihood becomes sharper and pulls the posterior towards the empirical mean <span class="math inline">\bar{x}</span>, while the prior loses its influence.</p>
 <div id="fig-mapposterior" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mapposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/map-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;4.2: Prior, (normalized) likelihood and posterior of the mean \mu for N = 1, 5 and 50 samples drawn from \mathcal{N}(3, 2), with a prior \mathcal{N}(0, 1). The thin vertical lines show the MLE estimate \bar{x} (orange) and the MAP estimate \mu_\text{MAP} (green); the dotted gray line is the true mean."><img src="../img/map-posterior.png" class="img-fluid figure-img"></a>
+<a href="../img/map-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;5.2: Prior, (normalized) likelihood and posterior of the mean \mu for N = 1, 5 and 50 samples drawn from \mathcal{N}(3, 2), with a prior \mathcal{N}(0, 1). The thin vertical lines show the MLE estimate \bar{x} (orange) and the MAP estimate \mu_\text{MAP} (green); the dotted gray line is the true mean."><img src="../img/map-posterior.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mapposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.2: Prior, (normalized) likelihood and posterior of the mean <span class="math inline">\mu</span> for <span class="math inline">N = 1</span>, 5 and 50 samples drawn from <span class="math inline">\mathcal{N}(3, 2)</span>, with a prior <span class="math inline">\mathcal{N}(0, 1)</span>. The thin vertical lines show the MLE estimate <span class="math inline">\bar{x}</span> (orange) and the MAP estimate <span class="math inline">\mu_\text{MAP}</span> (green); the dotted gray line is the true mean.
+Figure&nbsp;5.2: Prior, (normalized) likelihood and posterior of the mean <span class="math inline">\mu</span> for <span class="math inline">N = 1</span>, 5 and 50 samples drawn from <span class="math inline">\mathcal{N}(3, 2)</span>, with a prior <span class="math inline">\mathcal{N}(0, 1)</span>. The thin vertical lines show the MLE estimate <span class="math inline">\bar{x}</span> (orange) and the MAP estimate <span class="math inline">\mu_\text{MAP}</span> (green); the dotted gray line is the true mean.
 </figcaption>
 </figure>
 </div>
