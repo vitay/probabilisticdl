@@ -336,7 +336,8 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#mle-for-the-univariate-normal-distribution" id="toc-mle-for-the-univariate-normal-distribution" class="nav-link active" data-scroll-target="#mle-for-the-univariate-normal-distribution">MLE for the univariate normal distribution</a></li>
+  <li><a href="#principle" id="toc-principle" class="nav-link active" data-scroll-target="#principle">Principle</a></li>
+  <li><a href="#mle-for-the-univariate-normal-distribution" id="toc-mle-for-the-univariate-normal-distribution" class="nav-link" data-scroll-target="#mle-for-the-univariate-normal-distribution">MLE for the univariate normal distribution</a></li>
   </ul>
 </nav>
     </div>
@@ -362,6 +363,8 @@ window.Quarto = {
 </header>
 
 
+<section id="principle" class="level2">
+<h2 class="anchored" data-anchor-id="principle">Principle</h2>
 <p>Maximum likelihood estimation (MLE) is a statistical method to <strong>estimate</strong> the parameters <span class="math inline">\theta</span> of a parametric family of probability distributions <span class="math inline">p(x; \theta) = p_\theta(x)</span> that <strong>best explains</strong> some observed data samples <span class="math inline">X = \{x_i\}_{i=1}^N</span> coming from an unknown distribution <span class="math inline">p(x)</span>.</p>
 <p>The <span class="math inline">N</span> samples <span class="math inline">x_i</span> come from some unknown probability distribution <span class="math inline">\mathcal{D}</span>. An important assumption is that the samples are <strong>i.i.d</strong> (independent and identically distributed), i.e.&nbsp;that they all come from the same distribution and are not correlated with each other (the value of one sample does not influence the value taken by the next one).</p>
 <p>We then assume a particular parametric family of probability distributions, with a probability density function (pdf) <span class="math inline">p_\theta(x)</span>. For example, the pdf of the family of normal distributions is:</p>
@@ -385,7 +388,7 @@ Figure&nbsp;4.1: Normal distributions with different parameters <span class="mat
     L(\theta)  = p_\theta( X) = p_\theta( x_1, x_2, \ldots, x_N)
 </span></p>
 <p>Note that <span class="math inline">p_\theta( X )</span> is a joint probability, but <span class="math inline">L(\theta)</span> is a likelihood: the first is asking about the data, while the second is asking about the parameters.</p>
-<p>When the samples are <strong>i.i.d</strong>, the joint probability of observing the <span class="math inline">N</span> samples <span class="math inline">x_i</span> is equal to the product of their individual probabilities, as <span class="math inline">P(X, Y) = P(X) \, P(Y)</span> when <span class="math inline">X</span> and <span class="math inline">Y</span> are independent:</p>
+<p>When the samples are <strong>i.i.d</strong>, the joint probability of observing the <span class="math inline">N</span> samples <span class="math inline">x_i</span> is equal to the product of their individual probabilities, as <span class="math inline">p(x, y) = p(x) \, p(y)</span> when <span class="math inline">x</span> and <span class="math inline">y</span> are independent:</p>
 <p><span class="math display">
     L(\theta) = p_\theta( X ) = \prod_{i=1}^{N} p_\theta(x_i )
 </span></p>
@@ -408,6 +411,7 @@ Figure&nbsp;4.1: Normal distributions with different parameters <span class="mat
 </span></p>
 <p>Any optimization method can be used, either analytic optimization if we have the analytical form of the pdf, or approximate optimization methods such as gradient descent.</p>
 <p>Note that the probability distribution <span class="math inline">p(x; \theta_\text{MLE})</span> with the best parameters is not equal to the true distribution of the data <span class="math inline">\mathcal{D}</span>: it is only the best approximation we can get using 1) that particular family of distributions (the pdf of <span class="math inline">\mathcal{D}</span> might not have the Gaussian shape of the normal distribution) and 2) those samples (the more samples, the better).</p>
+</section>
 <section id="mle-for-the-univariate-normal-distribution" class="level2">
 <h2 class="anchored" data-anchor-id="mle-for-the-univariate-normal-distribution">MLE for the univariate normal distribution</h2>
 <p>For the normal distribution, the likelihood function is:</p>
@@ -447,8 +451,75 @@ l(\mu, \sigma) &amp; = \log L(\mu, \sigma) \\
 <p><span class="math display">
     \mu = \frac{1}{N} \sum_{i=1}^{N} x_i \qquad\qquad \sigma^2 = \frac{1}{N} \sum_{i=1}^{N}(x_i - \mu)^2
 </span></p>
-<p>Unsurprisingly, the mean and variance of the normal distribution which best explains the data are the empirical mean and variance of the data…</p>
-<p>The same principle can be applied to estimate the parameters of any distribution based on samples: normal, exponential, Bernoulli, Poisson, etc.</p>
+<p>Unsurprisingly, the mean and variance of the normal distribution which best explains the data are the empirical mean and variance of the data… When we summarize data points by their mean and variance only, we implicitly treat them as normally distributed: these two numbers fully describe a normal distribution, but they can be misleading for skewed or multimodal data.</p>
+<p>The same principle can be applied to estimate the parameters of any distribution based on samples. The following table gives the MLE estimates for the most common distributions, where <span class="math inline">\bar{x} = \frac{1}{N} \sum_{i=1}^N x_i</span> denotes the empirical mean of the samples:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Distribution</th>
+<th style="text-align: left;">pmf / pdf</th>
+<th style="text-align: left;">MLE estimates</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Bernoulli <span class="math inline">\mathcal{B}(\rho)</span>, <span class="math inline">x \in \{0, 1\}</span></td>
+<td style="text-align: left;"><span class="math inline">\rho^x \, (1 - \rho)^{1-x}</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\rho} = \bar{x}</span> (fraction of ones)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Categorical, <span class="math inline">x \in \{1, \ldots, K\}</span></td>
+<td style="text-align: left;"><span class="math inline">\pi_x</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\pi}_k = \frac{N_k}{N}</span> (fraction of samples in class <span class="math inline">k</span>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Binomial, <span class="math inline">n</span> trials, <span class="math inline">x \in \{0, \ldots, n\}</span></td>
+<td style="text-align: left;"><span class="math inline">\binom{n}{x} \, \rho^x \, (1 - \rho)^{n-x}</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\rho} = \frac{\bar{x}}{n}</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Poisson, <span class="math inline">x \in \mathbb{N}</span></td>
+<td style="text-align: left;"><span class="math inline">\frac{\lambda^x \, e^{-\lambda}}{x!}</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\lambda} = \bar{x}</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Geometric, <span class="math inline">x \in \{1, 2, \ldots\}</span></td>
+<td style="text-align: left;"><span class="math inline">(1 - \rho)^{x-1} \, \rho</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\rho} = \frac{1}{\bar{x}}</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Uniform <span class="math inline">\mathcal{U}(a, b)</span></td>
+<td style="text-align: left;"><span class="math inline">\frac{1}{b - a}</span> on <span class="math inline">[a, b]</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{a} = \min_i x_i</span>, <span class="math inline">\hat{b} = \max_i x_i</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Exponential, <span class="math inline">x \geq 0</span></td>
+<td style="text-align: left;"><span class="math inline">\lambda \, e^{-\lambda x}</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\lambda} = \frac{1}{\bar{x}}</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Normal <span class="math inline">\mathcal{N}(\mu, \sigma)</span></td>
+<td style="text-align: left;"><span class="math inline">\frac{1}{\sqrt{2\pi\sigma^2}} \, e^{- \frac{(x - \mu)^2}{2\sigma^2}}</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\mu} = \bar{x}</span>, <span class="math inline">\hat{\sigma}^2 = \frac{1}{N} \sum_i (x_i - \bar{x})^2</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Laplace</td>
+<td style="text-align: left;"><span class="math inline">\frac{1}{2b} \, e^{- \frac{\lvert x - \mu \rvert}{b}}</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\mu} = \text{median}(x_i)</span>, <span class="math inline">\hat{b} = \frac{1}{N} \sum_i \lvert x_i - \hat{\mu} \rvert</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Multivariate normal <span class="math inline">\mathcal{N}(\mu, \Sigma)</span></td>
+<td style="text-align: left;"><span class="math inline">\frac{1}{\sqrt{(2\pi)^d \det \Sigma}} \, e^{- \frac{1}{2} (x - \mu)^T \Sigma^{-1} (x - \mu)}</span></td>
+<td style="text-align: left;"><span class="math inline">\hat{\mu} = \bar{x}</span>, <span class="math inline">\hat{\Sigma} = \frac{1}{N} \sum_i (x_i - \bar{x}) (x_i - \bar{x})^T</span></td>
+</tr>
+</tbody>
+</table>
+<p>The empirical mean appears in many of these estimates, not only for the normal distribution. Other distributions, such as the gamma or beta distributions, have no closed-form MLE: the log-likelihood has to be maximized numerically, for example with gradient ascent.</p>
 <p>Maximum likelihood estimation is a good method when 1) the number of samples is big enough (central limit theorem, see <a href="3-Bayesian.html" class="quarto-xref"><span>Bayesian estimation</span></a>) and 2) we do not care about the uncertainty of our estimator.</p>
 
 

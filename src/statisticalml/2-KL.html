@@ -388,8 +388,7 @@ window.Quarto = {
 </header>
 
 
-<p>Let us now look at maximum likelihood estimation / KL minimization from the information theory point of view.</p>
-<p>The definition of the KL divergence (<a href="../basics/1-InformationTheory.html#sec-kl" class="quarto-xref"><span>Kullback-Leibler divergence</span></a>) relies on the mathematical expectation of the negative log-likelihood of the outcomes of <span class="math inline">p</span>:</p>
+<p>Let us now look at maximum likelihood estimation / KL minimization from the information theory point of view. The definition of the KL divergence (<a href="../basics/1-InformationTheory.html#sec-kl" class="quarto-xref"><span>Kullback-Leibler divergence</span></a>) relies on the mathematical expectation of the negative log-likelihood of the outcomes of <span class="math inline">p</span>:</p>
 <p><span class="math display">
     \text{KL}(p || q) = \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}]
 </span></p>
@@ -400,19 +399,6 @@ window.Quarto = {
 <p><span class="math display">
     p(x) = \mathcal{N}(x; \mu_p, \sigma_p) \qquad\qquad\qquad q(x) = \mathcal{N}(x; \mu_q, \sigma_q)
 </span></p>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>KL for multivariate normal distributions
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>For multivariate normal distributions, see <a href="https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/" class="uri">https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/</a>. The formula looks the same, but with vectors and matrices.</p>
-</div>
-</div>
 <p>We can use the known pdf of normal distributions to get the KL:</p>
 <p><span class="math display">
 \begin{aligned}
@@ -482,58 +468,77 @@ window.Quarto = {
 <p><span class="math display">
     \text{KL}(p || \mathcal{N}(0, 1)) = \dfrac{1}{2} [\sigma_p^2 + \mu_p^2 - 1 - \log \sigma_p^2]
 </span></p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>KL for multivariate normal distributions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For two multivariate normal distributions in <span class="math inline">d</span> dimensions, <span class="math inline">p = \mathcal{N}(\mu_p, \Sigma_p)</span> and <span class="math inline">q = \mathcal{N}(\mu_q, \Sigma_q)</span>, parameterized by their mean vectors and covariance matrices, the KL divergence has the same structure as in the univariate case, with vectors and matrices:</p>
+<p><span class="math display">
+    \text{KL}(p || q) = \dfrac{1}{2} \left[ \text{tr}(\Sigma_q^{-1} \, \Sigma_p) + (\mu_q - \mu_p)^T \, \Sigma_q^{-1} \, (\mu_q - \mu_p) - d + \log \dfrac{\det \Sigma_q}{\det \Sigma_p} \right]
+</span></p>
+<p>When both covariance matrices are diagonal, with standard deviations <span class="math inline">\sigma_{p, k}</span> and <span class="math inline">\sigma_{q, k}</span> along each dimension <span class="math inline">k</span>, the dimensions are independent and the KL is the sum of the univariate KL divergences:</p>
+<p><span class="math display">
+    \text{KL}(p || q) = \sum_{k=1}^{d} \left[ \log \dfrac{\sigma_{q, k}}{\sigma_{p, k}} + \dfrac{\sigma_{p, k}^2 + (\mu_{p, k} - \mu_{q, k})^2}{2 \sigma_{q, k}^2} - \dfrac{1}{2} \right]
+</span></p>
+<p>See <a href="https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/" class="uri">https://mr-easy.github.io/2020-04-16-kl-divergence-between-2-gaussian-distributions/</a> for a derivation.</p>
+</div>
+</div>
 </section>
 <section id="equivalence-between-kl-and-cross-entropy" class="level2">
 <h2 class="anchored" data-anchor-id="equivalence-between-kl-and-cross-entropy">Equivalence between KL and cross-entropy</h2>
-<p>Let’s now consider that the samples <span class="math inline">X = \{x_i\}_{i=1}^N</span> come from some unknown distribution <span class="math inline">p</span> (the data), while <span class="math inline">Y</span> comes from a parameterized family of probability distributions <span class="math inline">p_\theta(x)</span> with parameters <span class="math inline">\theta</span> (the model). The KL divergence is expressed as:</p>
+<p>Let’s now consider that the samples <span class="math inline">\{x_i\}_{i=1}^N</span> come from some unknown distribution <span class="math inline">p</span> (the data), which we try to learn using a parameterized family of probability distributions <span class="math inline">p_\theta</span> with parameters <span class="math inline">\theta</span> (the model). The KL divergence is expressed as:</p>
 <p><span class="math display">
 \begin{aligned}
 \text{KL}(p || p_\theta) &amp; = \mathbb{E}_{x \sim p(x)}[- \log \dfrac{p_\theta(x)}{p(x)}] \\
 &amp; = \mathbb{E}_{x \sim p(x)}[- \log p_\theta(x)] - \mathbb{E}_{x \sim p(x)}[- \log p(x)] \\
-&amp; = H(p(x), p_\theta(x)) - H(p(x)) \\
+&amp; = H(p, p_\theta) - H(p) \\
 \end{aligned}
 </span></p>
-<p>The KL between the data and the model is the difference between their cross-entropy and the entropy of the data.</p>
-<p>If we want the model <span class="math inline">p_\theta</span> to explain the data <span class="math inline">\{x_i\}_{i=1}^N</span> sampled from <span class="math inline">p</span>, we want the KL divergence between <span class="math inline">p_\theta</span> and <span class="math inline">p</span> to be zero, as both distributions would then be the same. In other terms, we search for a value of <span class="math inline">\theta</span> where the KL divergence between the model and the data is <strong>minimal</strong>: the KL is always positive, so its minimum is 0.</p>
+<p>The KL between the data and the model is the difference between their cross-entropy and the entropy of the data. If we want the model <span class="math inline">p_\theta</span> to explain the data <span class="math inline">\{x_i\}_{i=1}^N</span> sampled from <span class="math inline">p</span>, we want the KL divergence between <span class="math inline">p_\theta</span> and <span class="math inline">p</span> to be zero, as both distributions would then be the same. In other terms, we search for a value of <span class="math inline">\theta</span> where the KL divergence between the model and the data is <strong>minimal</strong>: the KL is always positive or zero, and it reaches zero only if the family of the model contains the data distribution; otherwise, the minimum corresponds to the best possible fit.</p>
 <p><span class="math display">
-    \theta^* = \text{argmin}_\theta \, \text{KL}(p(x) || p_\theta(x))
+    \theta^* = \text{argmin}_\theta \, \text{KL}(p || p_\theta)
 </span></p>
 <p>Minimizing the KL with respect to <span class="math inline">\theta</span> requires access to its <strong>gradient</strong>, i.e.&nbsp;the partial derivatives of the KL divergence with respect to each parameter. Gradient descent can for example be used to iteratively update the parameters in the opposite direction to this gradient:</p>
 <p><span class="math display">
-    \Delta \theta = - \eta \, \nabla_\theta \, \text{KL}(p(x) || p_\theta(x))
+    \Delta \theta = - \eta \, \nabla_\theta \, \text{KL}(p || p_\theta)
 </span></p>
 <p>Let us have a look at this gradient:</p>
 <p><span class="math display">
-    \nabla_\theta \, \text{KL}(p(x) || p_\theta(x)) = \nabla_\theta \, H(p(x), p_\theta(x)) - \nabla_\theta \, H(p(x))
+    \nabla_\theta \, \text{KL}(p || p_\theta) = \nabla_\theta \, H(p, p_\theta) - \nabla_\theta \, H(p)
 </span></p>
-<p>The gradient of the KL is the gradient of the cross-entropy minus the gradient of the entropy of the data. However, the data distribution <span class="math inline">p(x)</span> does not depend on the parameters <span class="math inline">\theta</span> of the model, so the gradient of the entropy of the data is zero:</p>
+<p>The gradient of the KL is the gradient of the cross-entropy minus the gradient of the entropy of the data. However, the data distribution <span class="math inline">p</span> does not depend on the parameters <span class="math inline">\theta</span> of the model, so the gradient of the entropy of the data is zero:</p>
 <p><span class="math display">
-    \nabla_\theta \, H(p(x)) = 0
+    \nabla_\theta \, H(p) = 0
 </span></p>
 <p>This means that the gradient of the KL is the same as the gradient of the cross-entropy:</p>
 <p><span class="math display">
-    \nabla_\theta \, \text{KL}(p(x) || p_\theta(x)) = \nabla_\theta \, H(p(x), p_\theta(x))
+    \nabla_\theta \, \text{KL}(p || p_\theta) = \nabla_\theta \, H(p, p_\theta)
 </span></p>
 <p><strong>Minimizing the KL divergence between a model and the data is the same as minimizing their cross-entropy!</strong></p>
 <p>The KL divergence and the cross-entropy only differ by a constant term, the entropy of the data, which does not depend on the model. The value of <span class="math inline">\theta</span> that minimizes one also minimizes the other.</p>
 <p>Let us now estimate the cross-entropy:</p>
 <p><span class="math display">
-    H(p(x), p_\theta(x)) = \mathbb{E}_{x \sim p(x)}[- \log p_\theta(x)]
+    H(p, p_\theta) = \mathbb{E}_{x \sim p(x)}[- \log p_\theta(x)]
 </span></p>
 <p>Using <span class="math inline">N</span> samples <span class="math inline">\{x_i\}_{i=1}^N</span> from the data, we can approximate this expectation with a <strong>Monte Carlo estimate</strong> (<a href="../sampling/1-MonteCarlo.html" class="quarto-xref"><span>Monte Carlo and importance sampling</span></a>), i.e.&nbsp;the average of <span class="math inline">- \log p_\theta(x)</span> over the samples:</p>
 <p><span class="math display">
-    H(p(x), p_\theta(x)) \approx \dfrac{1}{N} \, \sum_{i=1}^N - \log p_\theta(x_i) = - \dfrac{1}{N} \, l(\theta)
+    H(p, p_\theta) \approx \dfrac{1}{N} \, \sum_{i=1}^N - \log p_\theta(x_i) = - \dfrac{1}{N} \, l(\theta)
 </span></p>
 <p>where <span class="math inline">l(\theta) = \sum_{i=1}^N \log p_\theta(x_i)</span> is the log-likelihood of the model on the data that we introduced in <strong>maximum likelihood estimation</strong> (<a href="../basics/2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>). Maximizing the log-likelihood minimizes the cross-entropy and therefore the KL divergence.</p>
 <p>This means that MLE is strictly equivalent to minimizing the KL divergence (or cross-entropy) between the model <span class="math inline">p_\theta</span> and the distribution of the data <span class="math inline">p</span>!</p>
 <p><span class="math display">
-    \theta_\text{MLE} = \text{argmax}_\theta \, l(\theta) = \text{argmin}_\theta \, H(p(x), p_\theta(x)) = \text{argmin}_\theta \, \text{KL}(p(x) || p_\theta(x))
+    \theta_\text{MLE} = \text{argmax}_\theta \, l(\theta) = \text{argmin}_\theta \, H(p, p_\theta) = \text{argmin}_\theta \, \text{KL}(p || p_\theta)
 </span></p>
-<p>Any machine learning model with a probabilistic interpretation that tries to fit a parameterized model to some data is implicitly minimizing the KL divergence between the two distributions.</p>
-<p>Depending on the assumption about the underlying distribution, we can use the following neural network architectures:</p>
+<p>Any machine learning model with a probabilistic interpretation that tries to fit a parameterized model to some data is implicitly minimizing the KL divergence between the two distributions. Depending on the assumption about the underlying distribution, we can use the following neural network architectures:</p>
 <ul>
-<li>Discrete / categorical / multinoulli distribution: softmax classifier.</li>
-<li>Continuous distribution: mixture density network <span class="citation" data-cites="Bishop1994">(MDN, <a href="../references.html#ref-Bishop1994" role="doc-biblioref">Bishop, 1994</a>)</span> or Gaussian Process regression (GPR, but it is a nonparametric kernel-based probabilistic model, not a neural network).</li>
+<li>Discrete (categorical) distribution: softmax classifier (<a href="3-Softmax.html" class="quarto-xref"><span>Softmax classifier for discrete distributions</span></a>).</li>
+<li>Continuous distribution: mixture density network <span class="citation" data-cites="Bishop1994">(MDN, <a href="../references.html#ref-Bishop1994" role="doc-biblioref">Bishop, 1994</a>)</span> (<a href="4-MDN.html" class="quarto-xref"><span>Mixture density networks for continuous distributions</span></a>) or Gaussian Process regression (GPR, but it is a nonparametric kernel-based probabilistic model, not a neural network).</li>
 </ul>
 </section>
 <section id="sec-forwardreverse" class="level2">

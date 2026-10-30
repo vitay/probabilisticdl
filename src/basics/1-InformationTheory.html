@@ -394,7 +394,23 @@ window.Quarto = {
 </ul>
 <p>This is also why messages can be compressed. In an English text, the letter following a “q” is almost always a “u”: transmitting it is a waste, as the receiver could have guessed it. Only the unpredictable parts of a message really need to be transmitted, and the more predictable a source is, the more its messages can be compressed.</p>
 <p>Why should machine learning care about telephone lines? Because <strong>predicting and compressing are two sides of the same coin</strong>. A model that predicts the data well assigns them a high probability: it is not surprised by them, and could therefore encode them with few bits. The cross-entropy loss used to train classifiers and language models (<a href="#sec-crossentropy" class="quarto-xref"><span>Cross-entropy</span></a>) is exactly the average number of bits (or nats) that the model needs to encode the data: training a language model to predict the next word is training it to compress text. The quantities introduced in this chapter, entropy, cross-entropy and the Kullback-Leibler divergence, will be used throughout this book to measure how well a model fits the data.</p>
-<p>Formally, the key concept of information theory is the <strong>entropy</strong> of a random variable <span class="math inline">X</span>, whose outcomes <span class="math inline">x</span> follow the probability distribution <span class="math inline">p(x) = P(X = x)</span>: a probability mass function (pmf) for discrete variables, a probability density function (pdf) for continuous ones. The entropy measures how much information is contained, on average, in the outcomes of <span class="math inline">X</span>. It is built on the information carried by each single outcome.</p>
+<p>Formally, the key concept of information theory is the <strong>entropy</strong> of a probability distribution <span class="math inline">p(x)</span>: a probability mass function (pmf) for discrete variables, a probability density function (pdf) for continuous ones. The entropy measures how much information is contained, on average, in the samples <span class="math inline">x</span> of <span class="math inline">p</span>. It is built on the information carried by each single sample.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Random variables or distributions?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Information theory is usually formulated with <strong>random variables</strong>: the entropy of a random variable <span class="math inline">X</span> is written <span class="math inline">H(X)</span>, the joint entropy of <span class="math inline">X</span> and <span class="math inline">Y</span> is written <span class="math inline">H(X, Y)</span>, and so on. As these quantities only depend on the distribution of the random variables, not on the variables themselves, this book only manipulates distributions and writes <span class="math inline">H(p)</span> instead of <span class="math inline">H(X)</span>. This is slightly improper but simpler, as machine learning is all about comparing distributions.</p>
+</div>
+</div>
+</div>
 <div id="fig-selfinformation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-selfinformation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -405,32 +421,31 @@ Figure&nbsp;3.1: Self-information of an outcome.
 </figcaption>
 </figure>
 </div>
-<p>A useful measurement of how surprising an outcome <span class="math inline">x</span> of a random variable <span class="math inline">X</span> with pdf/pmf <span class="math inline">p(x)</span> is, is the <strong>self-information</strong>:</p>
+<p>A useful measurement of how surprising a sample <span class="math inline">x</span> of a distribution <span class="math inline">p(x)</span> is, is the <strong>self-information</strong>:</p>
 <p><span class="math display">
-    I(x) = - \log P(X = x) = - \log p(x)
+    I(x) = - \log p(x)
 </span></p>
-<p>When <span class="math inline">P(X = x)</span> is 1, the self-information is 0, as the result is certain and deterministic: it brings no information. When <span class="math inline">P(X = x)</span> is close to 0, the self-information is very high, as it is very surprising that <span class="math inline">x</span> happens.</p>
+<p>When <span class="math inline">p(x)</span> is 1, the self-information is 0, as the result is certain and deterministic: it brings no information. When <span class="math inline">p(x)</span> is close to 0, the self-information is very high, as it is very surprising that <span class="math inline">x</span> happens.</p>
 <p>Depending on which log is used, the self-information has different units, but it is just a rescaling: the base never matters as we are going to compare it to other values.</p>
 <ul>
 <li><span class="math inline">\log_2</span>: bits or shannons.</li>
 <li><span class="math inline">\log_e = \ln</span>: nats.</li>
 </ul>
-<p>The <strong>entropy</strong> (or Shannon entropy) of a random variable <span class="math inline">X</span> is the expected value of the self-information of its outcomes:</p>
+<p>The <strong>entropy</strong> (or Shannon entropy) of a distribution <span class="math inline">p</span> is the expected value of the self-information of its samples:</p>
 <p><span class="math display">
-    H(X) = \mathbb{E}_{x \sim p(x)} [I(x)] = \mathbb{E}_{x \sim p(x)} [- \log p(x)]
+    H(p) = \mathbb{E}_{x \sim p(x)} [I(x)] = \mathbb{E}_{x \sim p(x)} [- \log p(x)]
 </span></p>
-<p>The entropy only depends on the distribution <span class="math inline">p(x)</span> of the random variable, not on the values of its outcomes, so it is also written <span class="math inline">H(p)</span>, the notation we use when comparing two distributions (<a href="#sec-crossentropy" class="quarto-xref"><span>Cross-entropy</span></a>).</p>
-<p>It measures the <strong>uncertainty</strong>, <strong>randomness</strong> or <strong>information content</strong> of the random variable.</p>
+<p>It measures the <strong>uncertainty</strong>, <strong>randomness</strong> or <strong>information content</strong> of the distribution.</p>
 <p>In the discrete case, the expectation is defined as a sum over the outcomes, weighted by the probability that they happen:</p>
 <p><span class="math display">
-    H(X) = - \sum_x P(X=x) \, \log P(X=x)
+    H(p) = - \sum_x p(x) \, \log p(x)
 </span></p>
 <p>In the continuous case, we need to use an integral to get the <strong>differential entropy</strong> (or continuous entropy):</p>
 <p><span class="math display">
-    H(X) = - \int_x p(x) \, \log p(x) \, dx
+    H(p) = - \int_x p(x) \, \log p(x) \, dx
 </span></p>
 <div class="callout callout-style-default callout-note no-icon callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -439,19 +454,19 @@ Figure&nbsp;3.1: Self-information of an outcome.
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The differential entropy is not an exact equivalent of the discrete entropy:</p>
 <ul>
 <li>It can be <strong>negative</strong>: a density can be larger than 1, so <span class="math inline">- \log p(x)</span> can be negative. For example, the differential entropy of a normal distribution <span class="math inline">\mathcal{N}(\mu, \sigma)</span> is <span class="math inline">\frac{1}{2} \log (2 \pi e \sigma^2)</span>, which is negative for small values of <span class="math inline">\sigma</span>.</li>
 <li>It depends on the <strong>units</strong> of <span class="math inline">x</span>: measuring <span class="math inline">x</span> in millimeters instead of meters multiplies the density by <span class="math inline">10^{-3}</span>, and adds <span class="math inline">\log 1000</span> to the differential entropy.</li>
-<li>It is not the limit of the discrete entropy when the continuous variable is discretized more and more finely: with bins of width <span class="math inline">\Delta</span>, the discrete entropy is approximately <span class="math inline">H(X) - \log \Delta</span>, which diverges when <span class="math inline">\Delta \rightarrow 0</span>, as describing a real number exactly would require an infinite number of bits.</li>
+<li>It is not the limit of the discrete entropy when the continuous variable is discretized more and more finely: with bins of width <span class="math inline">\Delta</span>, the discrete entropy is approximately <span class="math inline">H(p) - \log \Delta</span>, which diverges when <span class="math inline">\Delta \rightarrow 0</span>, as describing a real number exactly would require an infinite number of bits.</li>
 </ul>
 <p>These problems disappear in the KL divergence (<a href="#sec-kl" class="quarto-xref"><span>Kullback-Leibler divergence</span></a>), which compares two distributions: as a difference between a cross-entropy and an entropy, the problematic terms cancel out. The KL divergence between two continuous distributions is always positive or zero, and does not depend on the units, which is one reason why machine learning relies on it. See <a href="https://en.wikipedia.org/wiki/Differential_entropy" class="uri">https://en.wikipedia.org/wiki/Differential_entropy</a> for more details.</p>
 </div>
 </div>
 </div>
-<p>The entropy of a Bernoulli variable is maximal when both outcomes are <strong>equiprobable</strong>. If a variable is <strong>deterministic</strong> (probability is either 0 or 1), its entropy is minimal and equal to zero.</p>
+<p>The entropy of a Bernoulli distribution is maximal when both outcomes are <strong>equiprobable</strong>. If the distribution is <strong>deterministic</strong> (probability is either 0 or 1), its entropy is minimal and equal to zero.</p>
 <div id="fig-entropybernoulli" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-entropybernoulli-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -464,61 +479,61 @@ Figure&nbsp;3.2: The entropy of a Bernoulli distribution is maximal when the two
 </div>
 <p>The entropy has equivalent properties to probabilities, where products are replaced by additions and divisions are replaced by subtractions:</p>
 <ul>
-<li>The <strong>joint entropy</strong> of two random variables <span class="math inline">X</span> and <span class="math inline">Y</span> is defined by the joint probability:</li>
+<li>The <strong>joint entropy</strong> of two variables <span class="math inline">x</span> and <span class="math inline">y</span> is the entropy of their joint distribution <span class="math inline">p(x, y)</span>:</li>
 </ul>
 <p><span class="math display">
-    H(X, Y) = \mathbb{E}_{x \sim X, y \sim Y} [- \log P(X=x, Y=y)]
+    H(p(x, y)) = \mathbb{E}_{x, y \sim p(x, y)} [- \log p(x, y)]
 </span></p>
 <ul>
-<li>The <strong>conditional entropy</strong> of two random variables <span class="math inline">X</span> and <span class="math inline">Y</span> is defined by:</li>
+<li>The <strong>conditional entropy</strong> measures the uncertainty remaining on <span class="math inline">x</span> when <span class="math inline">y</span> is known, averaged over all pairs <span class="math inline">(x, y)</span>:</li>
 </ul>
 <p><span class="math display">
-    H(X | Y) = \mathbb{E}_{x \sim X, y \sim Y} [- \log p(x | y)]  = \mathbb{E}_{x \sim X, y \sim Y} [- \log \frac{p(x , y)}{p(y)}]
+    H(p(x | y)) = \mathbb{E}_{x, y \sim p(x, y)} [- \log p(x | y)]  = \mathbb{E}_{x, y \sim p(x, y)} [- \log \frac{p(x , y)}{p(y)}]
 </span></p>
 <p>which gives, as <span class="math inline">\log</span> turns divisions into subtractions:</p>
 <p><span class="math display">
-    H(X | Y) = H(X, Y) - H(Y)
+    H(p(x | y)) = H(p(x, y)) - H(p(y))
 </span></p>
 <ul>
-<li>If the variables are <strong>independent</strong>, we have:</li>
+<li>If the variables are <strong>independent</strong>, i.e.&nbsp;<span class="math inline">p(x, y) = p(x) \, p(y)</span>, we have:</li>
 </ul>
 <p><span class="math display">
-    H(X, Y) = H(X) + H(Y)
+    H(p(x, y)) = H(p(x)) + H(p(y))
 </span></p>
 <p><span class="math display">
-    H(X | Y) = H(X)
+    H(p(x | y)) = H(p(x))
 </span></p>
 <ul>
 <li>The equivalent of Bayes’ rule is:</li>
 </ul>
 <p><span class="math display">
-    H(Y |X) = H(X |Y) + H(Y) - H(X)
+    H(p(y | x)) = H(p(x | y)) + H(p(y)) - H(p(x))
 </span></p>
 </section>
 <section id="mutual-information" class="level2">
 <h2 class="anchored" data-anchor-id="mutual-information">Mutual information</h2>
 <p>The most important information measurement between two variables is the <strong>mutual information</strong> MI (or information gain):</p>
 <p><span class="math display">
-    I(X, Y) = H(X) - H(X | Y) = H(Y) - H(Y | X)
+    \text{MI}(x, y) = H(p(x)) - H(p(x | y)) = H(p(y)) - H(p(y | x))
 </span></p>
-<p>It measures how much information the variable <span class="math inline">Y</span> holds on <span class="math inline">X</span> (and reciprocally):</p>
+<p>It measures how much information the variable <span class="math inline">y</span> holds on <span class="math inline">x</span> (and reciprocally):</p>
 <ul>
-<li>If the two variables are <strong>independent</strong>, the MI is 0: <span class="math inline">X</span> is as uncertain, whether you know <span class="math inline">Y</span> or not.</li>
+<li>If the two variables are <strong>independent</strong>, the MI is 0: <span class="math inline">x</span> is as uncertain, whether you know <span class="math inline">y</span> or not.</li>
 </ul>
 <p><span class="math display">
-    I (X, Y) = 0
+    \text{MI}(x, y) = 0
 </span></p>
 <ul>
-<li>If the two variables are <strong>dependent</strong>, knowing <span class="math inline">Y</span> gives you information on <span class="math inline">X</span>, which becomes less random, i.e.&nbsp;less uncertain / surprising or more predictable.</li>
+<li>If the two variables are <strong>dependent</strong>, knowing <span class="math inline">y</span> gives you information on <span class="math inline">x</span>, which becomes less random, i.e.&nbsp;less uncertain / surprising or more predictable.</li>
 </ul>
 <p><span class="math display">
-    I (X, Y) &gt; 0
+    \text{MI}(x, y) &gt; 0
 </span></p>
-<p>If you can fully predict <span class="math inline">X</span> when you know <span class="math inline">Y</span>, it becomes deterministic (<span class="math inline">H(X|Y)=0</span>) so the mutual information is maximal (<span class="math inline">I(X, Y) = H(X)</span>).</p>
+<p>If you can fully predict <span class="math inline">x</span> when you know <span class="math inline">y</span>, it becomes deterministic (<span class="math inline">H(p(x|y))=0</span>) so the mutual information is maximal (<span class="math inline">\text{MI}(x, y) = H(p(x))</span>).</p>
 </section>
 <section id="sec-crossentropy" class="level2">
 <h2 class="anchored" data-anchor-id="sec-crossentropy">Cross-entropy</h2>
-<p>The entropy, joint entropy and mutual information are properties of random variables. The cross-entropy and the KL divergence compare two <strong>probability distributions</strong> <span class="math inline">p</span> and <span class="math inline">q</span> defined over the same outcomes <span class="math inline">x</span>. The <strong>cross-entropy</strong> between <span class="math inline">p</span> and <span class="math inline">q</span> is defined as:</p>
+<p>The entropy measures the information content of a single distribution. The cross-entropy and the KL divergence compare two <strong>probability distributions</strong> <span class="math inline">p</span> and <span class="math inline">q</span> defined over the same outcomes <span class="math inline">x</span>. The <strong>cross-entropy</strong> between <span class="math inline">p</span> and <span class="math inline">q</span> is defined as:</p>
 <p><span class="math display">
     H(p, q) = \mathbb{E}_{x \sim p(x)}[- \log q(x)]
 </span></p>
@@ -555,6 +570,7 @@ Figure&nbsp;3.3: The cross-entropy measures the overlap between two probability 
     \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}] = \mathbb{E}_{x \sim p(x)}[- \log q(x)] - \mathbb{E}_{x \sim p(x)}[- \log p(x)]
 </span></p>
 <p>If the two distributions are the same <em>almost everywhere</em>, the KL divergence is zero. If the two distributions are different, the KL divergence is positive. Minimizing the KL between two distributions is therefore the same as making the two distributions “equal” or similar.</p>
+<p>The mutual information is a particular KL divergence, between the joint distribution of two variables and the product of their marginals, which is what the joint distribution would be if they were independent: <span class="math inline">\text{MI}(x, y) = \text{KL}(p(x, y) || p(x) \, p(y))</span>.</p>
 <p>However, the KL is not a metric (a distance), as it is not symmetric:</p>
 <p><span class="math display">
     \text{KL}(p || q) \neq \text{KL}(q || p)
@@ -564,7 +580,6 @@ Figure&nbsp;3.3: The cross-entropy measures the overlap between two probability 
     \text{JS}(p, q) = \dfrac{1}{2} \, \text{KL}(p || m) + \dfrac{1}{2} \, \text{KL}(q || m)
 </span></p>
 <p>It is symmetric, <span class="math inline">\text{JS}(p, q) = \text{JS}(q, p)</span>, and always finite, even when <span class="math inline">q(x) = 0</span> where <span class="math inline">p(x) &gt; 0</span>, as the average <span class="math inline">m</span> is positive wherever one of the two distributions is. It is zero when the distributions are equal, and at most <span class="math inline">\log 2</span>, a value reached when they do not overlap at all.</p>
-<p>Refer to <a href="https://towardsdatascience.com/entropy-cross-entropy-and-kl-divergence-explained-b09cdae917a" class="uri">https://towardsdatascience.com/entropy-cross-entropy-and-kl-divergence-explained-b09cdae917a</a> for nice visual explanations of the cross-entropy and KL divergence.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
