@@ -9,7 +9,7 @@ Nearly every quantity we manipulate in this book is a mathematical expectation o
 * The entropy, the cross-entropy and the KL divergence (@sec-informationtheory) are expectations of (log-)probabilities:
 
 $$
-    H(X) = \mathbb{E}_{x \sim p(x)} [- \log p(x)] \qquad \text{KL}(p || q) = \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}]
+    H(p) = \mathbb{E}_{x \sim p(x)} [- \log p(x)] \qquad \text{KL}(p || q) = \mathbb{E}_{x \sim p(x)}[- \log \dfrac{q(x)}{p(x)}]
 $$
 
 * The loss functions of machine learning are expectations over the data distribution, for example the negative log-likelihood (@sec-klml):

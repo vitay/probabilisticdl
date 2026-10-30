@@ -1,5 +1,7 @@
 # Maximum likelihood estimation {#sec-mle}
 
+## Principle
+
 Maximum likelihood estimation (MLE) is a statistical method to **estimate** the parameters $\theta$ of a parametric family of probability distributions $p(x; \theta) = p_\theta(x)$ that **best explains** some observed data samples $X = \{x_i\}_{i=1}^N$ coming from an unknown distribution $p(x)$.
 
 The $N$ samples $x_i$ come from some unknown probability distribution $\mathcal{D}$. An important assumption is that the samples are **i.i.d** (independent and identically distributed), i.e. that they all come from the same distribution and are not correlated with each other (the value of one sample does not influence the value taken by the next one).
@@ -24,7 +26,7 @@ $$
 
 Note that $p_\theta( X )$ is a joint probability, but $L(\theta)$ is a likelihood: the first is asking about the data, while the second is asking about the parameters.
 
-When the samples are **i.i.d**, the joint probability of observing the $N$ samples $x_i$ is equal to the product of their individual probabilities, as $P(X, Y) = P(X) \, P(Y)$ when $X$ and $Y$ are independent:
+When the samples are **i.i.d**, the joint probability of observing the $N$ samples $x_i$ is equal to the product of their individual probabilities, as $p(x, y) = p(x) \, p(y)$ when $x$ and $y$ are independent:
 
 $$
     L(\theta) = p_\theta( X ) = \prod_{i=1}^{N} p_\theta(x_i )
@@ -110,8 +112,23 @@ $$
     \mu = \frac{1}{N} \sum_{i=1}^{N} x_i \qquad\qquad \sigma^2 = \frac{1}{N} \sum_{i=1}^{N}(x_i - \mu)^2
 $$
 
-Unsurprisingly, the mean and variance of the normal distribution which best explains the data are the empirical mean and variance of the data...
+Unsurprisingly, the mean and variance of the normal distribution which best explains the data are the empirical mean and variance of the data... When we summarize data points by their mean and variance only, we implicitly treat them as normally distributed: these two numbers fully describe a normal distribution, but they can be misleading for skewed or multimodal data.
 
-The same principle can be applied to estimate the parameters of any distribution based on samples: normal, exponential, Bernoulli, Poisson, etc.
+The same principle can be applied to estimate the parameters of any distribution based on samples. The following table gives the MLE estimates for the most common distributions, where $\bar{x} = \frac{1}{N} \sum_{i=1}^N x_i$ denotes the empirical mean of the samples:
+
+| Distribution | pmf / pdf | MLE estimates |
+|:---|:---|:---|
+| Bernoulli $\mathcal{B}(\rho)$, $x \in \{0, 1\}$ | $\rho^x \, (1 - \rho)^{1-x}$ | $\hat{\rho} = \bar{x}$ (fraction of ones) |
+| Categorical, $x \in \{1, \ldots, K\}$ | $\pi_x$ | $\hat{\pi}_k = \frac{N_k}{N}$ (fraction of samples in class $k$) |
+| Binomial, $n$ trials, $x \in \{0, \ldots, n\}$ | $\binom{n}{x} \, \rho^x \, (1 - \rho)^{n-x}$ | $\hat{\rho} = \frac{\bar{x}}{n}$ |
+| Poisson, $x \in \mathbb{N}$ | $\frac{\lambda^x \, e^{-\lambda}}{x!}$ | $\hat{\lambda} = \bar{x}$ |
+| Geometric, $x \in \{1, 2, \ldots\}$ | $(1 - \rho)^{x-1} \, \rho$ | $\hat{\rho} = \frac{1}{\bar{x}}$ |
+| Uniform $\mathcal{U}(a, b)$ | $\frac{1}{b - a}$ on $[a, b]$ | $\hat{a} = \min_i x_i$, $\hat{b} = \max_i x_i$ |
+| Exponential, $x \geq 0$ | $\lambda \, e^{-\lambda x}$ | $\hat{\lambda} = \frac{1}{\bar{x}}$ |
+| Normal $\mathcal{N}(\mu, \sigma)$ | $\frac{1}{\sqrt{2\pi\sigma^2}} \, e^{- \frac{(x - \mu)^2}{2\sigma^2}}$ | $\hat{\mu} = \bar{x}$, $\hat{\sigma}^2 = \frac{1}{N} \sum_i (x_i - \bar{x})^2$ |
+| Laplace | $\frac{1}{2b} \, e^{- \frac{\lvert x - \mu \rvert}{b}}$ | $\hat{\mu} = \text{median}(x_i)$, $\hat{b} = \frac{1}{N} \sum_i \lvert x_i - \hat{\mu} \rvert$ |
+| Multivariate normal $\mathcal{N}(\mu, \Sigma)$ | $\frac{1}{\sqrt{(2\pi)^d \det \Sigma}} \, e^{- \frac{1}{2} (x - \mu)^T \Sigma^{-1} (x - \mu)}$ | $\hat{\mu} = \bar{x}$, $\hat{\Sigma} = \frac{1}{N} \sum_i (x_i - \bar{x}) (x_i - \bar{x})^T$ |
+
+The empirical mean appears in many of these estimates, not only for the normal distribution. Other distributions, such as the gamma or beta distributions, have no closed-form MLE: the log-likelihood has to be maximized numerically, for example with gradient ascent.
 
 Maximum likelihood estimation is a good method when 1) the number of samples is big enough (central limit theorem, see @sec-bayesian) and 2) we do not care about the uncertainty of our estimator.

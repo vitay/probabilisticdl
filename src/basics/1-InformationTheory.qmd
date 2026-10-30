@@ -13,43 +13,47 @@ This is also why messages can be compressed. In an English text, the letter foll
 
 Why should machine learning care about telephone lines? Because **predicting and compressing are two sides of the same coin**. A model that predicts the data well assigns them a high probability: it is not surprised by them, and could therefore encode them with few bits. The cross-entropy loss used to train classifiers and language models (@sec-crossentropy) is exactly the average number of bits (or nats) that the model needs to encode the data: training a language model to predict the next word is training it to compress text. The quantities introduced in this chapter, entropy, cross-entropy and the Kullback-Leibler divergence, will be used throughout this book to measure how well a model fits the data.
 
-Formally, the key concept of information theory is the **entropy** of a random variable $X$, whose outcomes $x$ follow the probability distribution $p(x) = P(X = x)$: a probability mass function (pmf) for discrete variables, a probability density function (pdf) for continuous ones. The entropy measures how much information is contained, on average, in the outcomes of $X$. It is built on the information carried by each single outcome.
+Formally, the key concept of information theory is the **entropy** of a probability distribution $p(x)$: a probability mass function (pmf) for discrete variables, a probability density function (pdf) for continuous ones. The entropy measures how much information is contained, on average, in the samples $x$ of $p$. It is built on the information carried by each single sample.
+
+:::{.callout-note icon="false" collapse="true"}
+## Random variables or distributions?
+
+Information theory is usually formulated with **random variables**: the entropy of a random variable $X$ is written $H(X)$, the joint entropy of $X$ and $Y$ is written $H(X, Y)$, and so on. As these quantities only depend on the distribution of the random variables, not on the variables themselves, this book only manipulates distributions and writes $H(p)$ instead of $H(X)$. This is slightly improper but simpler, as machine learning is all about comparing distributions.
+:::
 
 ![Self-information of an outcome.](../img/self-information.png){#fig-selfinformation width=60%}
 
-A useful measurement of how surprising an outcome $x$ of a random variable $X$ with pdf/pmf $p(x)$ is, is the **self-information**:
+A useful measurement of how surprising a sample $x$ of a distribution $p(x)$ is, is the **self-information**:
 
 $$
-    I(x) = - \log P(X = x) = - \log p(x)
+    I(x) = - \log p(x)
 $$
 
-When $P(X = x)$ is 1, the self-information is 0, as the result is certain and deterministic: it brings no information. When $P(X = x)$ is close to 0, the self-information is very high, as it is very surprising that $x$ happens.
+When $p(x)$ is 1, the self-information is 0, as the result is certain and deterministic: it brings no information. When $p(x)$ is close to 0, the self-information is very high, as it is very surprising that $x$ happens.
 
 Depending on which log is used, the self-information has different units, but it is just a rescaling: the base never matters as we are going to compare it to other values.
 
 * $\log_2$: bits or shannons.
 * $\log_e = \ln$: nats.
 
-The **entropy** (or Shannon entropy) of a random variable $X$ is the expected value of the self-information of its outcomes:
+The **entropy** (or Shannon entropy) of a distribution $p$ is the expected value of the self-information of its samples:
 
 $$
-    H(X) = \mathbb{E}_{x \sim p(x)} [I(x)] = \mathbb{E}_{x \sim p(x)} [- \log p(x)]
+    H(p) = \mathbb{E}_{x \sim p(x)} [I(x)] = \mathbb{E}_{x \sim p(x)} [- \log p(x)]
 $$
 
-The entropy only depends on the distribution $p(x)$ of the random variable, not on the values of its outcomes, so it is also written $H(p)$, the notation we use when comparing two distributions (@sec-crossentropy).
-
-It measures the **uncertainty**, **randomness** or **information content** of the random variable.
+It measures the **uncertainty**, **randomness** or **information content** of the distribution.
 
 In the discrete case, the expectation is defined as a sum over the outcomes, weighted by the probability that they happen:
 
 $$
-    H(X) = - \sum_x P(X=x) \, \log P(X=x)
+    H(p) = - \sum_x p(x) \, \log p(x)
 $$
 
 In the continuous case, we need to use an integral to get the **differential entropy** (or continuous entropy):
 
 $$
-    H(X) = - \int_x p(x) \, \log p(x) \, dx
+    H(p) = - \int_x p(x) \, \log p(x) \, dx
 $$
 
 :::{.callout-note icon="false" collapse="true"}
@@ -59,49 +63,49 @@ The differential entropy is not an exact equivalent of the discrete entropy:
 
 * It can be **negative**: a density can be larger than 1, so $- \log p(x)$ can be negative. For example, the differential entropy of a normal distribution $\mathcal{N}(\mu, \sigma)$ is $\frac{1}{2} \log (2 \pi e \sigma^2)$, which is negative for small values of $\sigma$.
 * It depends on the **units** of $x$: measuring $x$ in millimeters instead of meters multiplies the density by $10^{-3}$, and adds $\log 1000$ to the differential entropy.
-* It is not the limit of the discrete entropy when the continuous variable is discretized more and more finely: with bins of width $\Delta$, the discrete entropy is approximately $H(X) - \log \Delta$, which diverges when $\Delta \rightarrow 0$, as describing a real number exactly would require an infinite number of bits.
+* It is not the limit of the discrete entropy when the continuous variable is discretized more and more finely: with bins of width $\Delta$, the discrete entropy is approximately $H(p) - \log \Delta$, which diverges when $\Delta \rightarrow 0$, as describing a real number exactly would require an infinite number of bits.
 
 These problems disappear in the KL divergence (@sec-kl), which compares two distributions: as a difference between a cross-entropy and an entropy, the problematic terms cancel out. The KL divergence between two continuous distributions is always positive or zero, and does not depend on the units, which is one reason why machine learning relies on it. See <https://en.wikipedia.org/wiki/Differential_entropy> for more details.
 :::
 
-The entropy of a Bernoulli variable is maximal when both outcomes are **equiprobable**. If a variable is **deterministic** (probability is either 0 or 1), its entropy is minimal and equal to zero.
+The entropy of a Bernoulli distribution is maximal when both outcomes are **equiprobable**. If the distribution is **deterministic** (probability is either 0 or 1), its entropy is minimal and equal to zero.
 
 ![The entropy of a Bernoulli distribution is maximal when the two outcomes are equiprobable.](../img/entropy-bernoulli.png){#fig-entropybernoulli width=60%}
 
 The entropy has equivalent properties to probabilities, where products are replaced by additions and divisions are replaced by subtractions:
 
-* The **joint entropy** of two random variables $X$ and $Y$ is defined by the joint probability:
+* The **joint entropy** of two variables $x$ and $y$ is the entropy of their joint distribution $p(x, y)$:
 
 $$
-    H(X, Y) = \mathbb{E}_{x \sim X, y \sim Y} [- \log P(X=x, Y=y)]
+    H(p(x, y)) = \mathbb{E}_{x, y \sim p(x, y)} [- \log p(x, y)]
 $$
 
-* The **conditional entropy** of two random variables $X$ and $Y$ is defined by:
+* The **conditional entropy** measures the uncertainty remaining on $x$ when $y$ is known, averaged over all pairs $(x, y)$:
 
 $$
-    H(X | Y) = \mathbb{E}_{x \sim X, y \sim Y} [- \log p(x | y)]  = \mathbb{E}_{x \sim X, y \sim Y} [- \log \frac{p(x , y)}{p(y)}]
+    H(p(x | y)) = \mathbb{E}_{x, y \sim p(x, y)} [- \log p(x | y)]  = \mathbb{E}_{x, y \sim p(x, y)} [- \log \frac{p(x , y)}{p(y)}]
 $$
 
 which gives, as $\log$ turns divisions into subtractions:
 
 $$
-    H(X | Y) = H(X, Y) - H(Y)
+    H(p(x | y)) = H(p(x, y)) - H(p(y))
 $$
 
-* If the variables are **independent**, we have:
+* If the variables are **independent**, i.e. $p(x, y) = p(x) \, p(y)$, we have:
 
 $$
-    H(X, Y) = H(X) + H(Y)
+    H(p(x, y)) = H(p(x)) + H(p(y))
 $$
 
 $$
-    H(X | Y) = H(X)
+    H(p(x | y)) = H(p(x))
 $$
 
 * The equivalent of Bayes' rule is:
 
 $$
-    H(Y |X) = H(X |Y) + H(Y) - H(X)
+    H(p(y | x)) = H(p(x | y)) + H(p(y)) - H(p(x))
 $$
 
 
@@ -110,28 +114,28 @@ $$
 The most important information measurement between two variables is the **mutual information** MI (or information gain):
 
 $$
-    I(X, Y) = H(X) - H(X | Y) = H(Y) - H(Y | X)
+    \text{MI}(x, y) = H(p(x)) - H(p(x | y)) = H(p(y)) - H(p(y | x))
 $$
 
-It measures how much information the variable $Y$ holds on $X$ (and reciprocally):
+It measures how much information the variable $y$ holds on $x$ (and reciprocally):
 
-* If the two variables are **independent**, the MI is 0: $X$ is as uncertain, whether you know $Y$ or not.
-
-$$
-    I (X, Y) = 0
-$$
-
-* If the two variables are **dependent**, knowing $Y$ gives you information on $X$, which becomes less random, i.e. less uncertain / surprising or more predictable.
+* If the two variables are **independent**, the MI is 0: $x$ is as uncertain, whether you know $y$ or not.
 
 $$
-    I (X, Y) > 0
+    \text{MI}(x, y) = 0
 $$
 
-If you can fully predict $X$ when you know $Y$, it becomes deterministic ($H(X|Y)=0$) so the mutual information is maximal ($I(X, Y) = H(X)$).
+* If the two variables are **dependent**, knowing $y$ gives you information on $x$, which becomes less random, i.e. less uncertain / surprising or more predictable.
+
+$$
+    \text{MI}(x, y) > 0
+$$
+
+If you can fully predict $x$ when you know $y$, it becomes deterministic ($H(p(x|y))=0$) so the mutual information is maximal ($\text{MI}(x, y) = H(p(x))$).
 
 ## Cross-entropy {#sec-crossentropy}
 
-The entropy, joint entropy and mutual information are properties of random variables. The cross-entropy and the KL divergence compare two **probability distributions** $p$ and $q$ defined over the same outcomes $x$. The **cross-entropy** between $p$ and $q$ is defined as:
+The entropy measures the information content of a single distribution. The cross-entropy and the KL divergence compare two **probability distributions** $p$ and $q$ defined over the same outcomes $x$. The **cross-entropy** between $p$ and $q$ is defined as:
 
 $$
     H(p, q) = \mathbb{E}_{x \sim p(x)}[- \log q(x)]
@@ -170,6 +174,8 @@ $$
 
 If the two distributions are the same *almost everywhere*, the KL divergence is zero. If the two distributions are different, the KL divergence is positive. Minimizing the KL between two distributions is therefore the same as making the two distributions "equal" or similar.
 
+The mutual information is a particular KL divergence, between the joint distribution of two variables and the product of their marginals, which is what the joint distribution would be if they were independent: $\text{MI}(x, y) = \text{KL}(p(x, y) || p(x) \, p(y))$.
+
 However, the KL is not a metric (a distance), as it is not symmetric:
 
 $$
@@ -184,4 +190,3 @@ $$
 
 It is symmetric, $\text{JS}(p, q) = \text{JS}(q, p)$, and always finite, even when $q(x) = 0$ where $p(x) > 0$, as the average $m$ is positive wherever one of the two distributions is. It is zero when the distributions are equal, and at most $\log 2$, a value reached when they do not overlap at all.
 
-Refer to <https://towardsdatascience.com/entropy-cross-entropy-and-kl-divergence-explained-b09cdae917a> for nice visual explanations of the cross-entropy and KL divergence.
