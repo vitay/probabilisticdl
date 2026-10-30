@@ -3,7 +3,8 @@ project:
   output-dir: ./docs
 
 book:
-  title: "Probabilistic inference for machine learning"
+  title: "Probabilistic deep learning"
+  subtitle: "From maximum likelihood to diffusion models"
   author:
     - name: Dr. Julien Vitay 
       email: julien.vitay@gmail.com

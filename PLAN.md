@@ -1,6 +1,6 @@
 # Book plan
 
-*Probabilistic inference for machine learning* — a Quarto book (same format as `../DeepReinforcementLearning`) explaining the probabilistic concepts behind modern machine learning. The common thread: virtually every learning algorithm fits a parameterized distribution $p_\theta$ to data sampled from an unknown distribution $p$, i.e. minimizes a divergence between them, and most of the difficulty comes from intractable expectations (integrals), which are handled either by **sampling** or by **optimization** (variational inference).
+*Probabilistic deep learning: from maximum likelihood to diffusion models* — a Quarto book (same format as `../DeepReinforcementLearning`) explaining the probabilistic concepts behind modern machine learning. The common thread: virtually every learning algorithm fits a parameterized distribution $p_\theta$ to data sampled from an unknown distribution $p$, i.e. minimizes a divergence between them, and most of the difficulty comes from intractable expectations (integrals), which are handled either by **sampling** or by **optimization** (variational inference).
 
 Legend: `[x]` written · `[~]` in progress · `[ ]` planned · ★ priority.
 
@@ -30,7 +30,7 @@ For every new chapter:
 
 ### Preface — `index.qmd` [~]
 
-Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), license. To revise: the preface only mentions Parts I, II and IV; a more engaging introduction (why probabilistic rather than deterministic deep learning, applications) and the book title are under discussion.
+Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), license. To revise: the preface only mentions Parts I, II and IV; a more engaging introduction (why probabilistic rather than deterministic deep learning, applications) is under discussion. Title changed to *Probabilistic deep learning: from maximum likelihood to diffusion models* (repository renamed `probabilisticdl`).
 
 ### Part I — Basics (`src/basics/`)
 
@@ -96,7 +96,7 @@ Goal of the book, the common thread ($p_\theta$ vs. $p$, KL minimization), licen
 
 ## Open items
 
-- [x] GitHub repository `git@github.com:vitay/probabilisticinference.git`; CI `.github/workflows/quarto-publish.yml` renders and publishes to the `gh-pages` branch on every push to `main` (as in the Deep RL book); site <https://vitay.github.io/probabilisticinference/>.
+- [x] GitHub repository `git@github.com:vitay/probabilisticdl.git` (renamed from `probabilisticinference`); CI `.github/workflows/quarto-publish.yml` renders and publishes to the `gh-pages` branch on every push to `main` (as in the Deep RL book); site <https://vitay.github.io/probabilisticdl/>.
 
 ---
 

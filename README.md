@@ -1,5 +1,7 @@
-# Notes on probabilistic inference for machine learning
+# Probabilistic deep learning: from maximum likelihood to diffusion models
 
-Information theory, maximum likelihood estimation, statistical machine learning, Bayesian estimation and variational inference.
+Information theory, maximum likelihood estimation, statistical machine learning, sampling methods (Monte Carlo, MCMC, Langevin dynamics and HMC), variational inference and VAEs, diffusion models, optimal transport and flow matching.
+
+Online version: <https://vitay.github.io/probabilisticdl/>
 
 Made with Quarto <https://quarto.org>: run `just` to refresh the bibliography and render the book into `docs/`.
