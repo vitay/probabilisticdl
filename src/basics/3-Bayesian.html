@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.19">
+<meta name="generator" content="quarto-1.11.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -59,14 +59,15 @@ div.csl-indent {
 <link href="../../src/basics/2-MLE.html" rel="prev">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5c1318cf63eba56dbef7ba16bc7d56f5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-5de16f5e46225c21e2daa90d340bf64f.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-cbd9ed26555d85b248ce1d2018b64c7d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-629a43981c321074a8b70bf66af36d7a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -145,16 +146,16 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-sidebar docked quarto-light">
+<body class="nav-sidebar docked quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-  <nav class="quarto-secondary-nav">
+  <nav class="quarto-secondary-nav" aria-label="Toolbar">
     <div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1 no-decor" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
           <h1 class="quarto-secondary-nav-title"><span id="sec-bayesian" class="quarto-section-identifier"><span class="chapter-title">Bayesian estimation</span></span></h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -166,7 +167,7 @@ window.Quarto = {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto" aria-label="Site">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../../">Probabilistic deep learning</a> 
@@ -191,13 +192,10 @@ window.Quarto = {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text"><strong>Basics</strong></span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-controls="quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-1-label"><strong>Basics</strong></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" aria-labelledby="quarto-sidebar-section-1-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../src/basics/1-InformationTheory.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Information theory</span></a>
@@ -217,13 +215,10 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text"><strong>Statistical machine learning</strong></span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-controls="quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-2-label"><strong>Statistical machine learning</strong></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../src/statisticalml/1-Paradigms.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Learning paradigms</span></a>
@@ -248,13 +243,10 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text"><strong>Sampling methods</strong></span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-controls="quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-3-label"><strong>Sampling methods</strong></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-3" aria-labelledby="quarto-sidebar-section-3-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../src/sampling/1-MonteCarlo.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Monte Carlo and importance sampling</span></a>
@@ -274,13 +266,10 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text"><strong>Variational inference</strong></span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-controls="quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-4-label"><strong>Variational inference</strong></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-4" aria-labelledby="quarto-sidebar-section-4-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../src/variationalinference/1-LatentVariables.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Latent variable models</span></a>
@@ -310,13 +299,10 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text"><strong>Deep generative models</strong></span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-controls="quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-5-label"><strong>Deep generative models</strong></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" aria-labelledby="quarto-sidebar-section-5-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../src/generative/1-Diffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Denoising diffusion models</span></a>
@@ -351,23 +337,23 @@ window.Quarto = {
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active">
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#central-limit-theorem-frequentist-estimation" id="toc-central-limit-theorem-frequentist-estimation" class="nav-link active" data-scroll-target="#central-limit-theorem-frequentist-estimation">Central limit theorem: frequentist estimation</a></li>
+  <li><a href="#sec-clt" id="toc-sec-clt" class="nav-link active" data-scroll-target="#sec-clt">How uncertain is an estimate?</a></li>
+  <li><a href="#sec-bayesrule" id="toc-sec-bayesrule" class="nav-link" data-scroll-target="#sec-bayesrule">Bayes’ rule on the parameters</a></li>
   <li><a href="#sec-map" id="toc-sec-map" class="nav-link" data-scroll-target="#sec-map">Maximum a posteriori (MAP)</a>
   <ul class="collapse">
-  <li><a href="#bayes-rule-on-the-parameters" id="toc-bayes-rule-on-the-parameters" class="nav-link" data-scroll-target="#bayes-rule-on-the-parameters">Bayes’ rule on the parameters</a></li>
   <li><a href="#map-for-the-mean-of-a-normal-distribution" id="toc-map-for-the-mean-of-a-normal-distribution" class="nav-link" data-scroll-target="#map-for-the-mean-of-a-normal-distribution">MAP for the mean of a normal distribution</a></li>
   <li><a href="#map-and-regularization" id="toc-map-and-regularization" class="nav-link" data-scroll-target="#map-and-regularization">MAP and regularization</a></li>
-  <li><a href="#limitations-of-map" id="toc-limitations-of-map" class="nav-link" data-scroll-target="#limitations-of-map">Limitations of MAP</a></li>
   </ul></li>
+  <li><a href="#sec-posteriorpredictive" id="toc-sec-posteriorpredictive" class="nav-link" data-scroll-target="#sec-posteriorpredictive">Beyond point estimates</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
+<main class="content column-body" id="quarto-document-content" tabindex="-1">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -388,52 +374,71 @@ window.Quarto = {
 </header>
 
 
-<section id="central-limit-theorem-frequentist-estimation" class="level2">
-<h2 class="anchored" data-anchor-id="central-limit-theorem-frequentist-estimation">Central limit theorem: frequentist estimation</h2>
-<p>Suppose we have an unknown distribution <span class="math inline">X</span> (it does not have to be normal) with expected value <span class="math inline">\mu = \mathbb{E}[X]</span> and variance <span class="math inline">\sigma^2</span>. We can take randomly <span class="math inline">N</span> samples from <span class="math inline">X</span> to compute the sample average:</p>
+<p>Maximum likelihood estimation trusts the data, and only the data. Suppose you flip a coin three times and get three heads. The maximum likelihood estimate of the probability of heads is the fraction of heads (<a href="2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>), here <span class="math inline">\hat{\rho} = 1</span>: according to MLE, this coin can never land on tails. Nobody would believe that. We know from experience that most coins are close to fair, and three flips are far too few to conclude otherwise.</p>
+<p>Two things are missing from MLE. First, it returns a single value, without telling us how much we should trust it: three heads out of three flips and three thousand heads out of three thousand flips give the same estimate. Second, it cannot use what we already know about the problem before seeing the data. <strong>Bayesian estimation</strong> addresses both: it combines prior knowledge with the data, and returns a whole distribution over the plausible values of the parameters instead of a single one.</p>
+<section id="sec-clt" class="level2">
+<h2 class="anchored" data-anchor-id="sec-clt">How uncertain is an estimate?</h2>
+<p>Before turning to the Bayesian approach, let’s look at how classical (<strong>frequentist</strong>) statistics measures the uncertainty of an estimate. The key observation is that an estimate is itself random: it is computed from a finite set of samples, and another set of samples from the same distribution would give a slightly different value.</p>
+<p>Take the simplest estimate, the average of <span class="math inline">N</span> samples <span class="math inline">x_i</span> of a distribution <span class="math inline">p(x)</span> with mean <span class="math inline">\mu</span> and standard deviation <span class="math inline">\sigma</span>:</p>
 <p><span class="math display">
-    S_N = \frac{1}{N} \, \sum_{i=1}^N x_i
+    \bar{x} = \frac{1}{N} \, \sum_{i=1}^N x_i
 </span></p>
-<p>The <strong>Central Limit Theorem</strong> (CLT) states that:</p>
-<blockquote class="blockquote">
-<p>The distribution of sample averages is normally distributed with mean <span class="math inline">\mu</span> and variance <span class="math inline">\frac{\sigma^2}{N}</span>.</p>
-</blockquote>
+<p>The <strong>central limit theorem</strong> (CLT) states that, when <span class="math inline">N</span> is large enough, the average is approximately normally distributed around the true mean, whatever the shape of <span class="math inline">p(x)</span>:</p>
 <p><span class="math display">
-    S_N \sim \mathcal{N}(\mu, \frac{\sigma}{\sqrt{N}})
+    \bar{x} \sim \mathcal{N}(\mu, \frac{\sigma}{\sqrt{N}})
 </span></p>
-<p>If we perform the sampling multiple times, even with a few samples, the average of the sampling averages will be very close to the expected value. The more samples we get, the smaller the variance of the estimates. Although the distribution <span class="math inline">X</span> can be anything, the sampling averages are normally distributed.</p>
+<p><a href="#fig-clt" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> illustrates it with a very skewed distribution, the exponential distribution. The average of a single sample has the same skewed shape, but averages of a few dozen samples are already very close to a normal distribution.</p>
 <div id="fig-clt" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-clt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/central-limit-theorem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;5.1: Illustration of the central limit theorem. Source: https://en.wikipedia.org/wiki/Central_limit_theorem"><img src="../img/central-limit-theorem.png" class="img-fluid figure-img" style="width:70.0%"></a>
+<a href="../img/central-limit-theorem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;5.1: Distribution of the average \bar{x} of N samples of an exponential distribution with mean \mu = 1 and standard deviation \sigma = 1 (blue), compared to the normal approximation given by the central limit theorem (orange). The dotted line is the true mean."><img src="../img/central-limit-theorem.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.1: Illustration of the central limit theorem. Source: <a href="https://en.wikipedia.org/wiki/Central_limit_theorem" class="uri">https://en.wikipedia.org/wiki/Central_limit_theorem</a>
+Figure&nbsp;5.1: Distribution of the average <span class="math inline">\bar{x}</span> of <span class="math inline">N</span> samples of an exponential distribution with mean <span class="math inline">\mu = 1</span> and standard deviation <span class="math inline">\sigma = 1</span> (blue), compared to the normal approximation given by the central limit theorem (orange). The dotted line is the true mean.
 </figcaption>
 </figure>
 </div>
-<p>MLE (<a href="2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>) is a frequentist estimation method as it only relies on the obtained samples, not on additional knowledge one might have about the underlying distribution. In Bayesian statistics <span class="citation" data-cites="Bayes1763">(<a href="../references.html#ref-Bayes1763" role="doc-biblioref">Bayes, 1763</a>)</span>, this additional knowledge takes the form of a prior distribution <span class="math inline">p(\theta)</span> over the parameters <span class="math inline">\theta</span> of the model.</p>
+<p>The central limit theorem tells us two things about the estimate:</p>
+<ul>
+<li>It is centered on the true value: on average over many datasets, it neither over- nor under-estimates the mean.</li>
+<li>Its uncertainty, the standard deviation <span class="math inline">\sigma / \sqrt{N}</span>, decreases with the number of samples. This is the origin of the error bars reported in experimental sciences, and it explains why the precision of an estimate improves slowly: four times more samples are needed to halve the error.</li>
+</ul>
+<p>The same reasoning applies to the maximum likelihood estimates of <a href="2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>, which become approximately normal around the true parameters when the number of samples is large. This frequentist view of uncertainty has two limitations, however. It only holds for <strong>large</strong> <span class="math inline">N</span>, and says little about our three coin flips. And it treats the true parameter as a fixed unknown value, so it gives no room for prior knowledge about it. The <strong>Bayesian</strong> view <span class="citation" data-cites="Bayes1763">(<a href="../references.html#ref-Bayes1763" role="doc-biblioref">Bayes, 1763</a>)</span> takes the opposite stance: the parameters themselves are uncertain, and this uncertainty is described by a probability distribution.</p>
 </section>
-<section id="sec-map" class="level2">
-<h2 class="anchored" data-anchor-id="sec-map">Maximum a posteriori (MAP)</h2>
-<section id="bayes-rule-on-the-parameters" class="level3">
-<h3 class="anchored" data-anchor-id="bayes-rule-on-the-parameters">Bayes’ rule on the parameters</h3>
-<p>In MLE, the parameters <span class="math inline">\theta</span> are fixed but unknown quantities: we search for the value that maximizes the likelihood <span class="math inline">p(X | \theta) = p_\theta(X)</span> of the data, and that’s it. In Bayesian statistics, the parameters are themselves <strong>random variables</strong>. Before seeing any data, our belief about their value is described by the <strong>prior</strong> distribution <span class="math inline">p(\theta)</span>. After observing the data <span class="math inline">X = \{x_i\}_{i=1}^N</span>, this belief is updated into the <strong>posterior</strong> distribution <span class="math inline">p(\theta | X)</span> using Bayes’ rule:</p>
+<section id="sec-bayesrule" class="level2">
+<h2 class="anchored" data-anchor-id="sec-bayesrule">Bayes’ rule on the parameters</h2>
+<p>In the Bayesian view, our knowledge about the parameters <span class="math inline">\theta</span> before seeing any data is described by a <strong>prior</strong> distribution <span class="math inline">p(\theta)</span>. For the coin, the prior over the probability of heads <span class="math inline">\rho</span> would be concentrated around <span class="math inline">\frac{1}{2}</span>, as most coins are roughly fair, but would not completely exclude biased coins.</p>
+<p>After observing the data <span class="math inline">X = \{x_i\}_{i=1}^N</span>, this belief is updated into the <strong>posterior</strong> distribution <span class="math inline">p(\theta | X)</span>, using Bayes’ rule:</p>
 <p><span class="math display">
     p(\theta | X) = \dfrac{p(X | \theta) \, p(\theta)}{p(X)}
 </span></p>
 <p>The posterior depends on:</p>
 <ul>
-<li>the <strong>likelihood</strong> <span class="math inline">p(X | \theta)</span>: how well the parameters <span class="math inline">\theta</span> explain the data, exactly as in MLE.</li>
+<li>the <strong>likelihood</strong> <span class="math inline">p(X | \theta)</span>: how well the parameters <span class="math inline">\theta</span> explain the data. It is the same likelihood <span class="math inline">p_\theta(X)</span> as in MLE, written as a conditional probability now that <span class="math inline">\theta</span> has a distribution.</li>
 <li>the <strong>prior</strong> <span class="math inline">p(\theta)</span>: which values of the parameters are plausible before seeing the data.</li>
-<li>the <strong>evidence</strong> <span class="math inline">p(X)</span>: the probability of the data under all possible values of the parameters.</li>
+<li>the <strong>evidence</strong> <span class="math inline">p(X)</span>: the probability of the data, averaged over all possible values of the parameters.</li>
 </ul>
 <p>The evidence is obtained by marginalizing over the parameters:</p>
 <p><span class="math display">
     p(X) = \int_\theta p(X | \theta) \, p(\theta) \, d\theta
 </span></p>
-<p>It does not depend on <span class="math inline">\theta</span> anymore: it is only a normalization constant ensuring that the posterior integrates to one.</p>
-<p>The idea of <strong>maximum a posteriori</strong> (MAP) estimation is to search for the value of the parameters that is the most probable <em>after</em> having observed the data, i.e.&nbsp;the <strong>mode</strong> of the posterior distribution:</p>
+<p>It does not depend on <span class="math inline">\theta</span>: it is only a normalization constant ensuring that the posterior integrates to one. The posterior is therefore proportional to the product of the likelihood and the prior: the values of the parameters that remain plausible are those that were plausible before <strong>and</strong> explain the data well.</p>
+<p><a href="#fig-coinposterior" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> shows this update for the coin. After three heads, the posterior moves towards biased coins, but a fair coin is still quite plausible. After thirty heads in a row, the data has overwhelmed the prior: the coin is almost certainly biased. In both cases, the posterior is a whole distribution, whose width tells us how uncertain we still are, unlike the MLE estimate <span class="math inline">\hat{\rho} = 1</span>, which is the same in both cases.</p>
+<div id="fig-coinposterior" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-coinposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="../img/coin-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;5.2: Prior over the probability of heads \rho of a coin (a \text{Beta}(5, 5) distribution centered on fair coins), and posterior after observing 3 or 30 heads in a row. The MLE estimate is \hat{\rho} = 1 in both cases."><img src="../img/coin-posterior.png" class="img-fluid figure-img" style="width:70.0%"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-coinposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: Prior over the probability of heads <span class="math inline">\rho</span> of a coin (a <span class="math inline">\text{Beta}(5, 5)</span> distribution centered on fair coins), and posterior after observing 3 or 30 heads in a row. The MLE estimate is <span class="math inline">\hat{\rho} = 1</span> in both cases.
+</figcaption>
+</figure>
+</div>
+<p>Bayesian updating is naturally <strong>sequential</strong>: the posterior obtained after a first batch of data can serve as the prior for the next batch, and the result is the same as if all the data had been observed at once.</p>
+</section>
+<section id="sec-map" class="level2">
+<h2 class="anchored" data-anchor-id="sec-map">Maximum a posteriori (MAP)</h2>
+<p>The posterior contains everything we know about the parameters, but we often need a single value, for example to make predictions. The simplest choice is the most probable value of the parameters <em>after</em> having observed the data, i.e.&nbsp;the <strong>mode</strong> of the posterior. This is <strong>maximum a posteriori</strong> (MAP) estimation:</p>
 <p><span class="math display">
     \theta_\text{MAP} = \text{argmax}_\theta \, p(\theta | X) = \text{argmax}_\theta \, \dfrac{p(X | \theta) \, p(\theta)}{p(X)}
 </span></p>
@@ -441,30 +446,66 @@ Figure&nbsp;5.1: Illustration of the central limit theorem. Source: <a href="htt
 <p><span class="math display">
     \theta_\text{MAP} = \text{argmax}_\theta \, p(X | \theta) \, p(\theta)
 </span></p>
-<p>For the same reasons as in MLE, we rather maximize the logarithm of this quantity. When the samples are i.i.d, the likelihood is a product over the samples, so the log-posterior (up to a constant) is a sum:</p>
-<p><span class="math display">
-    \theta_\text{MAP} = \text{argmax}_\theta \, \log p(X | \theta) + \log p(\theta) = \text{argmax}_\theta \, \sum_{i=1}^N \log p(x_i | \theta) + \log p(\theta)
-</span></p>
-<p>or, if you prefer minimizing the negative log-likelihood:</p>
+<p>For the same reasons as in MLE, we rather minimize the negative logarithm of this quantity. When the samples are i.i.d., the likelihood is a product over the samples, so the objective is a sum:</p>
 <p><span class="math display">
     \theta_\text{MAP} = \text{argmin}_\theta \, \sum_{i=1}^N - \log p(x_i | \theta) - \log p(\theta)
 </span></p>
-<p>The MAP objective is the MLE objective plus an additional term, the log-prior, which pulls the estimate towards the values of the parameters that we believe are plausible.</p>
-<p>If the prior is <strong>uniform</strong> (all values of <span class="math inline">\theta</span> are equally plausible), <span class="math inline">\log p(\theta)</span> is a constant and MAP reduces to MLE:</p>
+<p>The MAP objective is the MLE objective plus an additional term, the negative log-prior, which pulls the estimate towards the values of the parameters that we believe are plausible. If the prior is <strong>uniform</strong> (all values of <span class="math inline">\theta</span> are equally plausible), this term is a constant and MAP reduces to MLE: MLE is the special case of MAP where we have no prior knowledge about the parameters.</p>
+<p>For the coin, the MAP estimate after three heads is the mode of the green posterior of <a href="#fig-coinposterior" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>, a probability of heads of about <span class="math inline">0.64</span>: the data suggests that the coin may be biased towards heads, but not that tails is impossible. The prior used in the figure acts as if we had already observed four heads and four tails before the experiment, which tempers the conclusions drawn from a few flips. After thirty heads, the MAP estimate is close to <span class="math inline">0.9</span>, and it tends towards the MLE estimate as heads keep coming.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>MAP for the coin
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The prior of <a href="#fig-coinposterior" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> is a <strong>beta distribution</strong> <span class="math inline">\text{Beta}(a, b)</span>, the standard distribution over probabilities <span class="math inline">\rho \in [0, 1]</span>:</p>
 <p><span class="math display">
-    p(\theta) = \text{cst} \quad \Rightarrow \quad \theta_\text{MAP} = \theta_\text{MLE}
+    p(\rho) \propto \rho^{a-1} \, (1 - \rho)^{b-1}
 </span></p>
-<p>MLE is therefore a special case of MAP where we have no prior knowledge about the parameters.</p>
-</section>
+<p>With <span class="math inline">a = b</span>, it is symmetric around <span class="math inline">\frac{1}{2}</span>, and the larger <span class="math inline">a</span> and <span class="math inline">b</span>, the more concentrated it is. The likelihood of observing <span class="math inline">k</span> heads in <span class="math inline">N</span> flips is <span class="math inline">\rho^k \, (1 - \rho)^{N - k}</span> (Bernoulli trials), so the posterior is:</p>
+<p><span class="math display">
+    p(\rho | X) \propto \rho^{k + a - 1} \, (1 - \rho)^{N - k + b - 1}
+</span></p>
+<p>i.e.&nbsp;another beta distribution <span class="math inline">\text{Beta}(a + k, b + N - k)</span>: the beta prior is <strong>conjugate</strong> to the Bernoulli likelihood. Its mode is the MAP estimate:</p>
+<p><span class="math display">
+    \rho_\text{MAP} = \dfrac{k + a - 1}{N + a + b - 2}
+</span></p>
+<p>Compared to the MLE estimate <span class="math inline">\frac{k}{N}</span>, the prior adds <span class="math inline">a - 1</span> “virtual” heads and <span class="math inline">b - 1</span> “virtual” tails to the observations. With <span class="math inline">a = b = 5</span> and <span class="math inline">k = N = 3</span>, <span class="math inline">\rho_\text{MAP} = \frac{7}{11} \approx 0.64</span>. With a uniform prior (<span class="math inline">a = b = 1</span>), MAP is the same as MLE.</p>
+</div>
+</div>
+</div>
 <section id="map-for-the-mean-of-a-normal-distribution" class="level3">
 <h3 class="anchored" data-anchor-id="map-for-the-mean-of-a-normal-distribution">MAP for the mean of a normal distribution</h3>
-<p>Let’s go back to the example of the univariate normal distribution from <a href="2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>. To keep the math simple, we suppose that the standard deviation <span class="math inline">\sigma</span> of the data is known and only estimate its mean <span class="math inline">\mu</span>. The likelihood of the <span class="math inline">N</span> samples is:</p>
+<p>Let’s go back to the example of the univariate normal distribution from <a href="2-MLE.html" class="quarto-xref"><span>Maximum likelihood estimation</span></a>. To keep the math simple, we suppose that the standard deviation <span class="math inline">\sigma</span> of the data is known and only estimate its mean <span class="math inline">\mu</span>. Before seeing the data, we believe that the mean should be around a value <span class="math inline">\mu_0</span>, with an uncertainty <span class="math inline">\sigma_0</span>. This translates into a normal prior <span class="math inline">p(\mu) = \mathcal{N}(\mu_0, \sigma_0)</span> on the parameter <span class="math inline">\mu</span>. Setting the derivative of the log-posterior to zero gives:</p>
+<p><span class="math display">
+    \mu_\text{MAP} = \dfrac{N \, \sigma_0^2}{N \, \sigma_0^2 + \sigma^2} \, \bar{x} + \dfrac{\sigma^2}{N \, \sigma_0^2 + \sigma^2} \, \mu_0
+</span></p>
+<p>where <span class="math inline">\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_i</span> is the empirical mean of the data, i.e.&nbsp;the MLE estimate.</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Derivation
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The likelihood of the <span class="math inline">N</span> samples is:</p>
 <p><span class="math display">
     p(X | \mu) = \prod_{i=1}^{N} \frac{1}{\sqrt{2\pi \sigma^2}} \, \exp{- \frac{(x_i - \mu)^2}{2\sigma^2}}
 </span></p>
-<p>Before seeing the data, we believe that the mean should be around a value <span class="math inline">\mu_0</span>, with an uncertainty <span class="math inline">\sigma_0</span>. This translates into a normal prior on the parameter <span class="math inline">\mu</span>:</p>
+<p>and the prior is:</p>
 <p><span class="math display">
-    p(\mu) = \mathcal{N}(\mu_0, \sigma_0) = \frac{1}{\sqrt{2\pi \sigma_0^2}} \, \exp{- \frac{(\mu - \mu_0)^2}{2\sigma_0^2}}
+    p(\mu) = \frac{1}{\sqrt{2\pi \sigma_0^2}} \, \exp{- \frac{(\mu - \mu_0)^2}{2\sigma_0^2}}
 </span></p>
 <p>The log-posterior is, up to constant terms that do not depend on <span class="math inline">\mu</span>:</p>
 <p><span class="math display">
@@ -476,35 +517,35 @@ Figure&nbsp;5.1: Illustration of the central limit theorem. Source: <a href="htt
 </span></p>
 <p>which gives:</p>
 <p><span class="math display">
-    \mu \, (\frac{N}{\sigma^2} + \frac{1}{\sigma_0^2}) = \frac{\sum_{i=1}^{N} x_i}{\sigma^2} + \frac{\mu_0}{\sigma_0^2}
+    \mu \, (\frac{N}{\sigma^2} + \frac{1}{\sigma_0^2}) = \frac{N \, \bar{x}}{\sigma^2} + \frac{\mu_0}{\sigma_0^2}
 </span></p>
-<p>By introducing the empirical mean of the data <span class="math inline">\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_i</span>, i.e.&nbsp;the MLE estimate, we obtain:</p>
-<p><span class="math display">
-    \mu_\text{MAP} = \dfrac{N \, \sigma_0^2}{N \, \sigma_0^2 + \sigma^2} \, \bar{x} + \dfrac{\sigma^2}{N \, \sigma_0^2 + \sigma^2} \, \mu_0
-</span></p>
+<p>Multiplying both sides by <span class="math inline">\sigma^2 \, \sigma_0^2</span> and dividing by <span class="math inline">N \, \sigma_0^2 + \sigma^2</span> gives the result.</p>
+</div>
+</div>
+</div>
 <p>The MAP estimate is a <strong>weighted average</strong> between the MLE estimate <span class="math inline">\bar{x}</span> and the prior mean <span class="math inline">\mu_0</span>. The two weights sum to one, and their relative importance depends on the number of samples and on how confident we are in the prior:</p>
 <ul>
-<li>When there are <strong>few samples</strong> (<span class="math inline">N \rightarrow 0</span>), the estimate stays close to the prior <span class="math inline">\mu_0</span>: we do not have enough evidence to change our mind.</li>
+<li>When there are <strong>few samples</strong>, the estimate stays close to the prior <span class="math inline">\mu_0</span>: we do not have enough evidence to change our mind.</li>
 <li>When there are <strong>many samples</strong> (<span class="math inline">N \rightarrow \infty</span>), the weight of the prior vanishes and the MAP estimate tends to the MLE estimate <span class="math inline">\bar{x}</span>: the data overrides the prior.</li>
 <li>When the prior is <strong>very uncertain</strong> (<span class="math inline">\sigma_0 \rightarrow \infty</span>), the prior becomes uniform and we also recover MLE.</li>
 <li>When the prior is <strong>very certain</strong> (<span class="math inline">\sigma_0 \rightarrow 0</span>), the estimate sticks to <span class="math inline">\mu_0</span>, whatever the data says.</li>
 </ul>
-<p><a href="#fig-mapposterior" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> illustrates this with a prior <span class="math inline">\mathcal{N}(0, 1)</span> and data sampled from <span class="math inline">\mathcal{N}(3, 2)</span>. With a single sample, the posterior stays close to the prior. As more samples are observed, the likelihood becomes sharper and pulls the posterior towards the empirical mean <span class="math inline">\bar{x}</span>, while the prior loses its influence.</p>
+<p><a href="#fig-mapposterior" class="quarto-xref">Figure&nbsp;<span>5.3</span></a> illustrates this with a prior <span class="math inline">\mathcal{N}(0, 1)</span> and data sampled from <span class="math inline">\mathcal{N}(3, 2)</span>. With a single sample, the posterior stays close to the prior. As more samples are observed, the likelihood becomes sharper and pulls the posterior towards the empirical mean <span class="math inline">\bar{x}</span>, while the prior loses its influence.</p>
 <div id="fig-mapposterior" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mapposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="../img/map-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;5.2: Prior, (normalized) likelihood and posterior of the mean \mu for N = 1, 5 and 50 samples drawn from \mathcal{N}(3, 2), with a prior \mathcal{N}(0, 1). The thin vertical lines show the MLE estimate \bar{x} (orange) and the MAP estimate \mu_\text{MAP} (green); the dotted gray line is the true mean."><img src="../img/map-posterior.png" class="img-fluid figure-img"></a>
+<a href="../img/map-posterior.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;5.3: Prior, (normalized) likelihood and posterior of the mean \mu for N = 1, 5 and 50 samples drawn from \mathcal{N}(3, 2), with a prior \mathcal{N}(0, 1). The thin vertical lines show the MLE estimate \bar{x} (orange) and the MAP estimate \mu_\text{MAP} (green); the dotted gray line is the true mean."><img src="../img/map-posterior.png" class="img-fluid figure-img"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mapposterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.2: Prior, (normalized) likelihood and posterior of the mean <span class="math inline">\mu</span> for <span class="math inline">N = 1</span>, 5 and 50 samples drawn from <span class="math inline">\mathcal{N}(3, 2)</span>, with a prior <span class="math inline">\mathcal{N}(0, 1)</span>. The thin vertical lines show the MLE estimate <span class="math inline">\bar{x}</span> (orange) and the MAP estimate <span class="math inline">\mu_\text{MAP}</span> (green); the dotted gray line is the true mean.
+Figure&nbsp;5.3: Prior, (normalized) likelihood and posterior of the mean <span class="math inline">\mu</span> for <span class="math inline">N = 1</span>, 5 and 50 samples drawn from <span class="math inline">\mathcal{N}(3, 2)</span>, with a prior <span class="math inline">\mathcal{N}(0, 1)</span>. The thin vertical lines show the MLE estimate <span class="math inline">\bar{x}</span> (orange) and the MAP estimate <span class="math inline">\mu_\text{MAP}</span> (green); the dotted gray line is the true mean.
 </figcaption>
 </figure>
 </div>
-<p>In this particular case, the posterior is itself a normal distribution (the normal prior is said to be <strong>conjugate</strong> to the normal likelihood), whose mean is <span class="math inline">\mu_\text{MAP}</span> and whose variance <span class="math inline">\sigma_N^2</span> is given by:</p>
+<p>As for the coin, the posterior has the same form as the prior: here it is itself a normal distribution (the normal prior is <strong>conjugate</strong> to the normal likelihood), whose mean is <span class="math inline">\mu_\text{MAP}</span> and whose variance <span class="math inline">\sigma_N^2</span> is given by:</p>
 <p><span class="math display">
     \frac{1}{\sigma_N^2} = \frac{N}{\sigma^2} + \frac{1}{\sigma_0^2}
 </span></p>
-<p>The more samples we observe, the smaller the variance of the posterior: our uncertainty about the parameter decreases with the amount of data, as for the sampling averages in the central limit theorem.</p>
+<p>The more samples we observe, the smaller the variance of the posterior: our uncertainty about the parameter decreases with the amount of data, as for the sampling averages of the central limit theorem (<a href="#sec-clt" class="quarto-xref"><span>How uncertain is an estimate?</span></a>).</p>
 </section>
 <section id="map-and-regularization" class="level3">
 <h3 class="anchored" data-anchor-id="map-and-regularization">MAP and regularization</h3>
@@ -521,16 +562,23 @@ Figure&nbsp;5.2: Prior, (normalized) likelihood and posterior of the mean <span 
     \mathcal{L}(\theta) = \sum_{i=1}^N - \log p_\theta(x_i) + \lambda \, ||\theta||^2 \qquad \text{with} \qquad \lambda = \frac{1}{2 \sigma_0^2}
 </span></p>
 <p>This is exactly <strong>L2 regularization</strong> (or weight decay)! Adding weight decay to the loss function is the same as assuming that the parameters are normally distributed around zero, and the regularization coefficient <span class="math inline">\lambda</span> controls the width of this prior: a strong regularization means a narrow prior, i.e.&nbsp;a strong belief that the parameters should stay small.</p>
-<p>Similarly, a Laplace prior <span class="math inline">p(\theta_j) \propto \exp{- \frac{|\theta_j|}{b}}</span> leads to <strong>L1 regularization</strong> (the lasso), which favors sparse parameters.</p>
+<p>Similarly, a Laplace prior <span class="math inline">p(\theta_j) \propto \exp{- \frac{|\theta_j|}{b}}</span> leads to <strong>L1 regularization</strong> (the lasso), which favors sparse parameters. Most neural networks are therefore trained with MAP rather than MLE, often without saying so.</p>
 </section>
-<section id="limitations-of-map" class="level3">
-<h3 class="anchored" data-anchor-id="limitations-of-map">Limitations of MAP</h3>
-<p>MAP is still a <strong>point estimate</strong>: it returns a single value of the parameters, the mode of the posterior, and discards the rest of the distribution. It therefore does not tell us how uncertain the estimate is. In the normal example above, we could get the variance of the posterior analytically, but this is rarely the case.</p>
-<p><strong>Full Bayesian inference</strong> keeps the whole posterior distribution <span class="math inline">p(\theta | X)</span>, and makes predictions by averaging over all possible values of the parameters, weighted by their posterior probability:</p>
+</section>
+<section id="sec-posteriorpredictive" class="level2">
+<h2 class="anchored" data-anchor-id="sec-posteriorpredictive">Beyond point estimates</h2>
+<p>MAP is still a <strong>point estimate</strong>: it returns a single value of the parameters, the mode of the posterior, and discards the rest of the distribution. The two posteriors of <a href="#fig-coinposterior" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> have very different widths, but MAP only reports their peaks, without telling us how much we should trust them. The mode can also be a poor summary of the posterior, for example when the posterior is very skewed or has several modes.</p>
+<p><strong>Full Bayesian inference</strong> keeps the whole posterior distribution <span class="math inline">p(\theta | X)</span>, and makes predictions by averaging over all possible values of the parameters, weighted by their posterior probability. This gives the <strong>posterior predictive</strong> distribution of a new sample <span class="math inline">x</span>:</p>
 <p><span class="math display">
-    p(x | X) = \int_\theta p(x | \theta) \, p(\theta | X) \, d\theta
+    p(x | X) = \int_\theta p(x | \theta) \, p(\theta | X) \, d\theta = \mathbb{E}_{\theta \sim p(\theta | X)} [p(x | \theta)]
 </span></p>
-<p>This requires computing the evidence <span class="math inline">p(X)</span> to normalize the posterior, which is precisely the intractable integral that MAP avoids. Approximating such intractable posteriors with a tractable parameterized distribution is the main idea of <strong>variational inference</strong> (<a href="../variationalinference/2-VariationalInference.html" class="quarto-xref"><span>Variational inference</span></a>).</p>
+<p>For the coin, the probability that the next flip lands on heads is the average of <span class="math inline">\rho</span> over the posterior. After three heads, it is around <span class="math inline">0.6</span>: tails is less likely than heads, but far from impossible, as MLE would claim. The prediction accounts both for the randomness of the coin and for our uncertainty about its bias, which makes them much more sensible when data is scarce.</p>
+<p>The price to pay is that the posterior must now be known completely, including its normalization by the evidence <span class="math inline">p(X)</span>, and that predictions require an integral over all parameters. In conjugate cases such as the coin or the mean of a normal distribution, these integrals have closed forms. In general, and in particular for neural networks with millions of parameters, they are intractable: the parameter space is far too large to be covered by a grid (<a href="../sampling/1-MonteCarlo.html#sec-curse" class="quarto-xref"><span>Numerical integration does not scale</span></a>).</p>
+<p>These intractable integrals are the central difficulty of this book, and they will come back with the latent variables of generative models (<a href="../variationalinference/1-LatentVariables.html" class="quarto-xref"><span>Latent variable models</span></a>). Two strategies exist to handle them:</p>
+<ul>
+<li><strong>Sampling</strong> (Part III): instead of computing the posterior, draw samples from it, and replace the integrals with averages over these samples (<a href="../sampling/1-MonteCarlo.html" class="quarto-xref"><span>Monte Carlo and importance sampling</span></a>). Markov chain Monte Carlo methods only need the posterior up to the evidence, i.e.&nbsp;the product <span class="math inline">p(X | \theta) \, p(\theta)</span> (<a href="../sampling/2-MCMC.html#sec-mcmcposterior" class="quarto-xref"><span>Example: sampling a posterior</span></a>).</li>
+<li><strong>Optimization</strong> (Part IV): approximate the posterior with a simpler parameterized distribution, fitted by minimizing a divergence to the true posterior. This is <strong>variational inference</strong> (<a href="../variationalinference/2-VariationalInference.html" class="quarto-xref"><span>Variational inference</span></a>).</li>
+</ul>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
@@ -538,7 +586,6 @@ Figure&nbsp;5.2: Prior, (normalized) likelihood and posterior of the mean <span 
 Bayes, T. (1763). An essay towards solving a problem in the doctrine of chances. <em>Philosophical Transactions of the Royal Society of London</em> 53, 370–418. doi:<a href="https://doi.org/10.1098/rstl.1763.0053">10.1098/rstl.1763.0053</a>.
 </div>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -620,7 +667,8 @@ Bayes, T. (1763). An essay towards solving a problem in the doctrine of chances.
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
       // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
       for (var i=0; i<links.length; i++) {
         const link = links[i];
         if (!isInternal(link.href)) {
@@ -629,8 +677,69 @@ Bayes, T. (1763). An essay towards solving a problem in the doctrine of chances.
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+          if (!link.classList.contains('no-external-icon')) {
+          }
         }
       }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
       const config = {
         allowHTML: true,
@@ -644,6 +753,7 @@ Bayes, T. (1763). An essay towards solving a problem in the doctrine of chances.
         interactiveBorder: 10,
         theme: 'quarto',
         placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
       };
       if (contentFn) {
         config.content = contentFn;
@@ -806,44 +916,54 @@ Bayes, T. (1763). An essay towards solving a problem in the doctrine of chances.
           const lineIds = lines.map((line) => {
             return targetCell + "-" + line;
           })
-          let top = null;
-          let height = null;
-          let parent = null;
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
           if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
             }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
             }
+            placeBand(gutterDiv, el, lastEl);
             selectedAnnoteEl = annoteEl;
           }
         };
@@ -942,7 +1062,10 @@ Bayes, T. (1763). An essay towards solving a problem in the doctrine of chances.
     }
   });
   </script>
-<nav class="page-navigation column-body">
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
+  </script>
+<nav class="page-navigation column-body" aria-label="Page">
   <div class="nav-page nav-page-previous">
       <a href="../../src/basics/2-MLE.html" class="pagination-link" aria-label="Maximum likelihood estimation">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Maximum likelihood estimation</span></span>
