@@ -387,7 +387,7 @@ The left part of @fig-mcmcposterior shows the samples of the chain. Instead of a
 
 ![Bayesian estimation of the mean and standard deviation of a normal distribution from 20 data points, with random-walk Metropolis. Left: samples of the posterior $p(\mu, \sigma | X)$ (one every ten steps) and their marginal histograms. Right: the posterior predictive distribution (blue) is the average of the normal densities $\mathcal{N}(\mu_t, \sigma_t)$ of all the samples of the chain (a few of them in green).](../img/mcmc-posterior.png){#fig-mcmcposterior}
 
-The same holds for the **posterior predictive** distribution, which was out of reach in @sec-map. It is an expectation over the posterior:
+The same holds for the **posterior predictive** distribution, which was out of reach in @sec-posteriorpredictive. It is an expectation over the posterior:
 
 $$
     p(x | X) = \int p(x | \mu, \sigma) \, p(\mu, \sigma | X) \, d\mu \, d\sigma = \mathbb{E}_{(\mu, \sigma) \sim p(\mu, \sigma | X)} [\mathcal{N}(x ; \mu, \sigma)]

@@ -38,16 +38,16 @@ New chapter before Part I, `{#sec-introduction}`: why probabilistic rather than 
 
 ### Part I — Basics (`src/basics/`)
 
-- [x] **1. Information theory** `{#sec-informationtheory}` — self-information, entropy (discrete / differential, Bernoulli example), joint and conditional entropy, mutual information, cross-entropy `{#sec-crossentropy}`, KL divergence `{#sec-kl}` (relation to cross-entropy, asymmetry). Rewritten intro (Bell Labs, information as surprise, compression, predicting = compressing) [@Nyquist1924; @Hartley1928; @Shannon1948]; collapsed note on differential entropy; $p$, $q$ notation for cross-entropy and KL.
-- [x] **2. Maximum likelihood estimation** `{#sec-mle}` — likelihood vs. joint probability, i.i.d. assumption, log-likelihood and NLL; worked derivation of MLE for the univariate normal (empirical mean and variance).
-- [x] **3. Bayesian estimation** `{#sec-bayesian}` — central limit theorem (frequentist view); MAP `{#sec-map}`: Bayes' rule on the parameters (prior, likelihood, evidence, posterior), MLE as MAP with a uniform prior, MAP for the mean of a normal with a normal prior (weighted average of $\bar{x}$ and $\mu_0$, limit cases, conjugate posterior variance, figure `map-posterior.png`), MAP as L2 / L1 regularization, limitations (point estimate, posterior predictive, intractable evidence → VI).
-- Notation unified: cross-entropy and KL use distributions $p$, $q$ ($H(p, q)$, $\text{KL}(p || q)$, normals $\mathcal{N}(x; \mu_p, \sigma_p)$) in `basics/1-InformationTheory.qmd` and `statisticalml/2-KL.qmd`; $X$, $Y$ kept for entropy / joint / conditional entropy / mutual information; `cross-entropy.svg` replaced by `cross-entropy.png` (`src/img/cross-entropy.py`).
+- [x] **1. Information theory** `{#sec-informationtheory}` — self-information, entropy (discrete / differential, Bernoulli example), joint and conditional entropy, mutual information, cross-entropy `{#sec-crossentropy}`, KL divergence `{#sec-kl}` (relation to cross-entropy, asymmetry). Rewritten intro (Bell Labs, information as surprise, compression, predicting = compressing) [@Nyquist1924; @Hartley1928; @Shannon1948]; collapsed note on differential entropy; distribution-only notation throughout ($H(p)$, $H(p(x, y))$, $H(p(x | y))$, $\text{MI}(x, y) = \text{KL}(p(x, y) || p(x) \, p(y))$; collapsed note on the random-variable notation of the literature).
+- [x] **2. Maximum likelihood estimation** `{#sec-mle}` — likelihood vs. joint probability, i.i.d. assumption, log-likelihood and NLL; worked derivation of MLE for the univariate normal (empirical mean and variance); table of MLE estimates for common distributions.
+- [x] **3. Bayesian estimation** `{#sec-bayesian}` — levelled (see "Levelling plan: Bayesian estimation"): coin intro, how uncertain is an estimate `{#sec-clt}` (own figure `central-limit-theorem.png`), Bayes' rule on the parameters `{#sec-bayesrule}` (figure `coin-posterior.png`), MAP with the coin (Beta callout) and collapsed normal derivation, beyond point estimates `{#sec-posteriorpredictive}` (sampling vs. VI). Original content: central limit theorem (frequentist view); MAP `{#sec-map}`: Bayes' rule on the parameters (prior, likelihood, evidence, posterior), MLE as MAP with a uniform prior, MAP for the mean of a normal with a normal prior (weighted average of $\bar{x}$ and $\mu_0$, limit cases, conjugate posterior variance, figure `map-posterior.png`), MAP as L2 / L1 regularization, limitations (point estimate, posterior predictive, intractable evidence → VI).
+- Notation unified: cross-entropy and KL use distributions $p$, $q$ ($H(p, q)$, $\text{KL}(p || q)$, normals $\mathcal{N}(x; \mu_p, \sigma_p)$) in `basics/1-InformationTheory.qmd` and `statisticalml/2-KL.qmd`; entropy, joint / conditional entropy and mutual information also written with distributions (no random variables); `cross-entropy.svg` replaced by `cross-entropy.png` (`src/img/cross-entropy.py`).
 - [x] ★ **Forward vs. reverse KL** `{#sec-forwardreverse}` — new last section of `statisticalml/2-KL.qmd`, approved (figure `forward-reverse-kl.png`, modes at ±2 as the reverse KL also covers both modes at ±1.5).
 
 ### Part II — Statistical machine learning (`src/statisticalml/`)
 
 - [x] **1. Learning paradigms** `{#sec-paradigms}` — polished: one figure `learning-paradigms.png` (`src/img/learning-paradigms.py`, four panels replacing the mermaid diagrams); discriminative $p_\theta(y | x)$ (classification, regression with fixed or predicted variance, MDN), generative $p_\theta(x)$ (density estimation vs. generation), autoregressive models as generative models through the chain rule (LLMs, self-supervised, masked modeling), summary table.
-- [x] **2. KL divergence in machine learning** `{#sec-klml}` — closed form between two Gaussians `{#sec-klnormal}` (full derivation, special case $\mathcal{N}(0,1)$); equivalence of KL minimization, cross-entropy minimization and MLE.
+- [x] **2. KL divergence in machine learning** `{#sec-klml}` — closed form between two Gaussians `{#sec-klnormal}` (full derivation, special case $\mathcal{N}(0,1)$); multivariate normal KL formula (no derivation); equivalence of KL minimization, cross-entropy minimization and MLE.
 - [x] **3. Softmax classifier** `{#sec-softmax}` — one-hot targets as a multinomial distribution, softmax, cross-entropy loss $-\mathbf{t} \cdot \log \mathbf{y}$, gradient $-(\mathbf{t} - \mathbf{y})$ w.r.t. the logits (collapsed proof). Rewritten: classification as density estimation, the softmax function (ranking, differences, temperature), the cross-entropy loss (NLL of the correct class, limit cases), the gradient (prediction error), using the predicted distribution (argmax, sampling, LLMs).
 - [x] **4. Mixture density networks** `{#sec-mdn}` — mean-variance estimation (NLL of a Gaussian, regression as a special case), multimodal targets (inverse problems, half-moons), mixture of Gaussians output, NLL loss, two-step sampling.
 
@@ -600,3 +600,23 @@ File: `src/introduction.qmd`, label `{#sec-introduction}`, placed in `_quarto.ym
 - Section 1: own toy figure (proposed), or reuse the inverse-problem figure of @sec-mdn?
 - Section 2: borrowed figures for some applications (which ones? a figure from your data assimilation work?), or text only?
 
+
+---
+
+## Levelling plan: Bayesian estimation
+
+Current state: opens abruptly with a CLT section ("frequentist estimation", random-variable notation $X$, Wikipedia figure, loosely connected to the rest); the MAP part is solid but the normal-mean derivation is long in the main text; the ending only points to VI.
+
+### Sections
+
+0. **Intro** (no heading): MLE trusts the data blindly. Coin example: 3 flips, 3 heads → $\hat{\rho} = 1$ (MLE table of @sec-mle), "tails is impossible". We know coins are roughly fair: Bayesian estimation combines prior knowledge with data, and returns a distribution over plausible parameters instead of a single value.
+1. **How uncertain is an estimate?** `{#sec-clt}` — frequentist view: the estimator is itself random (another dataset, another estimate); CLT stated properly (approximately normal for large $N$, std $\sigma / \sqrt{N}$), distribution notation $p(x)$. New figure `central-limit-theorem.png` (own script, exact: sample means of an exponential distribution are gamma-distributed, $N = 1, 2, 10, 50$, vs. the normal approximation) replacing the Wikipedia one. Limits: says nothing for small $N$ (the coin) and cannot use prior knowledge → Bayesian view: the parameters themselves are uncertain.
+2. **Bayes' rule on the parameters** — prior, likelihood, evidence, posterior (current text, lightly polished).
+3. **Maximum a posteriori** `{#sec-map}` — current text; MLE = MAP with a uniform prior; the coin resolved in one sentence (estimate between 1/2 and 1), Beta-prior formula in a collapsed callout.
+    - *MAP for the mean of a normal distribution*: keep result, limit cases, figure `map-posterior.png`, conjugacy; move the derivation steps into a collapsed callout.
+    - *MAP and regularization*: unchanged (L2 / L1).
+4. **Beyond point estimates** — posterior predictive (the coin: the predicted probability of tails is no longer zero), intractable evidence, and the two strategies of the book: sampling (Part III, @sec-mcmcposterior) and variational inference (@sec-variationalinference).
+
+### Related edits
+
+- `@sec-bayesian` → `@sec-clt` for the CLT references in `basics/2-MLE.qmd` and `sampling/1-MonteCarlo.qmd`.

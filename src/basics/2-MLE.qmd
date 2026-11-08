@@ -131,4 +131,4 @@ The same principle can be applied to estimate the parameters of any distribution
 
 The empirical mean appears in many of these estimates, not only for the normal distribution. Other distributions, such as the gamma or beta distributions, have no closed-form MLE: the log-likelihood has to be maximized numerically, for example with gradient ascent.
 
-Maximum likelihood estimation is a good method when 1) the number of samples is big enough (central limit theorem, see @sec-bayesian) and 2) we do not care about the uncertainty of our estimator.
+Maximum likelihood estimation is a good method when 1) the number of samples is big enough (central limit theorem, see @sec-clt) and 2) we do not care about the uncertainty of our estimator.

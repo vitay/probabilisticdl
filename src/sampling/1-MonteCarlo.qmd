@@ -24,7 +24,7 @@ $$
     p_\theta(x) = \mathbb{E}_{z \sim p_\theta(z)} [p_\theta(x | z)]
 $$
 
-* The predictions of full Bayesian inference (@sec-map) are an expectation over the posterior of the parameters:
+* The predictions of full Bayesian inference (@sec-posteriorpredictive) are an expectation over the posterior of the parameters:
 
 $$
     p(x | X) = \mathbb{E}_{\theta \sim p(\theta | X)} [p(x | \theta)]
@@ -177,7 +177,7 @@ $$
     \sqrt{\text{Var}(\hat{f}_N)} = \dfrac{\sigma_f}{\sqrt{N}}
 $$
 
-Moreover, as $\hat{f}_N$ is a sampling average of i.i.d. variables, the **central limit theorem** (@sec-bayesian) tells us that it is approximately normally distributed for large $N$, whatever the distribution of $f(x)$:
+Moreover, as $\hat{f}_N$ is a sampling average of i.i.d. variables, the **central limit theorem** (@sec-clt) tells us that it is approximately normally distributed for large $N$, whatever the distribution of $f(x)$:
 
 $$
     \hat{f}_N \sim \mathcal{N}(\mu_f, \dfrac{\sigma_f}{\sqrt{N}})
@@ -373,7 +373,7 @@ Ancestral sampling illustrates an asymmetry that will follow us for the rest of 
 * For latent variable models, **sampling** from $p(x)$ is easy, but **evaluating** $p(x)$ for a given $x$ is hard, as it requires the intractable integral over $z$.
 * For many other distributions, it is the opposite: we can **evaluate** the density, at least up to a constant, but we have no simple way to **sample** from it.
 
-The second case is very common. The posterior of the parameters (@sec-map) is known up to the evidence:
+The second case is very common. The posterior of the parameters (@sec-bayesrule) is known up to the evidence:
 
 $$
     p(\theta | X) = \dfrac{p(X | \theta) \, p(\theta)}{p(X)} \propto p(X | \theta) \, p(\theta)
